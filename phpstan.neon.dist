@@ -7,6 +7,7 @@ parameters:
   # Paths are added as the directories come into existence.
   paths:
     - config
+    - web/app/themes/cigarholic
     - web/index.php
     - web/wp-config.php
   scanFiles:

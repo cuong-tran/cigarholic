@@ -1,0 +1,95 @@
+/*
+Theme Name: Cigarholic
+Theme URI: https://cigarholic.com
+Author: HuyLinh LLC
+Author URI: https://cigarholic.com
+Description: Block theme for the Cigarholic store: handcrafted wooden humidors, cigar boxes and humidor accessories, made in Vietnam and shipped from Texas. Presentation only (theme.json tokens, templates, parts and patterns); all logic lives in the cigarholic-core mu-plugin.
+Requires at least: 7.0
+Tested up to: 7.1
+Requires PHP: 8.3
+Version: 0.1.0
+License: GPL-2.0-or-later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: cigarholic
+Tags: e-commerce, block-patterns, block-styles, full-site-editing, accessibility-ready, wide-blocks
+*/
+
+/*
+ * Everything visual is a token in theme.json. This file only holds what
+ * theme.json cannot express: focus indicators, the skip link, minimum target
+ * sizes, reduced motion and print. Feature IDs: FND-05, CNT-01, CMP-04.
+ */
+
+/* Visible focus for keyboard users (WCAG 2.2 AA, 2.4.7 Focus Visible, 2.4.11 Focus Not Obscured). */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+	outline: 3px solid var(--wp--preset--color--contrast, #1c1917);
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
+/* Skip link: core prints it for block themes; only its colours are themed here. */
+.skip-link.screen-reader-text:focus {
+	background-color: var(--wp--preset--color--base, #fff);
+	color: var(--wp--preset--color--contrast, #1c1917);
+	outline: 3px solid var(--wp--preset--color--contrast, #1c1917);
+}
+
+/* Minimum 24 x 24 px pointer targets for controls (WCAG 2.2 AA, 2.5.8 Target Size). */
+:where(
+	button,
+	input[type="submit"],
+	input[type="button"],
+	input[type="checkbox"],
+	input[type="radio"],
+	.wp-element-button,
+	.wp-block-button__link,
+	.wp-block-search__button,
+	.wp-block-navigation-item__content,
+	.wp-block-navigation__responsive-container-open,
+	.wp-block-navigation__responsive-container-close,
+	.wp-block-query-pagination a,
+	.wp-block-details summary,
+	.wc-block-mini-cart__button,
+	.wc-block-customer-account__account-icon,
+	.wc-block-components-button,
+	.wc-block-components-quantity-selector button
+) {
+	min-inline-size: 24px;
+	min-block-size: 24px;
+}
+
+/* No motion for people who asked for none (WCAG 2.2 AA, 2.3.3 Animation from Interactions). */
+@media (prefers-reduced-motion: reduce) {
+
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+
+/* Print: content only, black on white, link targets spelled out. */
+@media print {
+
+	header.wp-block-template-part,
+	footer.wp-block-template-part,
+	.wp-block-navigation,
+	.wp-block-search,
+	.wc-block-mini-cart,
+	.skip-link {
+		display: none !important;
+	}
+
+	body {
+		color: #000;
+		background: #fff;
+	}
+
+	a[href^="http"]::after {
+		content: " (" attr(href) ")";
+		font-size: 0.85em;
+	}
+}
