@@ -1,9 +1,0 @@
-# Paths left out of the release uploaded to the server (rsync --exclude-from).
-/.git/
-/.github/
-/.dev/
-/.env
-/docs/
-/node_modules/
-/web/app/uploads/
-/*.md
