@@ -4,6 +4,8 @@
  * config/environments/{WP_ENV}.php. Deviate from this file as little as possible.
  *
  * Based on Roots Bedrock 1.31.
+ *
+ * @package Cigarholic
  */
 
 use Roots\WPConfig\Config;
@@ -12,18 +14,10 @@ use function Env\env;
 
 Env\Env::$options |= Env\Env::USE_ENV_ARRAY;
 
-/**
- * Directory containing all of the site's files.
- *
- * @var string
- */
+// Directory containing all of the site's files.
 $root_dir = dirname( __DIR__ );
 
-/**
- * Document root.
- *
- * @var string
- */
+// Document root.
 $webroot_dir = $root_dir . '/web';
 
 /**

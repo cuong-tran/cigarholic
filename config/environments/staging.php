@@ -1,6 +1,8 @@
 <?php
 /**
  * Staging: staging.cigarholic.com. Mirrors production, but never indexed and with error logging on.
+ *
+ * @package Cigarholic
  */
 
 use Roots\WPConfig\Config;
