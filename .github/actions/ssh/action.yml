@@ -1,0 +1,104 @@
+name: SSH to the Cigarholic VPS
+description: >
+  Sets up SSH to the VPS from the SSH_* secrets (pinned known_hosts, never StrictHostKeyChecking=no),
+  verifies the connection, uploads the repository's infra/ directory and .env.example to
+  ~/cigarholic-infra on the server, and puts `ssh-run` on the PATH: it streams a local script over
+  `ssh ... 'bash -s' -- args < script` with selected environment variables prepended as exports,
+  so no secret ever appears on a command line. Later steps can also use `ssh cigarholic-vps ...`.
+
+inputs:
+  host:
+    description: SSH_HOST secret (VPS address)
+    required: true
+  port:
+    description: SSH_PORT secret
+    required: false
+    default: "22"
+  user:
+    description: SSH_USER secret (root until the deploy user is verified, then deploy)
+    required: true
+  private_key:
+    description: SSH_PRIVATE_KEY secret (whole key, BEGIN to END)
+    required: true
+  known_hosts:
+    description: SSH_KNOWN_HOSTS secret (ssh-keyscan -H output, pins the host key)
+    required: true
+  upload_infra:
+    description: Upload infra/ and .env.example to ~/cigarholic-infra on the server
+    required: false
+    default: "true"
+
+outputs:
+  alias:
+    description: SSH host alias to use in later steps
+    value: cigarholic-vps
+  remote_user:
+    description: The user the connection runs as
+    value: ${{ steps.verify.outputs.remote_user }}
+  infra_dir:
+    description: Absolute path of the uploaded infra/ directory on the server
+    value: ${{ steps.upload.outputs.infra_dir }}
+
+runs:
+  using: composite
+  steps:
+    - name: Configure SSH from secrets
+      shell: bash
+      env:
+        SSH_HOST_IN: ${{ inputs.host }}
+        SSH_PORT_IN: ${{ inputs.port }}
+        SSH_USER_IN: ${{ inputs.user }}
+        SSH_KEY_IN: ${{ inputs.private_key }}
+        SSH_KNOWN_HOSTS_IN: ${{ inputs.known_hosts }}
+      run: |
+        set -euo pipefail
+        for v in SSH_HOST_IN SSH_USER_IN SSH_KEY_IN SSH_KNOWN_HOSTS_IN; do
+          if [ -z "${!v:-}" ]; then
+            echo "::error::secret ${v%_IN} is empty. Set it in GitHub (docs/runbooks/secrets.md)."; exit 1
+          fi
+        done
+        mkdir -p ~/.ssh && chmod 700 ~/.ssh
+        printf '%s\n' "$SSH_KEY_IN" > ~/.ssh/cigarholic
+        chmod 600 ~/.ssh/cigarholic
+        printf '%s\n' "$SSH_KNOWN_HOSTS_IN" > ~/.ssh/known_hosts
+        chmod 644 ~/.ssh/known_hosts
+        {
+          for h in cigarholic-vps "$SSH_HOST_IN"; do
+            echo "Host $h"
+            echo "  HostName $SSH_HOST_IN"
+            echo "  Port ${SSH_PORT_IN:-22}"
+            echo "  User $SSH_USER_IN"
+            echo "  IdentityFile ~/.ssh/cigarholic"
+            echo "  IdentitiesOnly yes"
+            echo "  StrictHostKeyChecking yes"
+            echo "  UserKnownHostsFile ~/.ssh/known_hosts"
+            echo "  ServerAliveInterval 30"
+            echo "  ServerAliveCountMax 4"
+            echo "  ConnectTimeout 20"
+            echo "  LogLevel ERROR"
+          done
+        } > ~/.ssh/config
+        chmod 600 ~/.ssh/config
+        echo "SSH_RUN_USER=$SSH_USER_IN" >> "$GITHUB_ENV"
+        echo "$GITHUB_ACTION_PATH" >> "$GITHUB_PATH"
+
+    - name: Verify the connection
+      id: verify
+      shell: bash
+      run: |
+        set -euo pipefail
+        remote=$(ssh cigarholic-vps 'printf "%s %s %s" "$(id -un)" "$(hostname)" "$(. /etc/os-release && echo "$PRETTY_NAME")"')
+        echo "connected: $remote"
+        echo "remote_user=${remote%% *}" >> "$GITHUB_OUTPUT"
+
+    - name: Upload infra/ to the server
+      id: upload
+      if: inputs.upload_infra == 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        remote_home=$(ssh cigarholic-vps 'echo "$HOME"')
+        tar -czf - infra .env.example | ssh cigarholic-vps 'set -e; rm -rf ~/cigarholic-infra.tmp; mkdir -p ~/cigarholic-infra.tmp; tar -xzf - -C ~/cigarholic-infra.tmp; rm -rf ~/cigarholic-infra; mv ~/cigarholic-infra.tmp ~/cigarholic-infra; chmod -R go-w ~/cigarholic-infra'
+        echo "infra_dir=$remote_home/cigarholic-infra/infra" >> "$GITHUB_OUTPUT"
+        echo "REMOTE_INFRA_DIR=$remote_home/cigarholic-infra/infra" >> "$GITHUB_ENV"
+        echo "uploaded infra/ to $remote_home/cigarholic-infra"

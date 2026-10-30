@@ -1,0 +1,42 @@
+# fail2ban jails for the Cigarholic VPS. Installed to /etc/fail2ban/jail.d/ by provision.sh.
+# Nginx logs: /var/log/nginx/cigarholic-<site>.access.log and .error.log (created by site.sh).
+[DEFAULT]
+bantime  = 1h
+findtime = 10m
+maxretry = 5
+banaction = ufw
+backend = auto
+
+[sshd]
+enabled = true
+mode = aggressive
+maxretry = 4
+
+[nginx-http-auth]
+enabled = true
+logpath = /var/log/nginx/*error.log
+
+[nginx-botsearch]
+enabled = true
+logpath = /var/log/nginx/*access.log
+maxretry = 10
+
+[nginx-limit-req]
+enabled = true
+logpath = /var/log/nginx/*error.log
+maxretry = 20
+findtime = 5m
+
+[nginx-bad-request]
+enabled = true
+logpath = /var/log/nginx/*access.log
+maxretry = 20
+
+[wp-login]
+enabled = true
+port = http,https
+filter = wp-login
+logpath = /var/log/nginx/*access.log
+maxretry = 10
+findtime = 10m
+bantime = 2h

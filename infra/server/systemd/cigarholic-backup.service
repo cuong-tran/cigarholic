@@ -1,0 +1,14 @@
+# Nightly production backup (OPS-07). Installed by infra/server/provision.sh; schedule in the .timer.
+# Credentials: /etc/cigarholic/backup.env (B2_*), written by backup.sh when it runs as root with them.
+[Unit]
+Description=Cigarholic nightly production backup to Backblaze B2
+After=network-online.target mariadb.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+EnvironmentFile=-/etc/cigarholic/backup.env
+ExecStart=/usr/local/bin/cigarholic-backup production
+Nice=10
+IOSchedulingClass=idle

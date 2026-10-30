@@ -54,6 +54,21 @@ here. Hand-over instructions live in `docs/OWNER-ACTIONS.md`.
 | `WP_OWNER_INITIAL_PASSWORD` | secret | repository | Initial owner password on both sites, changed at first login | Not set |
 | `GSC_VERIFICATION_TOKEN` | variable | repository | Search Console DNS verification | Not set |
 | `BING_VERIFICATION_TOKEN` | variable | repository | Bing Webmaster verification | Not set |
+| `LETSENCRYPT_EMAIL` | variable | repository | Optional (added 2026-10-30, FND-08): contact for Let's Encrypt expiry notices; without it `site.sh` registers without an email | Not set |
+
+## Which workflow reads what (FND-08)
+
+| Workflow | Reads | Writes on the server |
+| --- | --- | --- |
+| `infra-provision.yml` | `SSH_*`; `site-staging`: `STAGING_BASIC_AUTH_USER`, `STAGING_BASIC_AUTH_PASSWORD`, `LETSENCRYPT_EMAIL`; `provision`: the public half of `SSH_PRIVATE_KEY` becomes the `deploy` user's authorized key | `shared/.env` (database credentials, salts; once), Nginx `htpasswd` |
+| `deploy-staging.yml` | `SSH_*`, `STAGING_POSTMARK_SERVER_TOKEN` → `POSTMARK_SERVER_TOKEN`, `STAGING_TURNSTILE_SITE_KEY` → `TURNSTILE_SITE_KEY`, `STAGING_TURNSTILE_SECRET_KEY` → `TURNSTILE_SECRET_KEY`, `STRIPE_TEST_PUBLISHABLE_KEY`, `STRIPE_TEST_SECRET_KEY`, `STRIPE_TAX_SECRET_KEY`, `PAYPAL_SANDBOX_CLIENT_ID`, `PAYPAL_SANDBOX_CLIENT_SECRET`, `GA4_MEASUREMENT_ID` (same names in `.env`); `STAGING_BASIC_AUTH_*` for the health check | `shared/.env` keys (empty secrets are skipped) |
+| `deploy-production.yml` | `SSH_*`, `PRODUCTION_POSTMARK_SERVER_TOKEN` → `POSTMARK_SERVER_TOKEN`, `PRODUCTION_TURNSTILE_SITE_KEY` → `TURNSTILE_SITE_KEY`, `PRODUCTION_TURNSTILE_SECRET_KEY` → `TURNSTILE_SECRET_KEY`, `GA4_MEASUREMENT_ID`; `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID_CIGARHOLIC` (purge, optional) | `shared/.env` keys; never Stripe or PayPal live credentials |
+| `cloudflare.yml` | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_ZONE_ID_CIGARHOLIC`, `CLOUDFLARE_ZONE_ID_MAX2LAB`, `SSH_HOST` as the origin address | nothing on the server |
+| `backup-restore.yml` | `SSH_*`, `B2_BUCKET`, `B2_KEY_ID`, `B2_APPLICATION_KEY`, `B2_S3_ENDPOINT` | `/etc/cigarholic/backup.env` (root only) so the nightly timer can upload |
+| `wp-cli.yml` | `SSH_*`, `WP_OWNER_EMAIL`, `WP_OWNER_INITIAL_PASSWORD` (exported for the one command, for `wp core install`) | whatever the WP-CLI command does |
+
+Secrets travel to the server inside the streamed script (`.github/actions/ssh/ssh-run`), never on a
+command line.
 
 Live Stripe and PayPal credentials are never stored anywhere in GitHub; the owner connects them in
 WP admin on production (`docs/OWNER-ACTIONS.md` C1).
