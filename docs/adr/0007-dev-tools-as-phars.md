@@ -8,8 +8,8 @@ The Claude Code sandbox reaches the internet through a proxy that refuses GitHub
 
 ## Decision
 
-- `scripts/tools.sh` installs PHPStan, PHPUnit and Deployer as phars into `tools/` (gitignored), each pinned by version and sha256; `--check` verifies them. CI, the sandbox and laptops run the same script.
-- `composer.json` keeps the libraries those tools load (PHPStan WordPress extension, WordPress and WooCommerce stubs, wp-phpunit, PHPUnit polyfills, WPCS and PHPCompatibility) and **replaces** `phpstan/phpstan` and `phpunit/phpunit` at the pinned versions so the dependency graph resolves without them.
+- `scripts/tools.sh` installs PHPStan, PHPUnit and Deployer as phars into `tools/` (gitignored), each pinned by version and sha256; `--check` verifies them. CI, the sandbox and laptops run the same script. PHPUnit stays on 9.6 because the WordPress test suite (wp-phpunit) still calls PHPUnit 9 APIs; the polyfills package supports it.
+- `composer.json` keeps the libraries those tools load (PHPStan WordPress extension, WordPress and WooCommerce stubs, wp-phpunit, PHPUnit polyfills, WPCS and PHPCompatibility) and **replaces** `phpstan/phpstan` and `phpunit/phpunit` at the pinned versions so the dependency graph resolves without them. WP-CLI symbols come from a small local stub (`tests/phpstan/wp-cli-stubs.php`) because `php-stubs/wp-cli-stubs` requires WordPress stubs below 7.
 - Composer scripts (`composer phpstan`, `composer test`) and the `Makefile` call the phars, so nobody needs to know the difference.
 
 ## Consequences

@@ -1,7 +1,8 @@
 # Cigarholic runtime for the sandbox, CI and laptops (FND-02). Pinned to the Ubuntu 26.04 VPS minors:
 # PHP 8.5, MariaDB 11.8, Valkey 9.0, nginx 1.28 (docs/versions.md). Start it with scripts/runtime-up.sh
 # or `make up`; it installs WordPress, provisions and seeds. The repository is bind-mounted, so Composer
-# runs on the host and the containers only execute.
+# runs on the host and the containers only execute. In the sandbox all TLS egress is intercepted by a
+# gateway, so its CA is passed to the image build (secret) and mounted into the php container.
 name: cigarholic
 
 services:
@@ -60,12 +61,10 @@ services:
     environment:
       WP_CLI_ALLOW_ROOT: "1"
       COMPOSER_ALLOW_SUPERUSER: "1"
-      HTTPS_PROXY: ${HTTPS_PROXY:-}
-      https_proxy: ${HTTPS_PROXY:-}
-      NO_PROXY: ${NO_PROXY:-}
-      no_proxy: ${NO_PROXY:-}
     volumes:
       - .:/var/www/html
+      # Sandbox: the egress gateway intercepts TLS, so its CA is trusted inside the container
+      # (empty file elsewhere). scripts/runtime-up.sh sets CA_BUNDLE_FILE.
       - ${CA_BUNDLE_FILE:-./docker/ca/empty.crt}:/run/ca-bundle.crt:ro
     working_dir: /var/www/html
 

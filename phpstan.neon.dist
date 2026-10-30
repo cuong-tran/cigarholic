@@ -7,10 +7,14 @@ parameters:
   # Paths are added as the directories come into existence.
   paths:
     - config
+    - provision
+    - web/app/mu-plugins/cigarholic-core.php
+    - web/app/mu-plugins/cigarholic-core
     - web/app/themes/cigarholic
     - web/index.php
     - web/wp-config.php
   scanFiles:
+    - tests/phpstan/wp-cli-stubs.php
     - vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
     - vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
   treatPhpDocTypesAsCertain: false

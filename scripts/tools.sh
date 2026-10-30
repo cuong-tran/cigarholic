@@ -18,7 +18,7 @@ mkdir -p tools
 # name|version|url|sha256
 TOOLS=(
   "phpstan.phar|2.3.4|https://github.com/phpstan/phpstan/releases/download/2.3.4/phpstan.phar|a961d12cc71941a31ad6560e6a330347d487612628c3202a718f71a59de21a7c"
-  "phpunit.phar|11.5.57|https://phar.phpunit.de/phpunit-11.5.57.phar|c704fdd37c6c6ab7adb386f31b4e186cd51156801fa9028b5ea8099a2cd7f106"
+  "phpunit.phar|9.6.38|https://phar.phpunit.de/phpunit-9.6.38.phar|6b5235f282c6ccab3674ac27c5b1ddbd1da838e74bf07002ddcfd030d31298d7"
   "deployer.phar|8.0.5|https://github.com/deployphp/deployer/releases/download/v8.0.5/deployer.phar|0026dfa73626a8ccde06222fe5fccf03e6d4a19e765914bb87d7d2cc21f3e57d"
 )
 
