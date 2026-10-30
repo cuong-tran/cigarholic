@@ -17,7 +17,7 @@ What runs where, and when it was last tested together. Same PHP minor on CI, sta
 | Mailpit | v1.32.0 | `docker-compose.yml`, `docker/php/Dockerfile` (sendmail shim) | 2026-10-30 (runtime) | Development only |
 | WP-CLI | 2.12.0 | `docker/php/Dockerfile` (from `wordpress:cli-2.12.0-php8.5`), sandbox | 2026-10-30 | |
 | PHPStan | 2.3.4 | `scripts/tools.sh` | 2026-10-30 | phar; `szepeviktor/phpstan-wordpress` 2.0.x, `php-stubs/woocommerce-stubs` 11.2.x |
-| PHPUnit | 11.5.57 | `scripts/tools.sh` | 2026-10-30 | phar; `wp-phpunit/wp-phpunit` 7.1.3, `yoast/phpunit-polyfills` |
+| PHPUnit | 9.6.38 | `scripts/tools.sh` | 2026-10-30 (6 tests green in the container) | phar; the WordPress test suite (`wp-phpunit/wp-phpunit` 7.1.3) still uses PHPUnit 9 APIs; `yoast/phpunit-polyfills` 4.0 |
 | Deployer | 8.0.5 | `scripts/tools.sh` | 2026-10-30 | phar |
 | PHP_CodeSniffer + WPCS | 3.x + 3.4.1 | `composer.lock` | 2026-10-30 | PHPCompatibilityWP 2.1.x |
 

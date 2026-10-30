@@ -46,7 +46,7 @@
   },
   "replace": {
     "phpstan/phpstan": "2.3.4",
-    "phpunit/phpunit": "11.5.57"
+    "phpunit/phpunit": "9.6.38"
   },
   "config": {
     "allow-plugins": {

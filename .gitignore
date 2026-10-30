@@ -56,3 +56,4 @@ Thumbs.db
 # Logs written by WordPress in development
 /web/app/debug.log
 /web/app/*.log
+/.phpunit.result.cache

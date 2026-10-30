@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PHPUnit 9.6 (the WordPress test suite's supported major) for cigarholic-core, run inside the php
+     container (make test) against the cigarholic_test database created by scripts/runtime-up.sh. -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
+	bootstrap="tests/phpunit/bootstrap.php"
+	cacheResultFile=".phpunit.cache/test-results"
+	colors="true"
+	convertDeprecationsToExceptions="false"
+	failOnWarning="true"
+	beStrictAboutOutputDuringTests="true">
+	<testsuites>
+		<testsuite name="core">
+			<directory>tests/phpunit</directory>
+		</testsuite>
+	</testsuites>
+	<coverage>
+		<include>
+			<directory>web/app/mu-plugins/cigarholic-core/src</directory>
+		</include>
+	</coverage>
+</phpunit>
