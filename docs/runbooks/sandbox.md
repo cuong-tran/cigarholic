@@ -1,7 +1,8 @@
 # Cloud sandbox: verified facts
 
 Measured in a Claude Code cloud session on 2026-10-30. The image and the environment's network
-settings change, so re-check anything a task depends on.
+settings change, so re-check anything a task depends on. `infra/cloud-setup.sh` is the
+environment's setup script and applies the fixes below.
 
 ## Image
 
@@ -24,8 +25,12 @@ settings change, so re-check anything a task depends on.
 
 - The daemon is not running at start. `service docker start` fails (`ulimit: Operation not
   permitted`), but starting the daemon directly works: `nohup dockerd >/tmp/dockerd.log 2>&1 &`.
-- Pulls from Docker Hub work (`ubuntu:24.04` and `ubuntu:26.04` tested). For HTTPS from inside
-  a container, run it with `--network host`, pass `HTTPS_PROXY`, and mount
+- Docker Hub sometimes answers anonymous pulls with `429 Too Many Requests`, because sessions
+  share their outgoing IP. With `"registry-mirrors": ["https://mirror.gcr.io"]` in
+  `/etc/docker/daemon.json`, which `infra/cloud-setup.sh` writes, the same pulls succeed
+  (`redis:7-alpine`, `mariadb:11.8` and `php:8.3-fpm-alpine` tested).
+  `public.ecr.aws/docker/library/<image>` works too.
+- For HTTPS from inside a container, run it with `--network host`, pass `HTTPS_PROXY`, and mount
   `/root/.ccr/ca-bundle.crt` into the container's trust store.
 - Containers have no systemd, and `ulimit`, `swapon` and iptables (ufw) are not permitted.
 

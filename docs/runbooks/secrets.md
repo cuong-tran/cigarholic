@@ -24,24 +24,12 @@ job logged in to the VPS as root with a pinned host key. The new names have not 
 
 ## VPS (as of 2026-10-30)
 
-- Ubuntu 26.04.1 LTS, 16 GB RAM, 193 GB disk. Root logs in with a key; SSH password login is
-  still enabled.
+- Ubuntu 26.04 LTS, 16 GB RAM, 193 GB disk, SSH on port 22.
+- The owner reinstalled the OS on 2026-10-30, after an earlier session had installed a server
+  stack on it. It should be clean; this hasn't been checked from the sandbox. Because of the
+  reinstall, the root public key and `SSH_KNOWN_HOSTS` must be the ones made after it.
 - Region not confirmed: the IP belongs to a Latin American (LACNIC) address block, while the
   launch plan calls for a US region.
-- **Not a clean install.** An earlier session ran a bootstrap script that installed and configured:
-  - Nginx 1.28: default site removed; `conf.d/00-cigarholic.conf` with catch-all default servers
-    (port 80 returns 444, port 443 rejects the TLS handshake); `conf.d/01-cloudflare-realip.conf`;
-    `server_tokens off` in `nginx.conf`
-  - PHP 8.5-FPM with mysql, curl, gd, intl, mbstring, xml, zip, bcmath, imagick and redis;
-    `conf.d/90-cigarholic.ini` (memory, upload and OPcache limits)
-  - MariaDB 11.8, Redis 8 (`maxmemory 256mb`), WP-CLI in `/usr/local/bin`
-  - Certbot with a deploy hook that reloads Nginx
-  - ufw enabled (allows `22/tcp` and `Nginx Full`), fail2ban, unattended security upgrades,
-    a 2 GB `/swapfile`
-
-  It created no sites, databases or site users. Reinstalling the OS from the provider's panel
-  returns the server to clean; afterwards, re-add the root public key and regenerate
-  `SSH_KNOWN_HOSTS`, because the host key changes.
 
 ## Domains (as of 2026-10-30)
 
