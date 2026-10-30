@@ -42,8 +42,8 @@ if ! docker info >/dev/null 2>&1; then
 	docker info >/dev/null 2>&1 || { echo "Docker is not available; see docs/runbooks/sandbox.md" >&2; exit 1; }
 fi
 
-# 2. Sandbox proxy: pass the proxy and its CA into the image build and the php container. The CA is
-# copied into the project (gitignored) so Compose can mount it.
+# 2. Sandbox: TLS egress is intercepted by a gateway. Its CA goes to the image build (secret) and is
+# mounted into the php container; the proxy variables are only needed by the build.
 if [ -z "${CA_BUNDLE_FILE:-}" ] && [ -s /root/.ccr/ca-bundle.crt ]; then
 	cp /root/.ccr/ca-bundle.crt docker/ca/proxy.crt
 	export CA_BUNDLE_FILE=./docker/ca/proxy.crt
@@ -113,6 +113,11 @@ log "activating plugins"
 # WooCommerce first: its extensions refuse to activate without it.
 wp plugin activate woocommerce >/dev/null
 wp plugin activate --all >/dev/null
+wp redis enable >/dev/null 2>&1 || true
+
+# Test database for PHPUnit (tests/phpunit/wp-tests-config.php).
+docker compose exec -T db mariadb -uroot -p"${DB_ROOT_PASSWORD:-root}" \
+	-e "CREATE DATABASE IF NOT EXISTS cigarholic_test; GRANT ALL ON cigarholic_test.* TO '${DB_USER:-cigarholic}'@'%'; FLUSH PRIVILEGES;"
 if [ -d web/app/themes/cigarholic ]; then
 	wp theme activate cigarholic >/dev/null 2>&1 || true
 else

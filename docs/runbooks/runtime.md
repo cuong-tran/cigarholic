@@ -28,6 +28,10 @@ make destroy     # stop and delete the database volume (next `make up` reinstall
 
 `scripts/runtime-up.sh` options: `--no-build` (reuse the image), `--no-seed`, `--build-only` (used by `infra/cloud-setup.sh` to warm the image cache).
 
+## Tests
+
+`make test` runs `tools/phpunit.phar` inside the php container with the WordPress test suite (`tests/phpunit/bootstrap.php`, database `cigarholic_test` created by `runtime-up.sh`, object cache disabled). `make check` runs the static checks on the host.
+
 ## What the script does
 
 1. Starts `dockerd` if it is not running (sandbox), copies the sandbox proxy CA into `docker/ca/proxy.crt` (gitignored) when present.
@@ -40,7 +44,7 @@ make destroy     # stop and delete the database volume (next `make up` reinstall
 
 ## Sandbox specifics
 
-- All HTTPS from the host and the containers goes through the agent proxy; the build and the php container receive `HTTPS_PROXY` and the CA. WordPress's own HTTP client uses its bundled CA bundle, so `wp_update_plugins()` warns about a "secure connection" in the sandbox; harmless, and `cigarholic-core` makes WordPress trust the system bundle in development.
+- HTTPS from the host goes through the agent proxy; TLS from the containers is intercepted transparently by the sandbox's egress gateway. The gateway CA is passed to the image build as a secret (phpredis download) and mounted into the php container, where the entrypoint adds it to the system store. WordPress's HTTP client verifies against its own bundled CA file, so in development `cigarholic-core` points it at the system store through the `https_ssl_verify` filter (verification stays on); Turnstile and wordpress.org calls then work. Outside the sandbox the mounted file is empty and nothing changes.
 - `docker compose build` would ask for `--allow=network.host` / `--allow=fs.read`; use `scripts/runtime-up.sh` instead.
 - WP-CLI 2.12's own libraries emit PHP 8.5 deprecations; `docker/php/wp` lowers error reporting for the CLI process only, and `WP_DEBUG_DISPLAY` is off under WP-CLI in development. PHP-FPM keeps `E_ALL` so deprecations from WordPress, WooCommerce and plugins are visible (PHP 8.5 gate, ADR 0001).
 - phpredis is downloaded from pecl.php.net with curl and compiled in the image because PEAR's HTTP/1.0 client receives `426 Upgrade Required`.
@@ -54,3 +58,5 @@ make destroy     # stop and delete the database volume (next `make up` reinstall
 | `wp-login.php returned 502` | `docker compose logs php web`; usually PHP-FPM still starting, re-run `make up` |
 | Plugins fail to activate | WooCommerce must be active first; `make wp ARGS="plugin activate --all"` |
 | Database volume from an older schema | `make destroy && make up` |
+| `make test` fails with a Redis connection error | The object-cache drop-in is active; tests set `WP_REDIS_DISABLED`, re-run `make up` to recreate the test database |
+| `make test`: "Call to undefined method PHPUnit\Util\Test::..." | Wrong PHPUnit major; `scripts/tools.sh` must install 9.6 (`tools/phpunit.phar --version`) |
