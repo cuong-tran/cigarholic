@@ -1,0 +1,111 @@
+# FND-08: build on the runner, upload an immutable release over SSH, then switch to it atomically
+# with server/deploy-release.sh (backup, migrations, provision/, smoke test, automatic rollback).
+#
+#   push to main         -> staging
+#   release published    -> production
+#   manual run           -> staging or production; deploy or rollback
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Environment
+        type: choice
+        options: [staging, production]
+        default: staging
+      action:
+        description: deploy builds and ships the selected ref; rollback re-activates the previous release
+        type: choice
+        options: [deploy, rollback]
+        default: deploy
+
+concurrency:
+  group: deploy-${{ github.event_name == 'release' && 'production' || inputs.target || 'staging' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  TARGET: ${{ github.event_name == 'release' && 'production' || inputs.target || 'staging' }}
+  ACTION: ${{ inputs.action || 'deploy' }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check server secrets
+        id: preflight
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_DEPLOY_KEY: ${{ secrets.VPS_DEPLOY_KEY }}
+        run: |
+          if [ -z "$VPS_HOST" ] || [ -z "$VPS_DEPLOY_KEY" ]; then
+            echo "::notice::VPS_HOST and VPS_DEPLOY_KEY are not set yet, so nothing was deployed. See docs/runbooks/vps-setup.md."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+          if [ "$TARGET" = production ]; then site=cigarholic; else site=cigarholic-staging; fi
+          echo "SITE=$site" >> "$GITHUB_ENV"
+          echo "SITE_ROOT=/srv/www/$site" >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v7
+        if: steps.preflight.outputs.ready == 'true'
+
+      - uses: shivammathur/setup-php@v2
+        if: steps.preflight.outputs.ready == 'true' && env.ACTION == 'deploy'
+        with:
+          php-version: "8.5"
+          tools: composer:v2
+          coverage: none
+
+      - name: Build
+        if: steps.preflight.outputs.ready == 'true' && env.ACTION == 'deploy'
+        run: composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+      - uses: ./.github/actions/vps-ssh
+        if: steps.preflight.outputs.ready == 'true'
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ vars.VPS_SSH_PORT || '22' }}
+          user: ${{ env.SITE }}
+          private-key: ${{ secrets.VPS_DEPLOY_KEY }}
+          known-hosts: ${{ secrets.VPS_KNOWN_HOSTS }}
+
+      - name: Upload release
+        if: steps.preflight.outputs.ready == 'true' && env.ACTION == 'deploy'
+        run: |
+          release_id="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
+          echo "RELEASE_ID=$release_id" >> "$GITHUB_ENV"
+          rsync -az --delete --exclude-from=.deployignore --link-dest="$SITE_ROOT/current/" \
+            ./ "vps:$SITE_ROOT/releases/$release_id/"
+
+      - name: Activate release
+        if: steps.preflight.outputs.ready == 'true' && env.ACTION == 'deploy'
+        run: |
+          # shellcheck disable=SC2029 # expanding on the runner is intended
+          ssh vps "bash $SITE_ROOT/releases/$RELEASE_ID/server/deploy-release.sh activate $RELEASE_ID"
+
+      - name: Roll back
+        if: steps.preflight.outputs.ready == 'true' && env.ACTION == 'rollback'
+        run: |
+          # shellcheck disable=SC2029 # expanding on the runner is intended
+          ssh vps "bash $SITE_ROOT/current/server/deploy-release.sh rollback"
+
+      - name: Summary
+        if: always() && steps.preflight.outputs.ready == 'true'
+        run: |
+          # shellcheck disable=SC2029 # expanding on the runner is intended
+          {
+            echo "### $ACTION to $TARGET"
+            echo
+            echo '```'
+            ssh vps "bash $SITE_ROOT/current/server/deploy-release.sh list" || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
