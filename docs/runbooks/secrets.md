@@ -6,46 +6,52 @@ here. Hand-over instructions live in `docs/OWNER-ACTIONS.md`.
 
 ## Where things live
 
-- **Environment secrets and variables** (`staging`, `production`): everything that differs per
-  site or must never reach the other site.
-- **Repository secrets and variables:** account-wide items (Cloudflare, GA4, verification tokens).
-- On GitHub Free, private repositories may not get Environment secrets. If the Environments page
-  offers no secrets for this repository, the same names go in as repository secrets instead
-  (`docs/OWNER-ACTIONS.md` A4), and production deploy becomes a `workflow_dispatch` with a `tag`
-  input that only the owner runs.
+- **GitHub Free, public repository (owner, 2026-10-30):** the owner put every key in as a
+  **repository secret or variable** (Settings → Secrets and variables → Actions) while the
+  repository was private; it was then made public. Workflows read `secrets.NAME`, which resolves an
+  Environment secret of that name first and the repository secret otherwise, so the keys can stay
+  where they are. Jobs declare `environment: staging` or `environment: production` for deployment
+  history and for the `production` required-reviewer rule (available on public repositories).
+- Items that differ per site carry a `STAGING_` or `PRODUCTION_` prefix. Items shared by both sites
+  (the VPS is one machine) or used by one site only keep the brief's name.
+- Production deploys run from a tag and wait for the owner's approval on the `production`
+  Environment; a `workflow_dispatch` with a `tag` input that only the owner runs is the fallback.
+- The repository is public: names and purposes only, never values, hostnames of internal services
+  or anything an attacker could use.
 - The sandbox cannot read, list or set any of these; the first workflow that uses one verifies it.
 
 ## Inventory
 
 | Name | Kind | Where | Purpose | Status |
 | --- | --- | --- | --- | --- |
-| `SSH_HOST` | secret | `staging`, `production` | VPS public IP | Set by the owner 2026-10-30, unverified |
-| `SSH_PORT` | secret | `staging`, `production` | `22` | Same |
-| `SSH_USER` | secret | `staging`, `production` | `root` until provisioning creates the limited `deploy` user | Same |
-| `SSH_PRIVATE_KEY` | secret | `staging`, `production` | ed25519 private key, installed for `root` (later also for `deploy`) | Same |
-| `SSH_KNOWN_HOSTS` | secret | `staging`, `production` | `ssh-keyscan -H <host>` output; pins the host key | Same |
-| `STAGING_BASIC_AUTH_USER` | secret | `staging` | Staging HTTP basic auth user | Same |
-| `STAGING_BASIC_AUTH_PASSWORD` | secret | `staging` | Staging HTTP basic auth password | Same |
+| `SSH_HOST` | secret | repository | VPS public IP (Hostinger, US) | Set by the owner 2026-10-30, unverified |
+| `SSH_PORT` | secret | repository | `22` | Same |
+| `SSH_USER` | secret | repository | `root` until provisioning creates the limited `deploy` user | Same |
+| `SSH_PRIVATE_KEY` | secret | repository | ed25519 private key, installed for `root` (later also for `deploy`) | Same |
+| `SSH_KNOWN_HOSTS` | secret | repository | `ssh-keyscan -H <host>` output; pins the host key | Same |
+| `STAGING_BASIC_AUTH_USER` | secret | repository | Staging HTTP basic auth user | Same |
+| `STAGING_BASIC_AUTH_PASSWORD` | secret | repository | Staging HTTP basic auth password | Same |
 | `CLOUDFLARE_API_TOKEN` | secret | repository | Token scoped to both zones: DNS, zone settings, SSL, cache purge, WAF, redirects; account: Turnstile | Not set |
 | `CLOUDFLARE_ACCOUNT_ID` | variable | repository | Cloudflare account id | Not set |
 | `CLOUDFLARE_ZONE_ID_CIGARHOLIC` | variable | repository | Zone id of `cigarholic.com` | Not set |
 | `CLOUDFLARE_ZONE_ID_MAX2LAB` | variable | repository | Zone id of `max2lab.com` | Not set |
-| `POSTMARK_SERVER_TOKEN` | secret | `staging` (sandbox server or `POSTMARK_API_TEST`), `production` (live server) | FluentSMTP transport | Not set |
-| `B2_BUCKET` | secret | `production` (staging optional) | Backup bucket name | Not set |
-| `B2_KEY_ID` | secret | `production` | Backblaze application key id, restricted to the bucket | Not set |
-| `B2_APPLICATION_KEY` | secret | `production` | Backblaze application key | Not set |
-| `B2_S3_ENDPOINT` | variable | `production` | S3 endpoint of the bucket's region (added 2026-10-30; the S3-compatible client needs it) | Not set |
+| `STAGING_POSTMARK_SERVER_TOKEN` | secret | repository | FluentSMTP transport on staging: sandbox server token or `POSTMARK_API_TEST` | Not set |
+| `PRODUCTION_POSTMARK_SERVER_TOKEN` | secret | repository | FluentSMTP transport on production: live server token | Not set |
+| `B2_BUCKET` | secret | repository | Backup bucket name (production backups; the restore drill reads it) | Not set |
+| `B2_KEY_ID` | secret | repository | Backblaze application key id, restricted to the bucket | Not set |
+| `B2_APPLICATION_KEY` | secret | repository | Backblaze application key | Not set |
+| `B2_S3_ENDPOINT` | variable | repository | S3 endpoint of the bucket's region (added 2026-10-30; the S3-compatible client needs it) | Not set |
 | `UPTIMEROBOT_API_KEY` | secret | repository | Creates the monitors; optional if the owner creates them by hand | Not set |
-| `STRIPE_TEST_PUBLISHABLE_KEY` | secret | `staging` | Stripe test mode | Not set |
-| `STRIPE_TEST_SECRET_KEY` | secret | `staging` | Stripe test mode | Not set |
-| `STRIPE_TAX_SECRET_KEY` | secret | `staging` | Only if the Stripe Tax plugin accepts a key instead of its Connect flow | Not set |
-| `PAYPAL_SANDBOX_CLIENT_ID` | secret | `staging` | PayPal sandbox app | Not set |
-| `PAYPAL_SANDBOX_CLIENT_SECRET` | secret | `staging` | PayPal sandbox app | Not set |
-| `TURNSTILE_SITE_KEY` | secret | `staging`, `production` | Turnstile widget; sandbox and CI use Cloudflare's public always-pass test keys | Not set |
-| `TURNSTILE_SECRET_KEY` | secret | `staging`, `production` | Turnstile server-side verification | Not set |
+| `STRIPE_TEST_PUBLISHABLE_KEY` | secret | repository | Stripe test mode, written to staging only | Not set |
+| `STRIPE_TEST_SECRET_KEY` | secret | repository | Stripe test mode, written to staging only | Not set |
+| `STRIPE_TAX_SECRET_KEY` | secret | repository | Only if the Stripe Tax plugin accepts a key instead of its Connect flow | Not set |
+| `PAYPAL_SANDBOX_CLIENT_ID` | secret | repository | PayPal sandbox app, staging only | Not set |
+| `PAYPAL_SANDBOX_CLIENT_SECRET` | secret | repository | PayPal sandbox app, staging only | Not set |
+| `STAGING_TURNSTILE_SITE_KEY`, `PRODUCTION_TURNSTILE_SITE_KEY` | secret | repository | Turnstile widget per site; sandbox and CI use Cloudflare's public always-pass test keys | Not set |
+| `STAGING_TURNSTILE_SECRET_KEY`, `PRODUCTION_TURNSTILE_SECRET_KEY` | secret | repository | Turnstile server-side verification per site | Not set |
 | `GA4_MEASUREMENT_ID` | variable | repository | GA4 web stream id | Not set |
 | `WP_OWNER_EMAIL` | variable | repository | Owner admin account | Not set |
-| `WP_OWNER_INITIAL_PASSWORD` | secret | `staging`, `production` | Initial owner password, changed at first login | Not set |
+| `WP_OWNER_INITIAL_PASSWORD` | secret | repository | Initial owner password on both sites, changed at first login | Not set |
 | `GSC_VERIFICATION_TOKEN` | variable | repository | Search Console DNS verification | Not set |
 | `BING_VERIFICATION_TOKEN` | variable | repository | Bing Webmaster verification | Not set |
 
@@ -58,12 +64,10 @@ Names from an earlier session that are to be deleted if they still exist: `VPS_H
 ## VPS (as reported, 2026-10-30)
 
 - Ubuntu 26.04 LTS, 16 GB RAM, 193 GB disk, SSH on port 22.
-- The owner reinstalled the OS on 2026-10-30, after an earlier session had installed a server
-  stack on it. It should be clean; this has not been checked from the sandbox (no SSH there, by
-  design). Because of the reinstall, the root public key and `SSH_KNOWN_HOSTS` must be the ones
-  made after it.
-- Region not confirmed: the IP belongs to a Latin American (LACNIC) address block, while the
-  launch plan calls for a US region (`docs/OWNER-ACTIONS.md` A1).
+- The owner reinstalled the OS on 2026-10-30 and confirmed a clean install with the root key and
+  `SSH_KNOWN_HOSTS` made after the reinstall. Not yet checked by a workflow run.
+- Hostinger, region shown as America / Houston (owner, 2026-10-30). The earlier session saw the IP
+  in a LACNIC block; the panel's region is what counts for latency.
 
 ## Domains (verified by RDAP on 2026-10-30)
 
