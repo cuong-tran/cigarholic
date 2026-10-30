@@ -1,0 +1,2 @@
+# WP-CLI configuration for the Bedrock layout (used inside the php container and on the servers).
+path: web/wp

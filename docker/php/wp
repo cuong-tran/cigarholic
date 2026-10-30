@@ -1,0 +1,5 @@
+#!/bin/sh
+# WP-CLI 2.12's bundled libraries emit PHP 8.5 deprecation notices of their own on every call. They are
+# silenced for the CLI process only; PHP-FPM keeps E_ALL so deprecations in WordPress, WooCommerce and
+# plugins still reach the logs (the PHP 8.5 gate in docs/adr/0001-platform.md).
+exec php -d error_reporting=24575 /usr/local/bin/wp-cli.phar "$@"

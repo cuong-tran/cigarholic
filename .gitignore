@@ -38,6 +38,8 @@ node_modules/
 /blob-report/
 /.deployer/
 /docker/data/
+/docker/ca/*.crt
+!/docker/ca/empty.crt
 
 # Claude Code worktrees for subagents (created by the harness inside the checkout)
 .claude/worktrees/

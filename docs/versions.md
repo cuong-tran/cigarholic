@@ -6,15 +6,16 @@ What runs where, and when it was last tested together. Same PHP minor on CI, sta
 |---|---|---|---|---|
 | WordPress | 7.1.4 | `composer.lock` (`roots/wordpress`) | 2026-10-30 (install) | 7.2 is in beta; wait for 7.2.1 |
 | WooCommerce | 11.2.1 | `composer.lock` | 2026-10-30 (install) | |
-| PHP (VPS, Compose, CI) | 8.5 | `docker/php/Dockerfile`, `infra/` | pending (FND-02) | Ubuntu 26.04 archive version; gate before M2, fallback 8.4 via ondrej PPA (brief section 4) |
+| PHP (VPS, Compose, CI) | 8.5 (image `php:8.5.12-fpm-trixie`; Ubuntu 26.04 archive 8.5.4) | `docker-compose.yml`, `docker/php/Dockerfile`, `infra/` | 2026-10-30 (runtime) | Same minor everywhere; gate before M2, fallback 8.4 via ondrej PPA (ADR 0001). WP-CLI 2.12's own libraries emit 8.5 deprecations |
 | PHP (sandbox host, lint only) | 8.3.6 | `composer.json` platform | 2026-10-30 | Code stays 8.3-compatible |
-| MariaDB | 11.8 | `docker-compose.yml`, `infra/` | pending (FND-02) | Ubuntu 26.04 archive version |
-| Valkey | to pin in FND-02 | `docker-compose.yml`, `infra/` | pending | Same minor as the Ubuntu 26.04 package |
-| Nginx | to pin in FND-02 | `docker/nginx`, `infra/` | pending | Same minor as the Ubuntu 26.04 package |
-| Node (tooling) | 22 | `.nvmrc` (FND-06) | 2026-10-30 | Sandbox image |
-| Playwright | to pin in FND-06 | `package-lock.json` | pending | Sandbox image has 1.63.0 with Chromium 1243 |
-| Composer | 2.8 | sandbox image | 2026-10-30 | |
-| WP-CLI | 2.12 | Docker image, sandbox | 2026-10-30 | |
+| MariaDB | 11.8 (image 11.8.9; Ubuntu 26.04 archive 11.8.6) | `docker-compose.yml`, `infra/` | 2026-10-30 (runtime) | |
+| Valkey | 9.0 (image `valkey/valkey:9.0.7-alpine`; Ubuntu 26.04 archive 9.0.4) | `docker-compose.yml`, `infra/` | 2026-10-30 (runtime) | Redis protocol; phpredis 6.3.0 client |
+| Nginx | 1.28 (image 1.28.3-alpine; Ubuntu 26.04 archive 1.28.3) | `docker-compose.yml`, `docker/nginx`, `infra/` | 2026-10-30 (runtime) | |
+| Node (tooling) | 22 | `.nvmrc` | 2026-10-30 | eslint 9.39, stylelint 16.26 in `package-lock.json` |
+| Playwright | 1.63.0 | `package-lock.json` | 2026-10-30 (install) | Pinned to the sandbox image's Chromium 1243 |
+| Composer | 2.8.12 | sandbox image, `docker/php/Dockerfile` | 2026-10-30 | |
+| Mailpit | v1.32.0 | `docker-compose.yml`, `docker/php/Dockerfile` (sendmail shim) | 2026-10-30 (runtime) | Development only |
+| WP-CLI | 2.12.0 | `docker/php/Dockerfile` (from `wordpress:cli-2.12.0-php8.5`), sandbox | 2026-10-30 | |
 | PHPStan | 2.3.4 | `scripts/tools.sh` | 2026-10-30 | phar; `szepeviktor/phpstan-wordpress` 2.0.x, `php-stubs/woocommerce-stubs` 11.2.x |
 | PHPUnit | 11.5.57 | `scripts/tools.sh` | 2026-10-30 | phar; `wp-phpunit/wp-phpunit` 7.1.3, `yoast/phpunit-polyfills` |
 | Deployer | 8.0.5 | `scripts/tools.sh` | 2026-10-30 | phar |
