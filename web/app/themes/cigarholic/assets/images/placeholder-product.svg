@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-labelledby="t">
+	<title id="t">Product photo coming soon</title>
+	<rect width="800" height="600" fill="#f4f1ec"/>
+	<rect x="24.5" y="24.5" width="751" height="551" fill="none" stroke="#5b564f" stroke-width="1" stroke-dasharray="8 8"/>
+	<rect x="280" y="230" width="240" height="140" rx="8" fill="none" stroke="#5b564f" stroke-width="3"/>
+	<rect x="280" y="230" width="240" height="28" rx="8" fill="#5b564f"/>
+	<text x="400" y="420" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif" font-size="22" fill="#5b564f">Product photo coming soon</text>
+</svg>
