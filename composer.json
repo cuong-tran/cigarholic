@@ -95,7 +95,7 @@
     "phpstan": "tools/phpstan.phar analyse --memory-limit=1G",
     "test": "tools/phpunit.phar",
     "check": [
-      "@composer validate --strict",
+      "@composer validate --no-check-publish",
       "@lint",
       "@phpcs",
       "@phpstan"

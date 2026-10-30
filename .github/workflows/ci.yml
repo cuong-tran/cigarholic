@@ -34,7 +34,8 @@ jobs:
           COMPOSER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Validate composer.json and composer.lock
-        run: composer validate --strict --no-check-publish
+        # Not --strict: exact plugin pins are deliberate and would be reported as warnings-as-errors.
+        run: composer validate --no-check-publish
 
       - name: Install Composer dependencies
         uses: ramsey/composer-install@v3

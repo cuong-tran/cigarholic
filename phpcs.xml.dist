@@ -60,4 +60,8 @@
 	<rule ref="Universal.Operators.DisallowShortTernary">
 		<exclude-pattern>*/config/*</exclude-pattern>
 	</rule>
+	<!-- A docblock followed by require_once is not recognised as a file comment by PHPCS. -->
+	<rule ref="Squiz.Commenting.FileComment">
+		<exclude-pattern>*/web/wp-config.php</exclude-pattern>
+	</rule>
 </ruleset>
