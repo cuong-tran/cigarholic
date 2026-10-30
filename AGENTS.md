@@ -31,14 +31,16 @@ bin/lint         # composer validate, php -l, shellcheck, actionlint, composer a
 - In cloud sessions Composer clones GitHub-hosted packages with git (zip downloads are blocked),
   so the first `composer install` of a new package is slow. That is expected.
 - Running as root needs `COMPOSER_ALLOW_SUPERUSER=1` and `WP_CLI_ALLOW_ROOT=1`; `bin/dev` sets them.
+- PHP is 8.5 everywhere: the VPS (Ubuntu 26.04), CI, the deploy build, and cloud sessions (the
+  setup script installs it). Composer resolves for PHP 8.5.4 (`config.platform`).
 
 ## Environments
 
 | Environment | URL / where | Linux user and path on the VPS | Deployed by |
 | --- | --- | --- | --- |
 | local | `http://localhost:8080` | this container | `bin/dev up` |
-| staging | `https://staging.<domain>` (basic auth, `noindex`, mail trapped) | `cigarholic-staging`, `/srv/www/cigarholic-staging` | every push to `main` |
-| production | `https://<domain>` | `cigarholic`, `/srv/www/cigarholic` | a published GitHub release, or the Deploy workflow with `target: production` |
+| staging | `https://staging.cigarholic.com` (basic auth, `noindex`, mail trapped) | `cigarholic-staging`, `/srv/www/cigarholic-staging` | every push to `main` |
+| production | `https://cigarholic.com` | `cigarholic`, `/srv/www/cigarholic` | a published GitHub release, or the Deploy workflow with `target: production` |
 
 Outside production, `MailGuard` (FND-07) traps `wp_mail()` unless every recipient is in `MAIL_ALLOWLIST`.
 
@@ -54,7 +56,8 @@ GitHub MCP tools: `actions_run_trigger` (`method: run_workflow`, `ref: main`), t
 | `wp.yml` | `target`, `commands` (WP-CLI, one per line, no shell operators) | inspect or change site data and settings |
 | `server.yml` | `action` (status/bootstrap/add-site), `site`, `domain`, `alias`, `email`, `harden_ssh` | server health and setup, as root |
 
-To check staging from the container, request `https://staging.<domain>/` with curl or Playwright.
+To check staging from the container, request `https://staging.cigarholic.com/` with curl or Playwright
+(the host must be in the environment's allowed network domains).
 If the owner stored the staging basic-auth login as a network secret, the proxy adds it for you.
 
 ## Rules

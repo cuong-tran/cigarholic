@@ -16,7 +16,7 @@ server action runs in GitHub Actions, and the SSH keys live in GitHub secrets, n
 
 | Workflow | Runs as | Does |
 | --- | --- | --- |
-| Server (`server.yml`) | root (`VPS_ROOT_KEY`) | `bootstrap`: Nginx, PHP 8.3-FPM, MariaDB, Redis, WP-CLI, Certbot, ufw, fail2ban, auto security updates. `add-site`: site user, database, `.env`, PHP pool, Nginx vhost, Let's Encrypt, WP-Cron. `status`: health report |
+| Server (`server.yml`) | root (`VPS_ROOT_KEY`) | `bootstrap`: Nginx, PHP-FPM, MariaDB, Redis, WP-CLI, Certbot, ufw, fail2ban, auto security updates. `add-site`: site user, database, `.env`, PHP pool, Nginx vhost, Let's Encrypt, WP-Cron. `status`: health report |
 | Deploy (`deploy.yml`) | site user (`VPS_DEPLOY_KEY`) | Builds with Composer, uploads a release, backs up the database, switches atomically, migrates, runs `provision/`, smoke tests, rolls back by itself on failure |
 | WP-CLI (`wp.yml`) | site user | Runs WP-CLI commands on staging or production |
 
@@ -26,8 +26,13 @@ releases and 10 pre-deploy database dumps are kept.
 
 ## 1. VPS and DNS
 
-1. A VPS running **Ubuntu 24.04** (2 vCPU / 4 GB or more) with root SSH access.
-2. DNS records pointing at the VPS IP: `staging.<domain>`, `<domain>` and `www.<domain>`.
+1. A VPS running **Ubuntu 26.04 LTS** (24.04 also works) with root SSH access, 2 vCPU / 4 GB or
+   more. The scripts use the release's own packages: on 26.04 that is PHP 8.5, Nginx 1.28,
+   MariaDB 11.8 and Redis 8, all kept patched by Ubuntu's security updates. Local development
+   and CI run PHP 8.5 too. Start from a clean image: if Apache is running, `bootstrap` stops and
+   asks you to disable it.
+2. DNS records pointing at the VPS IP: `staging.cigarholic.com`, `cigarholic.com` and
+   `www.cigarholic.com` (plus `max2lab.com` and `www.max2lab.com` if the server should redirect them).
    With Cloudflare in front, set SSL/TLS mode to **Full (strict)**. "Flexible" causes a redirect loop.
 
 ## 2. Keys (on your computer)
@@ -94,9 +99,9 @@ only when you ask.
 
 ## 4. Claude cloud environment (claude.ai/code → environment → Edit)
 
-- **Setup script:** paste the contents of `bin/cloud-env-setup.sh`. It adds shellcheck and
-  actionlint and warms the Composer cache. PHP 8.3, Composer, WP-CLI, MariaDB, Redis, Node and
-  Playwright are already in the image.
+- **Setup script:** paste the contents of `bin/cloud-env-setup.sh`. It installs PHP 8.5 (to match
+  the server), shellcheck and actionlint, and warms the Composer cache. Composer, WP-CLI, MariaDB,
+  Redis, Node and Playwright are already in the image.
 - **Environment variables:**
 
   ```text
@@ -104,10 +109,21 @@ only when you ask.
   WP_CLI_ALLOW_ROOT=1
   ```
 
-- **Network access:** Full works as is. With Trusted or Custom, allow `wordpress.org`,
-  `*.wordpress.org`, `repo.wp-packages.org`, `packagist.org`, `repo.packagist.org`,
-  `getcomposer.org` and your own domain (so Claude can check staging and production).
-- **Network secret (optional):** host `staging.<domain>`, type "Username and password", value from
+- **Network access:** with Custom, keep "Also include default list of common package managers"
+  ticked and allow the hosts below. Deploys don't need any of them; they let Claude build locally
+  and look at the live sites.
+
+  ```text
+  wordpress.org
+  *.wordpress.org
+  repo.wp-packages.org
+  ppa.launchpadcontent.net
+  keyserver.ubuntu.com
+  cigarholic.com
+  *.cigarholic.com
+  VPS_IP
+  ```
+- **Network secret (optional):** host `staging.cigarholic.com`, type "Username and password", value from
   `STAGING_HTTP_AUTH`. Claude can then open staging without seeing the password.
 
 ## 5. First run
@@ -116,8 +132,13 @@ The workflows have to be on `main` before they can be run, so merge the setup PR
 run these from the Actions tab (Run workflow), or ask Claude to run them:
 
 1. **Server**, `action: bootstrap`.
-2. **Server**, `action: add-site`, `site: staging`, `domain: staging.<domain>`, `email: <you>`.
-3. **Server**, `action: add-site`, `site: production`, `domain: <domain>`, `alias: www.<domain>`, `email: <you>`.
+2. **Server**, `action: add-site`, `site: staging`, `email: <you>`. The domain defaults to
+   `staging.cigarholic.com`.
+3. **Server**, `action: add-site`, `site: production`, `alias: www.cigarholic.com`, `email: <you>`.
+   The domain defaults to `cigarholic.com`. `alias` takes several hostnames separated by spaces,
+   but list only names whose DNS already points at the server: Let's Encrypt issues one
+   certificate for all of them, and a single unreachable name fails the whole request. Add
+   `max2lab.com www.max2lab.com` later, or redirect them in Cloudflare instead.
 4. **Deploy**, `target: staging`. After this, every push to `main` deploys staging.
 5. Read the WordPress admin passwords on the server, log in, and change them:
 
@@ -151,6 +172,7 @@ ssh root@VPS_IP 'bash cigarholic-server/add-site.sh --help'
 
 | Symptom | Fix |
 | --- | --- |
+| `bootstrap` stops with "Apache is running" | The image came with Apache. Disable it (`systemctl disable --now apache2`) and run `bootstrap` again |
 | `add-site` warns "certificate request failed" | DNS doesn't point at the VPS yet (or Cloudflare is in Flexible mode). Fix DNS, then run `add-site` again |
 | Browser shows a certificate warning | Same as above; until the certificate is issued Nginx serves a self-signed one |
 | Deploy failed with "rolled back" | The new release broke the site and the previous one is live again. Read the job log; the pre-deploy dump is in `shared/backups/` |

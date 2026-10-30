@@ -2,12 +2,16 @@
 # Read-only health report for the server. Run as root; used by the server workflow's "status" action.
 set -uo pipefail
 
-PHP_VERSION="${PHP_VERSION:-8.3}"
+PHP_VERSION="$(php -r 'echo PHP_MAJOR_VERSION, ".", PHP_MINOR_VERSION;' 2>/dev/null)"
 
 section() { printf '\n== %s\n' "$*"; }
 
 section "Host"
 hostname
+grep PRETTY_NAME /etc/os-release | cut -d= -f2 | tr -d '"'
+php -v | head -n1
+nginx -v 2>&1
+mariadb --version 2>/dev/null || mysql --version
 uptime
 section "Disk"
 df -h /

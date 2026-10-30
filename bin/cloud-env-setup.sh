@@ -6,10 +6,24 @@
 # for later sessions. It must exit 0 and finish in about five minutes, so every step is
 # allowed to fail without blocking the session.
 #
-# The base image already has PHP 8.3 (with mysqli, gd, intl, imagick, redis, zip), Composer,
-# WP-CLI, MariaDB, Redis, Node, Docker and Playwright with Chromium. This adds the rest.
+# The base image (Ubuntu 24.04) already has PHP 8.3, Composer, WP-CLI, MariaDB, Redis, Node, Docker
+# and Playwright with Chromium. This adds PHP 8.5 to match the VPS (Ubuntu 26.04) and the linters.
 
 export DEBIAN_FRONTEND=noninteractive
+
+# PHP 8.5 from the ondrej/php archive, made the default `php`. If this fails, PHP 8.3 stays.
+PHP=8.5
+if [ ! -x "/usr/bin/php$PHP" ]; then
+  { curl -fsSL 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x14AA40EC0831756756D7F66C4F4EA0AAE5267A6C' |
+    gpg --dearmor --yes -o /usr/share/keyrings/ondrej-php.gpg &&
+    echo "deb [signed-by=/usr/share/keyrings/ondrej-php.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu noble main" \
+      >/etc/apt/sources.list.d/ondrej-php.list &&
+    apt-get update -qq &&
+    apt-get install -y -qq --no-install-recommends "php$PHP-cli" "php$PHP-mysql" "php$PHP-curl" "php$PHP-gd" \
+      "php$PHP-intl" "php$PHP-mbstring" "php$PHP-xml" "php$PHP-zip" "php$PHP-bcmath" "php$PHP-imagick" "php$PHP-redis"; } ||
+    echo "PHP $PHP install failed; keeping the image's PHP" >&2
+fi
+[ -x "/usr/bin/php$PHP" ] && update-alternatives --set php "/usr/bin/php$PHP"
 
 # Linters used by `make lint` and CI: shellcheck for bin/, provision/ and server/ scripts,
 # actionlint for .github/workflows/.

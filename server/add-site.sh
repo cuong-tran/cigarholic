@@ -20,7 +20,6 @@
 set -euo pipefail
 umask 022
 
-PHP_VERSION="${PHP_VERSION:-8.3}"
 SITE="" DOMAIN="" WP_ENV="" EMAIL="" TLS=1
 DEPLOY_KEYS=() ALIASES=()
 
@@ -54,6 +53,16 @@ for alias in "${ALIASES[@]}"; do
   [[ "$alias" =~ ^[a-z0-9.-]+\.[a-z]{2,}$ ]] || die "bad --alias: $alias"
 done
 command -v nginx >/dev/null || die "run server/bootstrap.sh first"
+
+# Versions differ between Ubuntu releases (26.04: PHP 8.5, Nginx 1.28; 24.04: PHP 8.3, Nginx 1.24).
+PHP_VERSION="$(php -r 'echo PHP_MAJOR_VERSION, ".", PHP_MINOR_VERSION;')"
+MYSQL="$(command -v mariadb || command -v mysql)"
+NGINX_VERSION="$(nginx -v 2>&1 | sed -n 's|.*nginx/\([0-9.]*\).*|\1|p')"
+if dpkg --compare-versions "$NGINX_VERSION" ge 1.25.1; then
+  LISTEN_TLS="443 ssl" HTTP2="    http2 on;"
+else
+  LISTEN_TLS="443 ssl http2" HTTP2=""
+fi
 
 SITE_ROOT="/srv/www/$SITE"
 SHARED="$SITE_ROOT/shared"
@@ -112,7 +121,7 @@ if [ -z "$DB_PASSWORD" ]; then
   DB_PASSWORD="$(random 24)"
   save_credential DB_PASSWORD "$DB_PASSWORD"
 fi
-mysql <<SQL
+"$MYSQL" <<SQL
 CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
 ALTER USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
@@ -235,8 +244,9 @@ write_vhost() {
   if [ ${#ALIASES[@]} -gt 0 ]; then
     redirect_block="
 server {
-    listen 443 ssl http2;
-$(listen6 '443 ssl http2')
+    listen $LISTEN_TLS;
+$(listen6 "$LISTEN_TLS")
+$HTTP2
     server_name ${ALIASES[*]};
     ssl_certificate $cert;
     ssl_certificate_key $key;
@@ -256,8 +266,9 @@ $(listen6 80)
 }
 $redirect_block
 server {
-    listen 443 ssl http2;
-$(listen6 '443 ssl http2')
+    listen $LISTEN_TLS;
+$(listen6 "$LISTEN_TLS")
+$HTTP2
     server_name $DOMAIN;
 
     ssl_certificate $cert;

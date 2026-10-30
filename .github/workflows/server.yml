@@ -20,10 +20,10 @@ on:
         options: [staging, production]
         default: staging
       domain:
-        description: "add-site: canonical hostname, e.g. staging.cigarholic.com"
+        description: "add-site: canonical hostname (blank = staging.cigarholic.com or cigarholic.com)"
         type: string
       alias:
-        description: "add-site: optional hostname that redirects to the canonical one, e.g. www.cigarholic.com"
+        description: "add-site: optional hostnames that redirect to the canonical one, space-separated, e.g. www.cigarholic.com"
         type: string
       email:
         description: "add-site: WordPress admin and Let's Encrypt email"
@@ -91,13 +91,19 @@ jobs:
               [ "$HARDEN_SSH" != true ] || cmd+=(--harden-ssh)
               ;;
             add-site)
-              if [ -z "$DOMAIN" ] || [ -z "$EMAIL" ]; then
-                echo "::error::add-site needs the domain and email inputs"
+              if [ -z "$EMAIL" ]; then
+                echo "::error::add-site needs the email input"
                 exit 1
               fi
-              if [ "$SITE_ENV" = production ]; then site=cigarholic; else site=cigarholic-staging; fi
+              if [ "$SITE_ENV" = production ]; then
+                site=cigarholic
+                DOMAIN="${DOMAIN:-cigarholic.com}"
+              else
+                site=cigarholic-staging
+                DOMAIN="${DOMAIN:-staging.cigarholic.com}"
+              fi
               cmd=("${sudo[@]}" bash cigarholic-server/add-site.sh --site "$site" --domain "$DOMAIN" --env "$SITE_ENV" --email "$EMAIL")
-              [ -z "$ALIAS" ] || cmd+=(--alias "$ALIAS")
+              for alias in ${ALIAS//,/ }; do cmd+=(--alias "$alias"); done
               if [ -n "$VPS_DEPLOY_KEY" ]; then
                 printf '%s\n' "$VPS_DEPLOY_KEY" > "$RUNNER_TEMP/deploy_key"
                 chmod 600 "$RUNNER_TEMP/deploy_key"

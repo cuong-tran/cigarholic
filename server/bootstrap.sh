@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# OPS-01: server-wide setup for a fresh Ubuntu 24.04 VPS. Safe to re-run. Run as root:
+# OPS-01: server-wide setup for a fresh Ubuntu 26.04 (or 24.04) VPS. Safe to re-run. Run as root:
 #
 #   bash server/bootstrap.sh [--harden-ssh]
 #
 # Installs Nginx, PHP-FPM, MariaDB, Redis, WP-CLI and Certbot; turns on the firewall, fail2ban and
-# automatic security updates. Sites are added afterwards with server/add-site.sh.
+# automatic security updates. PHP is the release's own version (8.5 on 26.04, 8.3 on 24.04), so it
+# gets Ubuntu security updates. Sites are added afterwards with server/add-site.sh.
 #
 #   --harden-ssh   turn off SSH password logins (key-only, root included). Use it only once you can
 #                  log in with an SSH key, or you will lock yourself out.
 set -euo pipefail
 umask 022
 
-PHP_VERSION="${PHP_VERSION:-8.3}"
 HARDEN_SSH=0
 
 for arg in "$@"; do
@@ -27,7 +27,14 @@ warn() { printf 'WARNING: %s\n' "$*" >&2; }
 [ "$(id -u)" -eq 0 ] || { echo "Run as root." >&2; exit 1; }
 # shellcheck source=/dev/null
 . /etc/os-release
-[ "${ID:-}" = ubuntu ] || warn "written for Ubuntu 24.04; this is ${PRETTY_NAME:-unknown}."
+case "${ID:-}-${VERSION_ID:-}" in
+  ubuntu-26.04 | ubuntu-24.04) ;;
+  *) warn "written for Ubuntu 26.04 and 24.04; this is ${PRETTY_NAME:-unknown}." ;;
+esac
+if systemctl is-active --quiet apache2 2>/dev/null; then
+  echo "Apache is running and holds ports 80/443. Stop it first: systemctl disable --now apache2" >&2
+  exit 1
+fi
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -35,9 +42,8 @@ log "Installing packages"
 apt-get update -q
 apt-get install -y -q --no-install-recommends \
   nginx mariadb-server mariadb-client redis-server \
-  "php$PHP_VERSION-fpm" "php$PHP_VERSION-cli" "php$PHP_VERSION-mysql" "php$PHP_VERSION-curl" \
-  "php$PHP_VERSION-gd" "php$PHP_VERSION-intl" "php$PHP_VERSION-mbstring" "php$PHP_VERSION-xml" \
-  "php$PHP_VERSION-zip" "php$PHP_VERSION-bcmath" "php$PHP_VERSION-opcache" php-imagick php-redis \
+  php-fpm php-cli php-mysql php-curl php-gd php-intl php-mbstring php-xml php-zip php-bcmath \
+  php-imagick php-redis \
   certbot ufw fail2ban unattended-upgrades cron logrotate \
   ca-certificates curl git rsync unzip less ssl-cert apache2-utils
 
@@ -48,6 +54,7 @@ if ! command -v wp >/dev/null 2>&1; then
 fi
 wp --allow-root --version
 
+PHP_VERSION="$(php -r 'echo PHP_MAJOR_VERSION, ".", PHP_MINOR_VERSION;')"
 log "Configuring PHP $PHP_VERSION"
 cat >"/etc/php/$PHP_VERSION/fpm/conf.d/90-cigarholic.ini" <<'EOF'
 ; Managed by server/bootstrap.sh
@@ -72,9 +79,10 @@ mkdir -p /var/www/letsencrypt /etc/nginx/htpasswd
 rm -f /etc/nginx/sites-enabled/default
 # Listen on IPv6 too when the server has it.
 listen6() { [ -s /proc/net/if_inet6 ] && printf '    listen [::]:%s;' "$1"; true; }
+# Hide the Nginx version. Edited in place: 26.04's nginx.conf sets server_tokens itself.
+sed -i -E 's/^(\s*)#?\s*server_tokens\s+\S+;.*/\1server_tokens off;/' /etc/nginx/nginx.conf
 cat >/etc/nginx/conf.d/00-cigarholic.conf <<EOF
 # Managed by server/bootstrap.sh
-server_tokens off;
 client_max_body_size 64m;
 gzip_vary on;
 gzip_proxied any;
