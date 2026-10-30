@@ -1,0 +1,67 @@
+# Run WP-CLI on staging or production as the site user, from the live release.
+# Put one command per line, with or without the leading "wp", e.g.
+#   option get blogname
+#   plugin list --status=active
+# Each line runs as `wp <line>`; the run stops at the first failing command. Shell operators
+# (; & | ` $( ) are refused: put anything more involved in provision/ and deploy it.
+name: WP-CLI
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Environment
+        type: choice
+        options: [staging, production]
+        default: staging
+      commands:
+        description: WP-CLI commands, one per line
+        type: string
+        required: true
+
+concurrency:
+  group: wp-${{ inputs.target }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  wp:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check commands
+        env:
+          COMMANDS: ${{ inputs.commands }}
+        run: |
+          # shellcheck disable=SC2016 # '$(' is matched literally
+          while IFS= read -r line; do
+            if [[ "$line" =~ [\;\&\|\`] || "$line" == *'$('* ]]; then
+              echo "::error::Only plain WP-CLI commands are allowed: $line"
+              exit 1
+            fi
+          done <<< "$COMMANDS"
+
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/actions
+
+      - uses: ./.github/actions/vps-ssh
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ vars.VPS_SSH_PORT || '22' }}
+          user: ${{ inputs.target == 'production' && 'cigarholic' || 'cigarholic-staging' }}
+          private-key: ${{ secrets.VPS_DEPLOY_KEY }}
+          known-hosts: ${{ secrets.VPS_KNOWN_HOSTS }}
+
+      - name: Run WP-CLI
+        env:
+          COMMANDS: ${{ inputs.commands }}
+        run: |
+          while IFS= read -r line; do
+            line="$(sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/^wp[[:space:]]\{1,\}//' <<< "$line")"
+            [ -n "$line" ] || continue
+            echo "::group::wp $line"
+            ssh -n vps "cd ~/current && wp $line"
+            echo "::endgroup::"
+          done <<< "$COMMANDS"

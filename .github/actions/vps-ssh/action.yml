@@ -1,0 +1,50 @@
+name: VPS SSH
+description: Configure the SSH host alias "vps" for the Cigarholic server.
+inputs:
+  host:
+    description: Server IP or hostname (secret VPS_HOST)
+    required: true
+  port:
+    description: SSH port (variable VPS_SSH_PORT)
+    default: "22"
+  user:
+    description: Login user
+    required: true
+  private-key:
+    description: Private key for that user
+    required: true
+  known-hosts:
+    description: Output of `ssh-keyscan -p PORT HOST` (secret VPS_KNOWN_HOSTS)
+    default: ""
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        HOST: ${{ inputs.host }}
+        PORT: ${{ inputs.port }}
+        SSH_USER: ${{ inputs.user }}
+        PRIVATE_KEY: ${{ inputs.private-key }}
+        KNOWN_HOSTS: ${{ inputs.known-hosts }}
+      run: |
+        install -d -m 700 ~/.ssh
+        printf '%s\n' "$PRIVATE_KEY" > ~/.ssh/vps_key
+        chmod 600 ~/.ssh/vps_key
+        if [ -n "$KNOWN_HOSTS" ]; then
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+        else
+          echo "::warning::VPS_KNOWN_HOSTS is not set, so the server's host key is trusted on first use. Set it to pin the key."
+          ssh-keyscan -p "$PORT" "$HOST" > ~/.ssh/known_hosts 2>/dev/null
+        fi
+        cat > ~/.ssh/config <<CONFIG
+        Host vps
+          HostName $HOST
+          Port $PORT
+          User $SSH_USER
+          IdentityFile ~/.ssh/vps_key
+          IdentitiesOnly yes
+          StrictHostKeyChecking yes
+          ServerAliveInterval 30
+          ConnectTimeout 20
+        CONFIG
+        ssh vps true

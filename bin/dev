@@ -1,0 +1,163 @@
+#!/usr/bin/env bash
+# Local development site: MariaDB + PHP's built-in server via `wp server`.
+# Works in Claude Code cloud sessions (running as root) and on a Linux/macOS machine.
+#
+#   bin/dev setup    create .env, database, install dependencies, install WordPress, run provision/
+#   bin/dev up       setup, then start the site in the background on $PORT (default 8080)
+#   bin/dev down     stop the background server
+#   bin/dev reset    drop the local database and set everything up again
+#   bin/dev status   show what is running
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+PORT="${PORT:-8080}"
+RUN_DIR="$ROOT/.dev"
+PID_FILE="$RUN_DIR/server.pid"
+LOG_FILE="$RUN_DIR/server.log"
+ADMIN_USER="${ADMIN_USER:-admin}"
+ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin}"
+ADMIN_EMAIL="${ADMIN_EMAIL:-admin@example.test}"
+
+if [ "$(id -u)" -eq 0 ]; then
+  export COMPOSER_ALLOW_SUPERUSER=1 WP_CLI_ALLOW_ROOT=1
+fi
+
+log() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
+
+env_value() {
+  sed -n "s/^$1=['\"]\{0,1\}\([^'\"]*\)['\"]\{0,1\}$/\1/p" .env | head -n1
+}
+
+mysql_root() {
+  if mysql -uroot -e 'SELECT 1' >/dev/null 2>&1; then
+    mysql -uroot "$@"
+  else
+    sudo mysql "$@"
+  fi
+}
+
+ensure_env() {
+  if [ ! -f .env ]; then
+    log "Creating .env from .env.example"
+    cp .env.example .env
+  fi
+  if grep -q "generateme" .env; then
+    log "Generating salts"
+    while grep -q "generateme" .env; do
+      local salt
+      salt="$(php -r 'echo bin2hex(random_bytes(32));')"
+      sed -i.bak "0,/generateme/s//$salt/" .env
+    done
+    rm -f .env.bak
+  fi
+  sed -i.bak "s#^WP_HOME=.*#WP_HOME='http://localhost:$PORT'#" .env && rm -f .env.bak
+}
+
+ensure_db() {
+  if ! mysqladmin ping --silent >/dev/null 2>&1; then
+    log "Starting MariaDB"
+    service mariadb start >/dev/null 2>&1 || sudo service mariadb start >/dev/null 2>&1 || {
+      echo "Could not start MariaDB. Start it yourself, then re-run." >&2
+      exit 1
+    }
+  fi
+  local name user pass
+  name="$(env_value DB_NAME)"
+  user="$(env_value DB_USER)"
+  pass="$(env_value DB_PASSWORD)"
+  mysql_root -e "CREATE DATABASE IF NOT EXISTS \`$name\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    CREATE USER IF NOT EXISTS '$user'@'localhost' IDENTIFIED BY '$pass';
+    CREATE USER IF NOT EXISTS '$user'@'127.0.0.1' IDENTIFIED BY '$pass';
+    GRANT ALL PRIVILEGES ON \`$name\`.* TO '$user'@'localhost';
+    GRANT ALL PRIVILEGES ON \`$name\`.* TO '$user'@'127.0.0.1';
+    FLUSH PRIVILEGES;"
+}
+
+ensure_deps() {
+  if [ ! -f vendor/autoload.php ] || [ composer.lock -nt vendor/autoload.php ]; then
+    log "Installing Composer dependencies"
+    composer install --no-interaction --no-progress
+  fi
+}
+
+ensure_wp() {
+  if ! wp core is-installed >/dev/null 2>&1; then
+    log "Installing WordPress"
+    wp core install --url="http://localhost:$PORT" --title="Cigarholic (local)" \
+      --admin_user="$ADMIN_USER" --admin_password="$ADMIN_PASSWORD" \
+      --admin_email="$ADMIN_EMAIL" --skip-email
+  fi
+  log "Running provision/"
+  bash provision/run.sh
+}
+
+server_running() {
+  [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null
+}
+
+cmd_setup() {
+  ensure_env
+  ensure_db
+  ensure_deps
+  ensure_wp
+}
+
+cmd_up() {
+  cmd_setup
+  mkdir -p "$RUN_DIR"
+  if server_running; then
+    log "Already running at http://localhost:$PORT"
+    return
+  fi
+  log "Starting server on http://localhost:$PORT (log: .dev/server.log)"
+  nohup wp server --host=127.0.0.1 --port="$PORT" >"$LOG_FILE" 2>&1 &
+  echo $! >"$PID_FILE"
+  for _ in $(seq 1 30); do
+    if curl -fsS -o /dev/null "http://127.0.0.1:$PORT/" 2>/dev/null; then
+      log "Up: http://localhost:$PORT  (admin: http://localhost:$PORT/wp/wp-admin/  $ADMIN_USER / $ADMIN_PASSWORD)"
+      return
+    fi
+    sleep 0.5
+  done
+  echo "Server did not answer; see .dev/server.log" >&2
+  exit 1
+}
+
+cmd_down() {
+  if server_running; then
+    # `wp server` runs php -S as a child process; stop the whole group.
+    pkill -P "$(cat "$PID_FILE")" 2>/dev/null || true
+    kill "$(cat "$PID_FILE")" 2>/dev/null || true
+    log "Stopped"
+  fi
+  rm -f "$PID_FILE"
+}
+
+cmd_reset() {
+  cmd_down
+  if [ -f .env ]; then
+    log "Dropping local database"
+    mysql_root -e "DROP DATABASE IF EXISTS \`$(env_value DB_NAME)\`;"
+  fi
+  cmd_setup
+}
+
+cmd_status() {
+  if server_running; then echo "server: running on http://localhost:$PORT"; else echo "server: stopped"; fi
+  if mysqladmin ping --silent >/dev/null 2>&1; then echo "mariadb: running"; else echo "mariadb: stopped"; fi
+  if wp core is-installed >/dev/null 2>&1; then echo "wordpress: installed ($(wp core version))"; else echo "wordpress: not installed"; fi
+}
+
+case "${1:-}" in
+  setup) cmd_setup ;;
+  up) cmd_up ;;
+  down) cmd_down ;;
+  reset) cmd_reset ;;
+  status) cmd_status ;;
+  *)
+    awk 'NR > 1 && !/^#/ { exit } NR > 1 { sub(/^# ?/, ""); print }' "$0"
+    exit 1
+    ;;
+esac

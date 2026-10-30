@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# FND-06: the checks CI runs (.github/workflows/ci.yml). Needs PHP, Composer, shellcheck, actionlint.
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+if [ "$(id -u)" -eq 0 ]; then
+  export COMPOSER_ALLOW_SUPERUSER=1
+fi
+
+step() { printf '\n==> %s\n' "$*"; }
+
+step "composer validate"
+composer validate --no-check-publish
+
+step "php -l"
+find config web/index.php web/wp-config.php web/app/mu-plugins/cigarholic-core web/app/themes/cigarholic \
+  -name '*.php' -print0 | xargs -0 -n1 php -l
+
+step "shellcheck"
+shellcheck bin/dev bin/lint bin/cloud-env-setup.sh provision/run.sh server/*.sh
+shellcheck --shell=bash provision/[0-9][0-9]-*.sh
+
+step "actionlint"
+if command -v actionlint >/dev/null 2>&1; then
+  actionlint
+else
+  echo "actionlint not installed; skipped (CI runs it)"
+fi
+
+step "composer audit"
+composer audit --locked --no-interaction
