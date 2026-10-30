@@ -1,0 +1,78 @@
+# Owner actions
+
+The one place to see what the build needs from you (`docs/KICKOFF-BRIEF.md` rule 5). Kept current at the end of every session.
+
+- **A** blocks server setup, needed now. **B** needed within 2 weeks. **C** needed before go-live.
+- **Status** says what was verified from the sandbox, on which date, and what only you can confirm.
+- Secret and variable **names** are the contract (full inventory in `docs/runbooks/secrets.md`). Never put a value anywhere except GitHub, and never paste one into the session.
+- When you hand something over, reply in the session ("done A1, A2") or edit the Status column. I verify on first use and update this file.
+
+Last updated: 2026-10-30, end of Turn 1.
+
+**Phase 0 (the build in the sandbox) needs nothing from this list.** Phase 1 (coming-soon page live on `cigarholic.com`, milestone M1) needs all of group A. The critical path is **A5 (domain hold) and A2 (Cloudflare)**; the VPS (A1) can be provisioned in parallel without a domain.
+
+## How to hand over secrets and variables
+
+1. GitHub → `cuong-tran/cigarholic` → **Settings → Environments** → `staging` or `production` → **Add environment secret** / **Add environment variable**. Repository-wide items: **Settings → Secrets and variables → Actions**.
+2. Type the name exactly as written here; case matters.
+3. If the Environments page does not let you add a secret (see A4), add the same names as **repository** secrets and tell me. The workflows then read them from there.
+4. Nothing is ever read back: I cannot list or read secrets from the sandbox. The first workflow that uses a secret verifies it, and I report the result.
+
+## A) Blocks server setup, need now
+
+| # | What | How you hand it over | Status (2026-10-30) |
+|---|---|---|---|
+| A1 | **VPS access.** Provider, region, public IP, root SSH, and whether it is a clean Ubuntu 26.04 install | On your computer: `ssh-keygen -t ed25519 -f cigarholic-deploy -C deploy@cigarholic -N ""`. Put `cigarholic-deploy.pub` into `/root/.ssh/authorized_keys` on the VPS. In **both** Environments `staging` and `production` set secrets `SSH_HOST` (the IP), `SSH_PORT` (`22`), `SSH_USER` (`root` for now), `SSH_PRIVATE_KEY` (the whole content of `cigarholic-deploy`, including the BEGIN and END lines), `SSH_KNOWN_HOSTS` (output of `ssh-keyscan -H -p 22 <IP>`). Provisioning creates a limited `deploy` user with the same key; I tell you when to switch `SSH_USER` to `deploy` | Per `docs/runbooks/secrets.md` you re-created these on 2026-10-30 after reinstalling the OS. I cannot read secrets, so the first `infra-provision.yml` run verifies them (Phase 1). **Please confirm three things in the session:** (1) provider and region: the earlier session saw the IP in a Latin American (LACNIC) address block and the plan calls for a US region; (2) it is a clean install since the 2026-10-30 reinstall; (3) the host key and root key in the secrets were made after that reinstall |
+| A2 | **Cloudflare for both zones.** Everything DNS, TLS, WAF and redirects is applied by `cloudflare.yml` through the API; you do not need to point the domains at the VPS yourself | (1) Add `cigarholic.com` and `max2lab.com` to one Cloudflare account (Free plan is enough to launch). (2) Create an API token: My Profile → API Tokens → Create Token → Custom token with **Zone** permissions Zone:Read, DNS:Edit, Zone Settings:Edit, SSL and Certificates:Edit, Cache Purge:Purge, Zone WAF:Edit, Single Redirect:Edit, Page Rules:Edit and **Account** permissions Turnstile:Edit, Account Settings:Read; Zone Resources → Include → Specific zone → add **both** zones. Repository secret `CLOUDFLARE_API_TOKEN`. (3) Repository variables `CLOUDFLARE_ACCOUNT_ID` (zone Overview page, right column), `CLOUDFLARE_ZONE_ID_CIGARHOLIC`, `CLOUDFLARE_ZONE_ID_MAX2LAB` (same place, per zone). (4) Nameservers: both domains have **no DNS records today** (NXDOMAIN, see A5), so there is nothing to import and you can switch the nameservers at iNET to the two Cloudflare names as soon as the zones are added and A5 is lifted; you do not need to wait for me | Not started as far as I can tell. The DNS records (proxied A records to the VPS, `www` and `max2lab` redirect rules, Postmark records later) are created by the workflow; I never change an existing MX or TXT record without asking |
+| A3 | **Cloud environment** (the Claude Code environment this session runs in): network access, timeouts, setup script | Environment settings on claude.ai/code. After this turn, paste the **updated** `infra/cloud-setup.sh` into Setup script (it changed in Turn 1: time-boxed to 5 minutes, warms the Composer and npm caches, installs the MariaDB client). Optional environment variables `COMPOSER_ALLOW_SUPERUSER=1` and `WP_CLI_ALLOW_ROOT=1` (the scripts set them themselves) | **Verified today:** network access is effectively Full (every host in the brief is reachable, and so are arbitrary hosts), `BASH_DEFAULT_TIMEOUT_MS=600000` and `BASH_MAX_TIMEOUT_MS=1800000` are set, and the previous setup script has been applied (registry mirror, shellcheck and actionlint present). Nothing needs allowlisting. Only the re-paste is left |
+| A4 | **GitHub plan and settings.** Whether Environments can hold secrets and required reviewers on this private repo; Actions enabled | Tell me in the session: (1) the plan of the `cuong-tran` account (Free or Pro); (2) whether **Settings → Environments → staging** lets you add a secret; (3) that **Settings → Actions → General** allows all actions. If Environments cannot hold secrets, put every name from this file in as repository secrets, and production deploy becomes a `workflow_dispatch` with a `tag` input that only you run (brief section 3) | **Verified today:** the repository is private and owned by your personal account; the Claude GitHub App works for clone, push, PR creation and PR merge through the API (merge verified on this turn's PR, see `docs/STATUS.md`). `gh pr merge`, GraphQL, the Environments API and the Actions-settings API are refused by the sandbox proxy, so (1) to (3) can only come from you. Nothing here blocks Phase 0 |
+| A5 | **Domain registrar hold (new).** `cigarholic.com` and `max2lab.com` both carry registrar status `clientHold` at iNET Software Company Limited, with nameservers `ns/ns1/ns2.viettelidc.com.vn` and **no DNS answers at all** | Log in at the registrar (iNET), complete the registrant verification it is waiting for (usually the ICANN email verification or an identity check), and ask support to remove `clientHold`. Tell me when both domains show only `clientTransferProhibited` | **Verified today by RDAP:** both domains registered 2026-10-03, status `client hold` + `client transfer prohibited`, `A` lookups return NXDOMAIN. While the hold is on, no website, certificate or email can work on either domain, so **M1 is impossible until this is lifted**. No GitHub entry needed |
+
+## B) Needed within 2 weeks
+
+| # | What | How you hand it over | Status (2026-10-30) |
+|---|---|---|---|
+| B1 | **Postmark** account under HuyLinh LLC (approval can take a day; a live coming-soon page helps) | Create two servers: `cigarholic-production` (delivery type Live) and `cigarholic-staging` (delivery type **Sandbox**, nothing is delivered). Secret `POSTMARK_SERVER_TOKEN` in `production` (live server token) and in `staging` (sandbox server token, or the literal test token `POSTMARK_API_TEST`). Sender signature / domain: `cigarholic.com`; I add the DKIM and Return-Path records through Cloudflare once the zone is live and tell you when to click Verify | Not started. Depends on A2 and A5 for domain verification |
+| B2 | **Backblaze B2** bucket and application key for backups | Bucket `cigarholic-backups` (private, a US region), lifecycle "keep prior versions for 30 days". Application key restricted to that bucket (read, write, list, delete). In `production`: secrets `B2_BUCKET`, `B2_KEY_ID`, `B2_APPLICATION_KEY` and variable `B2_S3_ENDPOINT` (the S3 endpoint shown on the bucket page, like `s3.us-west-004.backblazeb2.com`; this variable is my addition, recorded in `docs/runbooks/secrets.md`). Staging optional | Not started |
+| B3 | **UptimeRobot** account | Either repository secret `UPTIMEROBOT_API_KEY` (Main API key) so the monitoring script creates the monitors, or create them yourself from `docs/runbooks/monitoring.md` once it exists: HTTPS home page, keyword check on `/checkout/`, SSL expiry; alerts to your email and phone | Not started |
+| B4 | **Stripe** account under HuyLinh LLC, with the business description "Handcrafted wooden storage boxes and humidors. We do not sell tobacco, cigars or nicotine." (L-01, L-03). Enable **Stripe Tax** in the dashboard (Settings → Tax) | Test mode → Developers → API keys. In `staging`: secrets `STRIPE_TEST_PUBLISHABLE_KEY` (`pk_test_...`), `STRIPE_TEST_SECRET_KEY` (`sk_test_...`). For Stripe Tax the plugin may only offer "Connect with Stripe" instead of a key; if so, you do that click yourself in **staging** WP admin (test mode) when I say staging is ready, and `STRIPE_TAX_SECRET_KEY` stays unused. Live keys never go through GitHub (C1) | Not started. Needed for M2 |
+| B5 | **PayPal Business** account under HuyLinh LLC (L-02) and a sandbox app | developer.paypal.com → Apps & Credentials → Sandbox → Create app `cigarholic-staging`. In `staging`: secrets `PAYPAL_SANDBOX_CLIENT_ID`, `PAYPAL_SANDBOX_CLIENT_SECRET`. Pay Later costs 4.99 % + 49 ¢ per transaction against 3.49 % + 49 ¢ for standard PayPal; tell me if you want it off at launch | Not started. Needed for M2 |
+| B6 | **Turnstile** widget (bot protection on the coming-soon signup and contact form) | Cloudflare dashboard → Turnstile → Add widget: hostnames `cigarholic.com` and `staging.cigarholic.com`, mode Managed. Secrets `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` in **both** Environments. The sandbox and CI use Cloudflare's public always-pass test keys automatically, so nothing is needed for Phase 0 | Not started. Needed for M1 (signup form live) |
+| B7 | **GA4** property | Google Analytics → create property "Cigarholic" (US, USD) → web data stream `https://cigarholic.com`. Repository variable `GA4_MEASUREMENT_ID` (`G-...`) | Not started |
+| B8 | **Owner admin account** and **staging basic auth** | Repository variable `WP_OWNER_EMAIL`; secret `WP_OWNER_INITIAL_PASSWORD` in both Environments (you change it at first login; 2FA is enforced). In `staging`: secrets `STAGING_BASIC_AUTH_USER`, `STAGING_BASIC_AUTH_PASSWORD` | Basic-auth secrets were set on 2026-10-30 per `docs/runbooks/secrets.md`; owner email and initial password not yet |
+| B9 | **Brand assets and first catalog content:** logo (SVG, plus PNG), colours (hex), fonts (licensed files or Google Fonts names; they are self-hosted), first product photos, specs and copy (L-06, L-10) | Push to a `brand/` folder on any branch and tell me, or share a drive link for large photo originals. Until then the theme uses neutral placeholder tokens (D-01) | Not started |
+| B10 | **Support mailbox** `support@cigarholic.com`; **Search Console** and **Bing** verification tokens | Tell me the mail provider you choose so its MX, SPF and DKIM records go into Cloudflare before anything else uses the zone (I add them, or you do; I never change existing MX or TXT records without asking). Repository variables `GSC_VERIFICATION_TOKEN` (the value after `google-site-verification=` of a Domain property) and `BING_VERIFICATION_TOKEN` | Not started. Needs A2 and A5 |
+| B11 | **Decisions D-01 to D-10:** confirm or change the defaults listed below | Reply in the session, or edit the table below in a PR | Defaults in force; nothing needed unless you want a change |
+| B12 | **Launch product and material sheet (new):** product types, every wood used (genus + species, including lining and veneer), country of harvest, composite panels yes/no (plywood, MDF, particleboard), finishes, lock / seal / humidification / hygrometer options, capacity ranges, dimensions and weights | One spreadsheet is enough: drop it into `brand/` or share a link | Not started. Needed to seed the attribute terms (CAT-03), the compliance fields (CMP-11), the CSV template (CAT-10) and the Prop 65 decision (D-08). Placeholder terms are used until it arrives |
+
+## C) Before go-live
+
+| # | What | How | Status (2026-10-30) |
+|---|---|---|---|
+| C1 | **Stripe live mode**, Apple Pay domain verification for `cigarholic.com`, **PayPal live** | You connect both in WP admin on production yourself (plugin onboarding) after I report M2 green; live credentials never pass through GitHub or me. I verify the webhooks and run the real-money matrix with you | Waits for M2 |
+| C2 | **Sales-tax registrations** (TX for stock, FL for the business address, per your CPA) and the matching Stripe Tax registrations in the dashboard (L-04) | Confirm in the session; I test TX, FL, another contiguous state and a rejected AK/HI/non-US address on production | Open. Configured for TX + FL on the assumption in the brief; no legal or tax assumption is made beyond that |
+| C3 | **Sign-offs:** policy texts (L-08), Prop 65 (D-08, L-09), prices and shipping rules (L-07), final product data and photos (L-06), warehouse hand-off process (D-02) | Content through the manager in WP admin; decisions in the session | Open |
+| C4 | **Store manager account** and handbook walkthrough (ORD-05) | Give me the manager's email, their time zone and the handbook language (English assumed). I create the Shop Manager account, enforce 2FA and walk them through `docs/manager-guide.md` | Open |
+| C5 | **Go-live** | Your explicit "turn coming-soon off" | Waits for M3 |
+
+## Decisions: defaults in force (B11)
+
+| ID | Default in force | Change it? |
+|---|---|---|
+| D-01 Theme | Custom block theme `cigarholic`, kept small; neutral placeholder tokens until B9 arrives | |
+| D-02 Fulfillment | Manual hand-off at launch (CSV or portal, tracking pasted by the manager); 3PL connector in P1 | |
+| D-03 Engraving | Not in P0; CAT-13 built in P1 as a module, fulfilled in the US (per-parcel shipping from Vietnam pays full duty) | |
+| D-04 Email platform | Undecided; coming-soon signups are stored in `cigarholic-core` (custom table, CSV export, Turnstile) and synced to the platform later | Tell me Klaviyo / Omnisend / MailPoet when you know |
+| D-05 Shipping | Free shipping on all humidors (priced in); flat rate by shipping class for accessories; oversized class for cabinet humidors | |
+| D-06 Zones | Contiguous US only at launch | |
+| D-07 Tax | Stripe Tax; TaxJar is the fallback if staging tests fail | |
+| D-08 Prop 65 | No warning by default; per-product toggle that renders the warning when you set it | |
+| D-09 SEO plugin | SEOPress | |
+| D-10 Helpdesk | Later (P1); launch support = contact form → `support@cigarholic.com` | |
+| Hosting panel | Raw VPS provisioned by scripts in `infra/`, no panel | |
+| Canonical host | Apex `cigarholic.com`; `www` and both `max2lab.com` hosts 301 to it | |
+| Progress tracking | `docs/STATUS.md`; GitHub Issues only for bugs and owner decisions | |
+
+## History
+
+- 2026-10-30 (Turn 1): created from `docs/KICKOFF-BRIEF.md` Appendix A, verified against the sandbox and RDAP. Added A5 (domain hold), B12 (material sheet), the `B2_S3_ENDPOINT` variable, and the verified facts in A3 and A4.
