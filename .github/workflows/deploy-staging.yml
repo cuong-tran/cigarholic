@@ -29,8 +29,30 @@ permissions:
   deployments: write
 
 jobs:
+  # Staging deploys are switched on by committing the marker file infra/deploy/STAGING_ENABLED once the
+  # server is provisioned (Phase 1). Until then pushes to main do not produce failed deploy runs.
+  gate:
+    name: Staging deploy enabled?
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: infra/deploy
+      - id: check
+        run: |
+          if [ -f infra/deploy/STAGING_ENABLED ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Staging deploy skipped: infra/deploy/STAGING_ENABLED does not exist yet (Phase 1)."
+          fi
+
   deploy:
     name: Deploy ${{ github.sha }} to staging
+    needs: gate
+    if: needs.gate.outputs.enabled == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment:
