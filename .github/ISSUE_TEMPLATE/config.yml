@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Build progress and next actions
+    url: https://github.com/cuong-tran/cigarholic/blob/main/docs/STATUS.md
+    about: Progress is tracked in docs/STATUS.md, not in issues. Issues are for bugs and owner decisions only.
+  - name: What the owner needs to provide
+    url: https://github.com/cuong-tran/cigarholic/blob/main/docs/OWNER-ACTIONS.md
+    about: Access, accounts, secrets and decisions, grouped by urgency.

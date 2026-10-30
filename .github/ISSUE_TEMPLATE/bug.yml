@@ -1,0 +1,55 @@
+name: Bug
+description: Something on staging or production does not work as the feature list says it should
+title: "fix(<ID>): <short description>"
+labels: ["bug"]
+body:
+  - type: input
+    id: feature
+    attributes:
+      label: Feature ID
+      description: The ID from docs/FEATURES.md this bug belongs to (for example PAY-05).
+      placeholder: PAY-05
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - production (cigarholic.com)
+        - staging
+        - local runtime (docker compose)
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual (include error text, order number, browser and device)
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or screen recording
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: This issue contains no customer data, card data, keys or passwords (the repository is public)
+          required: true

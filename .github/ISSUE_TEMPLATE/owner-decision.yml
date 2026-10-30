@@ -1,0 +1,38 @@
+name: Owner decision
+description: A decision only the owner can make (business, legal, money, scope)
+title: "decision(<D-ID or feature ID>): <question>"
+labels: ["owner-decision"]
+body:
+  - type: input
+    id: reference
+    attributes:
+      label: Decision or feature ID
+      description: D-01 to D-10 from docs/FEATURES.md section 6, or a feature ID.
+      placeholder: D-04
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: Options with consequences
+      placeholder: |
+        A) ... (cost, effort, risk)
+        B) ...
+    validations:
+      required: true
+  - type: input
+    id: default
+    attributes:
+      label: Default in force until decided
+    validations:
+      required: true
+  - type: input
+    id: needed_by
+    attributes:
+      label: Needed by (date) and what it blocks
