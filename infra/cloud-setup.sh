@@ -90,9 +90,16 @@ if [ ${#compose_files[@]} -gt 0 ]; then
     started_dockerd=$!
     for _ in $(seq 1 30); do docker info >/dev/null 2>&1 && break; sleep 1; done
   fi
+  # Cigarholic builds its PHP image through scripts/runtime-up.sh --build-only (host network and the
+  # proxy CA as a build secret); any other compose file is pulled and built plainly.
   for file in "${compose_files[@]}"; do
-    boxed 120 "compose pull $file" docker compose -f "$file" pull --ignore-buildable --quiet
-    boxed 200 "compose build $file" docker compose -f "$file" build --quiet
+    dir=$(dirname "$file")
+    if [ -x "$dir/scripts/runtime-up.sh" ]; then
+      boxed 280 "runtime images $dir" bash -c "cd '$dir' && HTTPS_PROXY='${HTTPS_PROXY:-}' NO_PROXY='${NO_PROXY:-}' scripts/runtime-up.sh --build-only"
+    else
+      boxed 120 "compose pull $file" docker compose -f "$file" pull --ignore-buildable --quiet
+      boxed 200 "compose build $file" docker compose -f "$file" build --quiet
+    fi
   done
   # Stop the daemon we started so the cached disk holds a cleanly shut down image store.
   if [ -n "$started_dockerd" ]; then
