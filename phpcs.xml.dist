@@ -4,6 +4,7 @@
 
 	<!-- Paths are added as the directories come into existence (PHPCS fails on a missing path). -->
 	<file>config</file>
+	<file>web/app/themes/cigarholic</file>
 	<file>web/index.php</file>
 	<file>web/wp-config.php</file>
 

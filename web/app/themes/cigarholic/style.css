@@ -29,7 +29,7 @@ Tags: e-commerce, block-patterns, block-styles, full-site-editing, accessibility
 
 /* Skip link: core prints it for block themes; only its colours are themed here. */
 .skip-link.screen-reader-text:focus {
-	background-color: var(--wp--preset--color--base, #ffffff);
+	background-color: var(--wp--preset--color--base, #fff);
 	color: var(--wp--preset--color--contrast, #1c1917);
 	outline: 3px solid var(--wp--preset--color--contrast, #1c1917);
 }
@@ -60,6 +60,7 @@ Tags: e-commerce, block-patterns, block-styles, full-site-editing, accessibility
 
 /* No motion for people who asked for none (WCAG 2.2 AA, 2.3.3 Animation from Interactions). */
 @media (prefers-reduced-motion: reduce) {
+
 	*,
 	*::before,
 	*::after {
@@ -72,6 +73,7 @@ Tags: e-commerce, block-patterns, block-styles, full-site-editing, accessibility
 
 /* Print: content only, black on white, link targets spelled out. */
 @media print {
+
 	header.wp-block-template-part,
 	footer.wp-block-template-part,
 	.wp-block-navigation,
