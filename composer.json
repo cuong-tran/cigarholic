@@ -89,7 +89,7 @@
   },
   "scripts": {
     "tools": "bash scripts/tools.sh",
-    "lint": "parallel-lint --exclude vendor --exclude web/wp --exclude web/app/plugins --exclude node_modules --exclude tools .",
+    "lint": "parallel-lint --exclude vendor --exclude web/wp --exclude web/app/plugins --exclude node_modules --exclude tools --exclude .claude .",
     "phpcs": "phpcs",
     "phpcbf": "phpcbf",
     "phpstan": "tools/phpstan.phar analyse --memory-limit=1G",

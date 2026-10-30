@@ -1,6 +1,8 @@
 <?php
 /**
  * Development: the Docker Compose runtime in the sandbox, CI and on laptops.
+ *
+ * @package Cigarholic
  */
 
 use Roots\WPConfig\Config;
