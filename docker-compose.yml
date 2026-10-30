@@ -1,0 +1,83 @@
+# Cigarholic runtime for the sandbox, CI and laptops (FND-02). Pinned to the Ubuntu 26.04 VPS minors:
+# PHP 8.5, MariaDB 11.8, Valkey 9.0, nginx 1.28 (docs/versions.md). Start it with scripts/runtime-up.sh
+# or `make up`; it installs WordPress, provisions and seeds. The repository is bind-mounted, so Composer
+# runs on the host and the containers only execute.
+name: cigarholic
+
+services:
+  db:
+    image: mariadb:11.8.9
+    environment:
+      MARIADB_DATABASE: ${DB_NAME:-cigarholic}
+      MARIADB_USER: ${DB_USER:-cigarholic}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-cigarholic}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    command: >-
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb-buffer-pool-size=256M
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 36
+
+  cache:
+    image: valkey/valkey:9.0.7-alpine
+    command: ["valkey-server", "--save", "", "--appendonly", "no", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  mail:
+    image: axllent/mailpit:v1.32.0
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports:
+      - "${MAILPIT_PORT:-8025}:8025"
+
+  php:
+    # scripts/runtime-up.sh builds this image with `docker build` (host network + proxy CA secret, which
+    # Compose's bake builder would refuse without entitlements); `docker compose build` works too where
+    # no proxy is involved (CI, laptops).
+    build:
+      context: ./docker/php
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.5.12}
+    image: cigarholic/php:${PHP_VERSION:-8.5.12}
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+      mail:
+        condition: service_started
+    environment:
+      WP_CLI_ALLOW_ROOT: "1"
+      COMPOSER_ALLOW_SUPERUSER: "1"
+      HTTPS_PROXY: ${HTTPS_PROXY:-}
+      https_proxy: ${HTTPS_PROXY:-}
+      NO_PROXY: ${NO_PROXY:-}
+      no_proxy: ${NO_PROXY:-}
+    volumes:
+      - .:/var/www/html
+      - ${CA_BUNDLE_FILE:-./docker/ca/empty.crt}:/run/ca-bundle.crt:ro
+    working_dir: /var/www/html
+
+  web:
+    image: nginx:1.28.3-alpine
+    depends_on:
+      - php
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    volumes:
+      - .:/var/www/html:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+volumes:
+  db-data:
