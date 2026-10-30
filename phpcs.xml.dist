@@ -4,6 +4,10 @@
 
 	<!-- Paths are added as the directories come into existence (PHPCS fails on a missing path). -->
 	<file>config</file>
+	<file>provision</file>
+	<file>tests</file>
+	<file>web/app/mu-plugins/cigarholic-core.php</file>
+	<file>web/app/mu-plugins/cigarholic-core</file>
 	<file>web/app/themes/cigarholic</file>
 	<file>web/index.php</file>
 	<file>web/wp-config.php</file>
@@ -61,6 +65,14 @@
 	<rule ref="Universal.Operators.DisallowShortTernary">
 		<exclude-pattern>*/config/*</exclude-pattern>
 	</rule>
+	<!-- Tests invoke core hooks and read the environment to find the WordPress test suite. -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
+	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_putenv">
+		<exclude-pattern>*/tests/phpunit/bootstrap.php</exclude-pattern>
+	</rule>
+
 	<!-- A docblock followed by require_once is not recognised as a file comment by PHPCS. -->
 	<rule ref="Squiz.Commenting.FileComment">
 		<exclude-pattern>*/web/wp-config.php</exclude-pattern>
