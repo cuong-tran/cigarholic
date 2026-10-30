@@ -52,3 +52,7 @@ Thumbs.db
 *.swp
 /tools/
 .phpstan-cache/
+
+# Logs written by WordPress in development
+/web/app/debug.log
+/web/app/*.log
