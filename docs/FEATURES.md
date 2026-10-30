@@ -23,7 +23,7 @@
 - Every feature has a **stable ID** (e.g. `CAT-04`). Reference it in branch names, commit messages, issues and PRs (`feat(CAT-04): spec table from attributes`).
 - **Never renumber or reuse IDs.** Add new features at the end of their section with the next number. Mark dropped features ~~struck through~~ with a reason rather than deleting them.
 - Work in priority order (P0 first). Don't start P1 work while a P0 item is open, unless it's needed to unblock a P0.
-- Progress is tracked in GitHub Issues (one issue per feature ID, labelled with its priority), not in this file. This file changes only when scope or priority changes.
+- Progress is tracked in `docs/STATUS.md` during the build (GitHub Issues are used only for bugs and owner decisions), not in this file. This file changes only when scope or priority changes.
 - The **How** column says how a feature should be built. Prefer, in order: **Core** → **Config** → **Plugin** → **Custom**. A new plugin must be justified in the PR (see FND-11).
 
 ### How column legend
@@ -69,7 +69,7 @@ A customer in the US can find a humidor, read its full specs, pay by card / Appl
 7. **Operations:** order handling, branded emails, Shop Manager role, manager handbook (ORD).
 8. **Content, SEO & compliance:** core pages and policies, SEO basics, sales tax, accessibility, privacy (CNT, SEO, CMP).
 
-P0 has 82 items, but it's lighter than it looks: 35 are built-in WordPress/WooCommerce settings (Core/Config), 21 are content, ops or SaaS setup, 8 are plugin installs, and only 18 need custom code.
+P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCommerce settings (Core/Config), 21 are content, ops or SaaS setup, 8 are plugin installs, and only 20 need custom code.
 
 ### Go-live checklist (all must pass on production)
 
@@ -103,7 +103,7 @@ P0 has 82 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | FND-09 | Secrets management: `.env` per environment, GitHub Environment secrets; API keys never committed | P0 | Ops | Includes Stripe, PayPal, tax, email provider keys |
 | FND-10 | Issue & PR templates that require a feature ID, test notes and screenshots; Conventional Commits; `CHANGELOG.md` | P0 | Custom | Keeps agent work reviewable |
 | FND-11 | Plugin budget and register: `docs/plugins.md` lists every plugin, why it's there and who owns it; target ≤ 15 active plugins | P0 | Custom | New plugin needs an ADR line in the PR |
-| FND-12 | End-to-end smoke tests (Playwright): browse → add to cart → checkout with Stripe test card → order email; run on staging after every deploy | P1 | Custom | Highest-value test suite for a store |
+| FND-12 | End-to-end smoke tests (Playwright): browse → add to cart → checkout with Stripe test card → order email; run on staging after every deploy | P0 | Custom | Highest-value test suite for a store. Raised from P1 (2026-10-30): the suite starts in Phase 0 — a smoke subset runs in CI against the local runtime, the full suite against staging after every deploy |
 | FND-13 | Automated dependency update PRs (Renovate or Dependabot) gated by CI + E2E | P1 | Service | Weekly batch; security fixes immediately |
 | FND-14 | Production → staging DB refresh with customer data anonymised | P2 | Custom | Lets agents debug with realistic data safely |
 | FND-15 | Visual regression tests for key templates (home, category, product, cart, checkout) | P3 | Custom | |
@@ -112,7 +112,7 @@ P0 has 82 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 
 | ID | Feature | Pri | How | Notes |
 |---|---|---|---|---|
-| OPS-01 | US-region VPS with server panel (RunCloud / SpinupWP / Cloudways class): Nginx, PHP 8.x, MariaDB/MySQL, Redis | P0 | Ops | Size for spikes (holiday promos) |
+| OPS-01 | US-region VPS: Nginx, PHP 8.x, MariaDB/MySQL, Redis/Valkey | P0 | Ops | Raw VPS provisioned by idempotent scripts in `infra/` run from GitHub Actions; no server panel (SpinupWP-class panel only if the owner asks). Size for spikes (holiday promos) |
 | OPS-02 | Domain, DNS on Cloudflare, SSL, HTTPS-only, single canonical host (www or apex) | P0 | Ops | |
 | OPS-03 | Cloudflare CDN + WAF: bot protection, rate limit on `wp-login.php` and checkout, block `xmlrpc.php` | P0 | Config | |
 | OPS-04 | Transactional email through a provider (Postmark, Amazon SES, Mailgun…) with SPF, DKIM, DMARC | P0 | Service | VPS mail alone lands in spam; order emails are critical |
@@ -199,7 +199,7 @@ P0 has 82 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 |---|---|---|---|---|
 | PAY-01 | Card payments through Stripe (hosted fields, 3-D Secure); card data never touches the server | P0 | Plugin | Official *WooCommerce Stripe Payment Gateway* |
 | PAY-02 | Apple Pay, Google Pay and Link express buttons on product, cart and checkout | P0 | Plugin | Same plugin; needs Apple Pay domain verification |
-| PAY-03 | PayPal, Venmo and Pay Later | P0 | Plugin | Official *WooCommerce PayPal Payments*. If approval lags, launch on Stripe and move to P1 |
+| PAY-03 | PayPal, Venmo and Pay Later | P0 | Plugin | Official *WooCommerce PayPal Payments*. If approval lags, launch on Stripe and move to P1. Note: Pay Later transactions cost 4.99 % + 49 ¢ (standard PayPal checkout is 3.49 % + 49 ¢); enable it knowingly |
 | PAY-04 | Full and partial refunds from WP admin, synced to the gateway | P0 | Core | |
 | PAY-05 | Payment webhooks configured and monitored (success, failure, refunds, disputes) | P0 | Config | Missed webhooks = orders stuck in "pending" |
 | PAY-06 | Fraud basics: Stripe Radar defaults, AVS/CVC checks, manual review of orders above a set value | P0 | Config | Humidors are high-ticket; tune rules in P1 |
@@ -279,13 +279,13 @@ P0 has 82 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 |---|---|---|---|---|
 | SEO-01 | SEO plugin: title/meta templates, XML sitemaps, canonicals, robots rules, Open Graph / social cards | P0 | Plugin | One of Yoast, Rank Math, SEOPress |
 | SEO-02 | Structured data: Product / Offer (price, availability, shipping and return policy), BreadcrumbList, Organization, WebSite | P0 | Core | WooCommerce + SEO plugin; validate with Rich Results Test |
-| SEO-03 | URL structure fixed before launch (e.g. `/humidors/desktop/<product>`) | P0 | Config | Changing later costs rankings |
+| SEO-03 | URL structure fixed before launch: products `/products/<slug>/`, categories `/collections/<slug>/` (flat, unique slugs), journal `/journal/<slug>/` | P0 | Config | Shopify-compatible paths, so a future storefront move (SHO-02) keeps every URL. Changing later costs rankings |
 | SEO-04 | Google Search Console and Bing Webmaster Tools verified; sitemaps submitted | P0 | Ops | |
 | SEO-05 | Image SEO: descriptive file names and required alt text (checklist in handbook) | P0 | Content | Also an accessibility requirement |
 | SEO-06 | Review / AggregateRating structured data once reviews exist | P1 | Core | |
 | SEO-07 | 301 redirect manager (for renamed products/pages) | P1 | Plugin | Often included in the SEO plugin |
 | SEO-08 | Content plan with topic hubs and internal linking (buying guides, comparisons, care) | P2 | Content | |
-| SEO-09 | Google Merchant Center product feed for free listings | P2 | Plugin | Check policy first: Google bars products that "facilitate tobacco consumption"; humidors may be disapproved |
+| SEO-09 | Google Merchant Center product feed for free listings | P2 | Plugin | Check policy first: Google bars products that "facilitate tobacco consumption"; humidors may be disapproved. Expect rejections: submit one product first and keep the rest out of the feed until it is approved |
 | SEO-10 | Pinterest catalog / rich pins | P3 | Plugin | Gift and décor audience |
 
 ### 4.12 Marketing & retention (MKT)
@@ -300,7 +300,7 @@ P0 has 82 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | MKT-06 | More flows: browse abandonment, win-back, birthday / anniversary of purchase | P2 | Service | |
 | MKT-07 | Promotions: automatic discounts (tiered, BOGO, bundle), scheduled campaigns, Black Friday playbook | P2 | Plugin | |
 | MKT-08 | Corporate / bulk orders: quote requests and quantity-tier pricing | P2 | Custom | |
-| MKT-09 | Ad & social pixels (Meta, Pinterest, TikTok) with server-side conversions | P2 | Plugin | Platforms may restrict tobacco-adjacent ads; triggers CMP-03 opt-out link |
+| MKT-09 | Ad & social pixels (Meta, Pinterest, TikTok) with server-side conversions | P2 | Plugin | Platforms may restrict tobacco-adjacent ads; triggers CMP-03 opt-out link. Expect ad or ad-account rejections: test one product on one platform before investing in pixels and budget |
 | MKT-10 | Referral program ("give $20, get $20") | P3 | Plugin | |
 | MKT-11 | SMS marketing with TCPA-compliant opt-in | P3 | Service | |
 | MKT-12 | Affiliate / influencer program with tracked links and commissions | P3 | Plugin | |
@@ -322,6 +322,7 @@ P0 has 82 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | CMP-08 | Automated sales-tax filing / remittance and economic-nexus monitoring | P1 | Service | WooCommerce Tax doesn't file; Stripe Tax, TaxJar, Avalara or a filing service can |
 | CMP-09 | Honest reviews and endorsements: no fake, gated or undisclosed incentivised reviews | P1 | Ops | FTC rule on consumer reviews |
 | CMP-10 | Material disclosures: wood species and finish on every product (from CAT-03) | P1 | Content | Supports Lacey Act declarations and customer questions |
+| CMP-11 | Per-product import compliance data: wood species (genus + species) for every wood incl. lining and veneer, country of harvest, composite-wood flag (plywood/MDF/particleboard → TSCA Title VI), HTS code | P0 | Custom | Private product fields in `cigarholic-core`, included in the CSV template (CAT-10), checked by `wp cigarholic catalog:check`, exportable for the customs broker (Lacey Act, TSCA, L-11); feeds CMP-10 |
 
 ### 4.14 AI customer service — later phase (AI)
 
@@ -365,7 +366,7 @@ Most of this is P3, but the groundwork is cheap and starts earlier: clean struct
 | ID | Feature | Pri | How | Notes |
 |---|---|---|---|---|
 | SHO-01 | **Architecture rule:** WooCommerce is the system of record; the site has no runtime dependency on Shopify; any sync is a separate module that can be switched off | P0 | Custom | Enforced in AGENTS.md and code review |
-| SHO-02 | Shopify-compatible product CSV export | P3 | Custom | Cheapest way to stand up a Shopify storefront if ever needed |
+| SHO-02 | Shopify-compatible product CSV export | P1 | Custom | Cheapest way to stand up a Shopify storefront if ever needed. Raised from P3 (2026-10-30): cheap once the catalog data model (CAT-03, CAT-09) and the Shopify-compatible URLs (SEO-03) exist, and it keeps the option open with no runtime dependency (SHO-01) |
 | SHO-03 | One-way product and inventory sync WooCommerce → Shopify (Shopify Admin API) | P3 | Custom | Built on INV-03 |
 | SHO-04 | Orders from Shopify back into WooCommerce (two-way) | P4 | Custom | Only if Shopify becomes a real sales channel |
 
@@ -414,7 +415,7 @@ These usually decide the launch date more than development does.
 |---|---|---|---|
 | D-01 | Theme base: custom block theme vs child of an existing block theme | CNT-01, NAV | Custom block theme, kept small |
 | D-02 | Fulfillment at launch: 3PL vs self-ship from a US address; which 3PL | SHP-05, SHP-06, SHP-10 | 3PL with a WooCommerce connector |
-| D-03 | Where laser engraving is done (Vietnam before shipping vs US warehouse/partner) and the lead time | CAT-13, SHP-03 | Decide before promising personalisation |
+| D-03 | Where laser engraving is done (Vietnam before shipping vs US warehouse/partner) and the lead time | CAT-13, SHP-03 | Decide before promising personalisation. Note: de minimis is suspended for all countries, so a single engraved parcel shipped from Vietnam pays full duty (about 12.5 %) and may need formal entry; engraving in the US (warehouse or partner) avoids that. Default until decided: not in P0, CAT-13 built in P1 and fulfilled in the US |
 | D-04 | Email marketing platform | MKT-01, MKT-03, MKT-04 | Klaviyo (strong e-commerce flows) or MailPoet (runs inside WP) |
 | D-05 | Free-shipping policy (always free vs threshold) | SHP-02, CHK-09 | Free shipping on all humidors, priced in |
 | D-06 | Ship to Alaska, Hawaii, territories, APO/FPO? | SHP-01 | Contiguous US at launch |
@@ -452,7 +453,7 @@ Gaps on the reference site we can beat: no visible reviews, no delivery-time est
 
 | Area | P0 | P1 | P2 | P3 | P4 | Total |
 |---|---|---|---|---|---|---|
-| FND – Foundation & agent workflow | 11 | 2 | 1 | 1 | 0 | 15 |
+| FND – Foundation & agent workflow | 12 | 1 | 1 | 1 | 0 | 15 |
 | OPS – Hosting, security & performance | 9 | 3 | 2 | 0 | 0 | 14 |
 | CAT – Catalog & product pages | 10 | 4 | 5 | 5 | 1 | 25 |
 | NAV – Navigation & merchandising | 7 | 3 | 3 | 1 | 0 | 14 |
@@ -464,10 +465,10 @@ Gaps on the reference site we can beat: no visible reviews, no delivery-time est
 | CNT – Content & brand | 4 | 4 | 3 | 2 | 0 | 13 |
 | SEO – SEO | 5 | 2 | 2 | 1 | 0 | 10 |
 | MKT – Marketing & retention | 2 | 3 | 4 | 5 | 1 | 15 |
-| CMP – Compliance & trust | 7 | 3 | 0 | 0 | 0 | 10 |
+| CMP – Compliance & trust | 8 | 3 | 0 | 0 | 0 | 11 |
 | AI – AI customer service | 0 | 1 | 3 | 6 | 0 | 10 |
 | APP – Mobile order app | 0 | 1 | 1 | 2 | 0 | 4 |
 | INV – Inventory integration | 1 | 0 | 1 | 3 | 1 | 6 |
-| SHO – Shopify sync | 1 | 0 | 0 | 2 | 1 | 4 |
+| SHO – Shopify sync | 1 | 1 | 0 | 1 | 1 | 4 |
 | CHN – Other channels | 0 | 0 | 0 | 0 | 2 | 2 |
-| **Total** | **82** | **39** | **34** | **33** | **8** | **196** |
+| **Total** | **84** | **39** | **34** | **32** | **8** | **197** |
