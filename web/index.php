@@ -1,6 +1,8 @@
 <?php
 /**
  * Front controller.
+ *
+ * @package Cigarholic
  */
 
 define( 'WP_USE_THEMES', true );

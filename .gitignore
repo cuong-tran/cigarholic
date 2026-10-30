@@ -39,6 +39,9 @@ node_modules/
 /.deployer/
 /docker/data/
 
+# Claude Code worktrees for subagents (created by the harness inside the checkout)
+.claude/worktrees/
+
 # OS and editors
 .DS_Store
 Thumbs.db
@@ -46,3 +49,4 @@ Thumbs.db
 .vscode/
 *.swp
 /tools/
+.phpstan-cache/

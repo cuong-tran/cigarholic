@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<ruleset name="Cigarholic" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/PHPCSStandards/PHP_CodeSniffer/master/phpcs.xsd">
+	<description>WordPress Coding Standards for Cigarholic: configuration, cigarholic-core, the theme, provisioning and tests.</description>
+
+	<!-- Paths are added as the directories come into existence (PHPCS fails on a missing path). -->
+	<file>config</file>
+	<file>web/index.php</file>
+	<file>web/wp-config.php</file>
+
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/web/wp/*</exclude-pattern>
+	<exclude-pattern>*/web/app/plugins/*</exclude-pattern>
+	<exclude-pattern>*/web/app/uploads/*</exclude-pattern>
+	<exclude-pattern>*/tools/*</exclude-pattern>
+	<exclude-pattern>*/.claude/*</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+	<arg value="sp"/>
+	<arg name="parallel" value="8"/>
+	<arg name="cache" value=".phpcs-cache"/>
+
+	<config name="minimum_wp_version" value="7.0"/>
+	<!-- Code must run on PHP 8.3 (sandbox) and 8.5 (VPS). -->
+	<config name="testVersion" value="8.3-"/>
+
+	<rule ref="WordPress-Extra">
+		<!-- PSR-4 class files in cigarholic-core are named after the class. -->
+		<exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
+		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
+	</rule>
+	<rule ref="WordPress-Docs"/>
+	<rule ref="PHPCompatibilityWP"/>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="cigarholic"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="cigarholic"/>
+				<element value="Cigarholic"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!-- Bedrock configuration and entry points are plain PHP that run before WordPress loads:
+	     they define WordPress's own constants and use the `env() ?: default` idiom. -->
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<exclude-pattern>*/config/*</exclude-pattern>
+		<exclude-pattern>*/web/index.php</exclude-pattern>
+		<exclude-pattern>*/web/wp-config.php</exclude-pattern>
+	</rule>
+	<rule ref="Universal.Operators.DisallowShortTernary">
+		<exclude-pattern>*/config/*</exclude-pattern>
+	</rule>
+	<!-- A docblock followed by require_once is not recognised as a file comment by PHPCS. -->
+	<rule ref="Squiz.Commenting.FileComment">
+		<exclude-pattern>*/web/wp-config.php</exclude-pattern>
+	</rule>
+</ruleset>

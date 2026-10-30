@@ -1,0 +1,17 @@
+includes:
+  - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+  level: 6
+  phpVersion: 80300
+  # Paths are added as the directories come into existence.
+  paths:
+    - config
+    - web/index.php
+    - web/wp-config.php
+  scanFiles:
+    - vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+    - vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
+  treatPhpDocTypesAsCertain: false
+  reportUnmatchedIgnoredErrors: true
+  tmpDir: .phpstan-cache
