@@ -93,3 +93,84 @@ jobs:
         run: |
           bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12 /usr/local/bin
           actionlint -color
+
+  runtime:
+    name: "Runtime PHP ${{ matrix.php }}: install, provision, PHPUnit, Playwright"
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      # PHP 8.5 on every PR; the 8.4 leg (fallback of the PHP gate, ADR 0001) only on pushes to main.
+      matrix:
+        php: ${{ fromJSON(github.event_name == 'push' && '["8.5.12", "8.4.19"]' || '["8.5.12"]') }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up host PHP 8.3 (Composer and the phars run on the host, the store in containers)
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, intl, gd, zip, mysqli, bcmath, curl, dom, xml
+          coverage: none
+          tools: composer:v2
+
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v3
+        with:
+          composer-options: "--prefer-dist --no-progress --no-interaction"
+
+      - name: Cache pinned phars
+        uses: actions/cache@v4
+        with:
+          path: tools
+          key: tools-${{ hashFiles('scripts/tools.sh') }}
+
+      - run: scripts/tools.sh
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci --no-audit --no-fund
+
+      - name: Build the PHP image (layer cache in GitHub Actions)
+        uses: docker/setup-buildx-action@v3
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: docker/php
+          build-args: PHP_VERSION=${{ matrix.php }}
+          tags: cigarholic/php:${{ matrix.php }}
+          load: true
+          cache-from: type=gha,scope=php-${{ matrix.php }}
+          cache-to: type=gha,mode=max,scope=php-${{ matrix.php }}
+
+      - name: Bring up the store (install, provision, seed)
+        env:
+          PHP_VERSION: ${{ matrix.php }}
+        run: scripts/runtime-up.sh --no-build
+
+      - name: PHPUnit in the php container
+        run: docker compose exec -T php tools/phpunit.phar
+
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Playwright smoke suite
+        env:
+          CI: "1"
+        run: npx playwright test
+
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --tail=200 php web
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-php-${{ matrix.php }}
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7

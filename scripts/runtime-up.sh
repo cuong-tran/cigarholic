@@ -48,6 +48,16 @@ if [ -z "${CA_BUNDLE_FILE:-}" ] && [ -s /root/.ccr/ca-bundle.crt ]; then
 	cp /root/.ccr/ca-bundle.crt docker/ca/proxy.crt
 	export CA_BUNDLE_FILE=./docker/ca/proxy.crt
 fi
+# Persist the CA path for Compose's variable substitution (it reads .env too), so a plain
+# `docker compose up` after a daemon restart keeps the CA mounted. Written after .env exists (step 3).
+persist_ca_setting() {
+	[ -n "${CA_BUNDLE_FILE:-}" ] && [ -f .env ] || return 0
+	if grep -q '^CA_BUNDLE_FILE=' .env; then
+		sed -i "s|^CA_BUNDLE_FILE=.*|CA_BUNDLE_FILE='${CA_BUNDLE_FILE}'|" .env
+	else
+		printf "\n# Compose only (sandbox): CA of the TLS-intercepting gateway, mounted into the php container\nCA_BUNDLE_FILE='%s'\n" "${CA_BUNDLE_FILE}" >> .env
+	fi
+}
 export HTTPS_PROXY="${HTTPS_PROXY:-${https_proxy:-}}" NO_PROXY="${NO_PROXY:-${no_proxy:-}}" HTTP_PORT MAILPIT_PORT
 PHP_VERSION=${PHP_VERSION:-8.5.12}
 export PHP_VERSION
@@ -73,6 +83,7 @@ if [ ! -f .env ]; then
 	done
 	sed -i "s|^WP_HOME=.*|WP_HOME='${SITE_URL}'|" .env
 fi
+persist_ca_setting
 
 # 4. Dependencies on the host (bind-mounted into the containers).
 if [ ! -f vendor/autoload.php ] || [ ! -f web/wp/wp-settings.php ]; then
@@ -124,7 +135,11 @@ else
 	echo "note: theme web/app/themes/cigarholic is not in this checkout yet; the front end has no theme"
 fi
 
-# 7. Provisioning and seed data from cigarholic-core, once they exist.
+# 7. Development only: WooCommerce's built-in Cash on delivery gateway, so cart -> order -> email can be
+# exercised without payment keys (ADR 0004). Provisioning never enables it on staging or production.
+wp option patch insert woocommerce_cod_settings enabled yes >/dev/null 2>&1 || wp option update woocommerce_cod_settings '{"enabled":"yes","title":"Cash on delivery (development)","instructions":"Development gateway, no payment is taken.","enable_for_methods":[],"enable_for_virtual":"yes"}' --format=json >/dev/null
+
+# 8. Provisioning and seed data from cigarholic-core, once they exist.
 if wp cli has-command "cigarholic provision" >/dev/null 2>&1; then
 	log "wp cigarholic provision"
 	wp cigarholic provision
@@ -140,7 +155,7 @@ if [ "$SEED" = 1 ]; then
 	fi
 fi
 
-# 8. Smoke check.
+# 9. Smoke check.
 log "smoke check"
 code=$(curl -sS -o /dev/null -w '%{http_code}' "${SITE_URL}/wp/wp-login.php" || true)
 if [ "$code" != "200" ]; then
