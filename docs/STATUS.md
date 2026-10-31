@@ -11,7 +11,8 @@ Last updated: 2026-10-31, Turn 2 (Phase 0 nearly complete; see "Where we are").
 | Current milestone | **Phase 0, Foundation**, one PR from done: FND-01/02/03/04/05/06/08/12/13, CNT-03, CNT-04, NAV-02 merged; CAT-03 (catalog model, spec table, CSV template, seed, catalog check) in review. **M0 "Repo green"** is reached when it lands and the storefront smoke test runs against seeded data |
 | Live on production | Nothing. No server provisioned yet, domains on registrar hold (`docs/OWNER-ACTIONS.md` A5) |
 | Live on staging | Nothing. Provisioning and deploy workflows exist (#10) and have been dry-run in a container; the first real run needs the owner's go after M0 |
-| In progress | CAT-03 catalog data model (subagent, branch `feat/CAT-03-catalog-data-model`); Phase 1 first step: `infra-provision.yml` `status` run to verify the SSH secrets against the VPS |
+| In progress | CAT-03 catalog data model (subagent, branch `feat/CAT-03-catalog-data-model`) |
+| Blocked (Phase 1) | `infra-provision.yml` → `status` (run 41157126002) reached the VPS but the pinned host key in `SSH_KNOWN_HOSTS` does not match the server after its OS reinstall; waits for the owner to refresh the secret (OWNER-ACTIONS A1). Everything DNS/TLS also waits for A5 |
 | Blocked | Phase 1 (M1) waits for A5 (domain hold) for anything DNS or TLS related; the VPS itself can be provisioned by IP as soon as the owner confirms Phase 1 may start |
 
 ### Merged so far (all squash-merged to `main`, CI green)
@@ -75,7 +76,8 @@ Last updated: 2026-10-31, Turn 2 (Phase 0 nearly complete; see "Where we are").
   - Infrastructure dry runs: full `provision.sh` + `site.sh staging|production` in an `ubuntu:26.04` container (idempotent second run; nginx 1.28.3, PHP 8.5.4, MariaDB 11.8.6, Valkey 9.0.4), Deployer recipe parsing (`list`, `tree deploy|rollback`, `config`), Cloudflare scripts `--dry-run`.
   - FEATURES priority recount after the reconciliation; RDAP and DNS checks of both domains.
 - **Executed and failed, then fixed:** PHPUnit 11 against the WordPress test suite (moved to 9.6); Composer source clones of PHPStan/PHPUnit too large for the sandbox (phars instead, ADR 0007); PEAR's HTTP/1.0 download of phpredis (curl + `docker-php-ext-install`); Compose bake entitlements (plain `docker build`); container TLS without the gateway CA (CA mounted, `https_ssl_verify` in development); `woocommerce_store_pages_only` defaulting to `yes` (provisioning pins `no`).
-- **Could not run here:** anything on the VPS (no SSH from the sandbox by design): the real `infra-provision.yml` run, Deployer end to end, Let's Encrypt, backups to B2; Stripe/PayPal test checkout (staging only, test keys not yet provided); the storefront smoke test end to end (needs seeded products from CAT-03); axe/Lighthouse budgets.
+- **Executed and failed (expected, owner action):** `infra-provision.yml` → `status` on 2026-10-31: SSH host key mismatch against the pinned `SSH_KNOWN_HOSTS` (server reinstalled after the scan); the workflow refused to connect, which is the intended behaviour of host-key pinning.
+- **Could not run here:** anything on the VPS beyond that check (no SSH from the sandbox by design): provisioning, Deployer end to end, Let's Encrypt, backups to B2; Stripe/PayPal test checkout (staging only, test keys not yet provided); the storefront smoke test end to end (needs seeded products from CAT-03); axe/Lighthouse budgets.
 - **Not implemented yet (Phase 0 leftovers):** CAT-03 catalog model in review; ORD-05 full manager guide (grows per feature), OPS-06 monitoring runbook.
 
 ## Decisions made, and why
