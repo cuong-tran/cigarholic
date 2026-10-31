@@ -35,7 +35,7 @@ composer lint | phpcs | phpcbf | phpstan | test
 make up                     # Compose stack up, WordPress installed, provisioned, seeded (scripts/runtime-up.sh)
 make seed | make provision | make down | make wp ARGS="option get blogname"
 make test                   # PHPUnit inside the PHP container
-make e2e                    # Playwright smoke suite against the Compose stack
+make e2e                    # Playwright smoke suite against the Compose stack (ARGS="--project=chromium" to narrow)
 ```
 
 The store runtime is the Docker Compose stack (PHP 8.5-FPM, Nginx, MariaDB 11.8, Valkey, Mailpit) at http://localhost:8080 with trapped mail at http://localhost:8025. Host PHP is for lint, PHPCS, PHPStan and Composer only. WP-CLI runs inside the `php` container.

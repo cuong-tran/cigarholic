@@ -12,7 +12,7 @@ What runs where, and when it was last tested together. Same PHP minor on CI, sta
 | Valkey | 9.0 (image `valkey/valkey:9.0.7-alpine`; Ubuntu 26.04 archive 9.0.4) | `docker-compose.yml`, `infra/` | 2026-10-30 (runtime) | Redis protocol; phpredis 6.3.0 client |
 | Nginx | 1.28 (image 1.28.3-alpine; Ubuntu 26.04 archive 1.28.3) | `docker-compose.yml`, `docker/nginx`, `infra/` | 2026-10-30 (runtime) | |
 | Node (tooling) | 22 | `.nvmrc` | 2026-10-30 | eslint 9.39, stylelint 16.26 in `package-lock.json` |
-| Playwright | 1.63.0 | `package-lock.json` | 2026-10-30 (install) | Pinned to the sandbox image's Chromium 1243 |
+| Playwright | 1.63.0 | `package-lock.json` | 2026-10-31 (smoke suite green in the sandbox) | Pinned to the sandbox image's Chromium 1243; CI installs Chromium with `playwright install` |
 | Composer | 2.8.12 | sandbox image, `docker/php/Dockerfile` | 2026-10-30 | |
 | Mailpit | v1.32.0 | `docker-compose.yml`, `docker/php/Dockerfile` (sendmail shim) | 2026-10-30 (runtime) | Development only |
 | WP-CLI | 2.12.0 | `docker/php/Dockerfile` (from `wordpress:cli-2.12.0-php8.5`), sandbox | 2026-10-30 | |

@@ -30,7 +30,7 @@ make destroy     # stop and delete the database volume (next `make up` reinstall
 
 ## Tests
 
-`make test` runs `tools/phpunit.phar` inside the php container with the WordPress test suite (`tests/phpunit/bootstrap.php`, database `cigarholic_test` created by `runtime-up.sh`, object cache disabled). `make check` runs the static checks on the host.
+`make test` runs `tools/phpunit.phar` inside the php container with the WordPress test suite (`tests/phpunit/bootstrap.php`, database `cigarholic_test` created by `runtime-up.sh`, object cache disabled). `make check` runs the static checks on the host. `make e2e` runs the Playwright smoke suite (`tests/e2e/`, `playwright.config.js`) against the running stack with the sandbox's preinstalled Chromium (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`); `E2E_BASE_URL`, `E2E_BASIC_AUTH` (`user:password`), `E2E_ADMIN_USER` / `E2E_ADMIN_PASSWORD` and `MAILPIT_URL` point it at staging later. The storefront checkout test uses WooCommerce's Cash on delivery gateway, which `runtime-up.sh` enables in development only, and skips itself while the catalog is empty.
 
 ## What the script does
 
@@ -60,3 +60,5 @@ make destroy     # stop and delete the database volume (next `make up` reinstall
 | Database volume from an older schema | `make destroy && make up` |
 | `make test` fails with a Redis connection error | The object-cache drop-in is active; tests set `WP_REDIS_DISABLED`, re-run `make up` to recreate the test database |
 | `make test`: "Call to undefined method PHPUnit\Util\Test::..." | Wrong PHPUnit major; `scripts/tools.sh` must install 9.6 (`tools/phpunit.phar --version`) |
+| Turnstile or wordpress.org requests fail with "self-signed certificate in certificate chain" after a Docker restart | The php container was recreated without the gateway CA (plain `docker compose up`). Run `make up` (or `scripts/runtime-up.sh --no-build --no-seed`): it mounts the CA and records `CA_BUNDLE_FILE` in `.env` for Compose |
+| Visitors see the store although coming-soon is on | `woocommerce_store_pages_only` must be `no` for the whole site; provisioning step `80-coming-soon` sets it |
