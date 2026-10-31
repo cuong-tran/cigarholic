@@ -35,8 +35,35 @@ return static function ( Context $ctx ): void {
 		'accessory'         => '9.95',
 	);
 
-	$lower_48 = array( 'AL', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY' );
-	$remote   = array( 'AK', 'HI', 'AS', 'GU', 'MP', 'PR', 'UM', 'VI' );
+	/**
+	 * Zone locations as WooCommerce models them: US states are `state` locations `US:XX`; the
+	 * territories (American Samoa, Guam, Northern Mariana Islands, Puerto Rico, Minor Outlying
+	 * Islands, US Virgin Islands) are their own `country` codes in WooCommerce's country list.
+	 * Armed-forces addresses (US:AA, US:AE, US:AP) are in no zone, so they get no method either.
+	 *
+	 * @param list<string> $states    Two-letter US state codes.
+	 * @param list<string> $countries Two-letter country codes.
+	 * @return list<array{code: string, type: string}>
+	 */
+	$locations = static function ( array $states, array $countries = array() ): array {
+		$list = array();
+		foreach ( $states as $state ) {
+			$list[] = array(
+				'code' => 'US:' . $state,
+				'type' => 'state',
+			);
+		}
+		foreach ( $countries as $country ) {
+			$list[] = array(
+				'code' => $country,
+				'type' => 'country',
+			);
+		}
+		return $list;
+	};
+
+	$lower_48 = $locations( array( 'AL', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY' ) );
+	$remote   = $locations( array( 'AK', 'HI' ), array( 'AS', 'GU', 'MP', 'PR', 'UM', 'VI' ) );
 
 	/**
 	 * Finds a zone by name.
@@ -55,15 +82,15 @@ return static function ( Context $ctx ): void {
 	};
 
 	/**
-	 * Ensures a zone exists with exactly these US states and this order.
+	 * Ensures a zone exists with exactly these locations and this order.
 	 *
-	 * @param string       $name   Zone name.
-	 * @param int          $order  Zone order (lower matches first).
-	 * @param list<string> $states Two-letter US state or territory codes.
+	 * @param string                                  $name      Zone name.
+	 * @param int                                     $order     Zone order (lower matches first).
+	 * @param list<array{code: string, type: string}> $locations Zone locations.
 	 * @return WC_Shipping_Zone|null The zone, null in a dry run when it would be created.
 	 */
-	$ensure_zone = static function ( string $name, int $order, array $states ) use ( $ctx, $find_zone ): ?WC_Shipping_Zone {
-		$wanted = array_map( static fn( string $state ): string => 'state:US:' . $state, $states );
+	$ensure_zone = static function ( string $name, int $order, array $locations ) use ( $ctx, $find_zone ): ?WC_Shipping_Zone {
+		$wanted = array_map( static fn( array $location ): string => $location['type'] . ':' . $location['code'], $locations );
 		sort( $wanted, SORT_STRING );
 
 		$zone = $find_zone( $name );
@@ -87,10 +114,10 @@ return static function ( Context $ctx ): void {
 		$dirty = false;
 		if ( $current !== $wanted ) {
 			$zone->clear_locations();
-			foreach ( $states as $state ) {
-				$zone->add_location( 'US:' . $state, 'state' );
+			foreach ( $locations as $location ) {
+				$zone->add_location( $location['code'], $location['type'] );
 			}
-			$ctx->changed( sprintf( 'shipping zone "%s" locations (%d states)', $name, count( $states ) ) );
+			$ctx->changed( sprintf( 'shipping zone "%s" locations (%d)', $name, count( $locations ) ) );
 			$dirty = true;
 		}
 		if ( $zone->get_zone_order() !== $order ) {
