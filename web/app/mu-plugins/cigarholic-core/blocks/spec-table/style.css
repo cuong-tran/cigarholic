@@ -1,0 +1,41 @@
+/**
+ * cigarholic/spec-table: an accessible two-column specification table (CAT-04).
+ * Colours and spacing come from theme.json tokens so the block follows the theme.
+ */
+.cigarholic-spec-table {
+	border-collapse: collapse;
+	width: 100%;
+	font-size: inherit;
+	line-height: 1.4;
+}
+
+.cigarholic-spec-table__caption {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect( 0, 0, 0, 0 );
+	clip-path: inset( 50% );
+	white-space: nowrap;
+	border: 0;
+}
+
+.cigarholic-spec-table th,
+.cigarholic-spec-table td {
+	padding: var( --wp--preset--spacing--30, 0.75rem ) var( --wp--preset--spacing--20, 0.5rem );
+	border-bottom: 1px solid var( --wp--preset--color--neutral-1, #ddd );
+	text-align: left;
+	vertical-align: top;
+}
+
+.cigarholic-spec-table th[scope="row"] {
+	width: 38%;
+	font-weight: 600;
+	color: var( --wp--preset--color--contrast, inherit );
+}
+
+.cigarholic-spec-table td {
+	color: var( --wp--preset--color--neutral-2, inherit );
+}

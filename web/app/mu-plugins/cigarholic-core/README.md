@@ -16,6 +16,12 @@ All custom PHP of the store, one class per feature ID from `docs/FEATURES.md`. L
 | `Storefront\AnnouncementBar` | NAV-02 | WooCommerce > Announcement bar settings and the `cigarholic/announcement-bar` block |
 | `Contact\ContactForm` | CNT-03 | `cigarholic/contact-form` block, `POST /wp-json/cigarholic/v1/contact`, admin-post fallback, Turnstile, honeypot, rate limit, email to the support inbox (WooCommerce > Contact form) |
 
+| `Catalog\DataModel` | CAT-03, CAT-02, CMP-11, CMP-06 | Categories with fixed slugs, `occasion` taxonomy, global attributes, "Specifications" product tab (`_ch_*` meta), private compliance fields, Prop 65 toggle and warning; `wp cigarholic catalog ensure` |
+| `Catalog\Sku` | INV-01, CAT-09 | SKU scheme `CH-{TYPE}-{CAPACITY}-{WOOD}-{FINISH}`, `SAMPLE-` sample data, validation on save |
+| `Catalog\SpecTable` | CAT-04 | Block `cigarholic/spec-table` (`blocks/spec-table/`), inches + cm and lb + kg, hides the "Additional information" tab |
+| `Catalog\Csv` | CAT-10 | `Occasions` and GTIN columns for the WooCommerce importer and exporter; template `docs/templates/products-import-template.csv` |
+| `Catalog\Check`, `Catalog\Cli` | CAT-09 | `wp cigarholic catalog check [--format]` (the brief's `catalog:check`), exit 1 on problems, fails on production while sample data exists |
+| `Catalog\Seed` | FND-02 | `wp cigarholic seed`: seven `SAMPLE-` products, idempotent, with placeholder images |
 ## Blocks
 
 Dynamic blocks live in `blocks/<name>/` with a `block.json` (`render: file:./render.php`), a plain-JavaScript `editor.js` registered with `ServerSideRender` (dependencies in `editor.asset.php`, no build step), optional `view.js` and `style.css`. The theme references them by name.
