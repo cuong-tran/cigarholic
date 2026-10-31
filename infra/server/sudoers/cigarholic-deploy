@@ -1,0 +1,8 @@
+# sudo rights of the deploy user. Installed to /etc/sudoers.d/cigarholic-deploy by provision.sh.
+# Only what a deploy needs: reload PHP-FPM and Nginx, test the Nginx config, run certbot and purge
+# the FastCGI cache through the root-owned helper (no wildcards, no shells).
+Defaults:deploy !requiretty
+Cmnd_Alias CIGARHOLIC_RELOAD  = /usr/bin/systemctl reload php8.5-fpm, /usr/bin/systemctl reload php8.5-fpm.service, /usr/bin/systemctl reload nginx, /usr/bin/systemctl reload nginx.service, /usr/sbin/nginx -t
+Cmnd_Alias CIGARHOLIC_CERTBOT = /usr/bin/certbot
+Cmnd_Alias CIGARHOLIC_CACHE   = /usr/local/sbin/cigarholic-cache-purge staging, /usr/local/sbin/cigarholic-cache-purge production
+deploy ALL=(root) NOPASSWD: CIGARHOLIC_RELOAD, CIGARHOLIC_CERTBOT, CIGARHOLIC_CACHE

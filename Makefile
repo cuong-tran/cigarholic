@@ -46,5 +46,5 @@ check: ## Static checks, exactly as CI: composer check + npm run lint
 test: ## PHPUnit inside the php container
 	docker compose exec -T php tools/phpunit.phar
 
-e2e: ## Playwright smoke suite against the running stack
-	npx playwright test
+e2e: ## Playwright smoke suite against the running stack (sandbox: preinstalled Chromium)
+	PLAYWRIGHT_BROWSERS_PATH=$${PLAYWRIGHT_BROWSERS_PATH:-/opt/pw-browsers} npx playwright test $(ARGS)

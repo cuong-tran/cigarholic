@@ -1,0 +1,95 @@
+# Server provisioning over SSH (FND-08, OPS-01). The sandbox has no SSH, so every server operation is a
+# workflow_dispatch job. Reads the SSH_* repository secrets (docs/runbooks/secrets.md).
+#
+#   provision           base packages, hardening, deploy user (needs SSH_USER=root)
+#   site-staging        staging.cigarholic.com: user, dirs, .env, DB, PHP-FPM pool, Nginx, TLS
+#   site-production     cigarholic.com + redirect hosts
+#   status              read-only report (works as root or deploy)
+#   disable-root-login  PermitRootLogin no (only after SSH_USER=deploy is verified; irreversible from here)
+name: Infra provision
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: What to run on the VPS
+        type: choice
+        required: true
+        default: status
+        options:
+          - provision
+          - site-staging
+          - site-production
+          - status
+          - disable-root-login
+
+concurrency:
+  group: vps-admin
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: ${{ inputs.action }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Connect
+        id: ssh
+        uses: ./.github/actions/ssh
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          user: ${{ secrets.SSH_USER }}
+          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: provision.sh
+        if: inputs.action == 'provision'
+        env:
+          FORWARD_ENV: DEPLOY_AUTHORIZED_KEY SSH_PORT
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+        run: |
+          # The deploy user gets the public half of the same key the workflows use.
+          DEPLOY_AUTHORIZED_KEY="$(ssh-keygen -y -f ~/.ssh/cigarholic) deploy@cigarholic"
+          export DEPLOY_AUTHORIZED_KEY
+          ssh-run --sudo infra/server/provision.sh
+
+      - name: site.sh staging
+        if: inputs.action == 'site-staging'
+        env:
+          FORWARD_ENV: STAGING_BASIC_AUTH_USER STAGING_BASIC_AUTH_PASSWORD LETSENCRYPT_EMAIL
+          STAGING_BASIC_AUTH_USER: ${{ secrets.STAGING_BASIC_AUTH_USER }}
+          STAGING_BASIC_AUTH_PASSWORD: ${{ secrets.STAGING_BASIC_AUTH_PASSWORD }}
+          LETSENCRYPT_EMAIL: ${{ vars.LETSENCRYPT_EMAIL }}
+        run: ssh-run --sudo infra/server/site.sh staging
+
+      - name: site.sh production
+        if: inputs.action == 'site-production'
+        env:
+          FORWARD_ENV: LETSENCRYPT_EMAIL
+          LETSENCRYPT_EMAIL: ${{ vars.LETSENCRYPT_EMAIL }}
+        run: ssh-run --sudo infra/server/site.sh production
+
+      - name: status.sh
+        if: inputs.action == 'status'
+        run: ssh-run infra/server/status.sh
+
+      - name: Disable root login
+        if: inputs.action == 'disable-root-login'
+        run: |
+          if [ "$SSH_RUN_USER" != root ]; then
+            echo "::error::This action needs SSH_USER=root: the deploy user's sudoers do not cover sshd. Nothing changed."
+            exit 1
+          fi
+          echo "Checking that the deploy user accepts the workflow key before closing root..."
+          if ! ssh -o User=deploy cigarholic-vps 'id -un' | grep -qx deploy; then
+            echo "::error::Login as deploy with the workflow key failed; run 'provision' first. Root login stays enabled."
+            exit 1
+          fi
+          ssh-run --sudo infra/server/provision.sh --sshd-only --disable-root-login
+          echo "::notice::Root SSH login is now disabled. Change the SSH_USER secret to deploy before the next workflow run."

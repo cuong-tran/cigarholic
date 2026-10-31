@@ -1,6 +1,6 @@
 # Cloud sandbox: verified facts
 
-Measured in Claude Code cloud sessions on 2026-10-30 (two sessions, two image builds). The image and
+Measured in Claude Code cloud sessions on 2026-10-30 and 2026-10-31 (three sessions, two image builds). The image and
 the environment's settings change, so re-check anything a task depends on. `infra/cloud-setup.sh` is
 the environment's setup script and applies the fixes below.
 
@@ -39,9 +39,24 @@ the environment's setup script and applies the fixes below.
   `public.ecr.aws/docker/library/<image>` works too.
 - Manifests verified on 2026-10-30: `php:8.5-fpm`, `php:8.5-fpm-bookworm`, `mariadb:11.8`,
   `valkey/valkey:8`, `valkey/valkey:9`, `nginx:1.28`, `axllent/mailpit:latest`, `ubuntu:26.04`.
-- For HTTPS from inside a container, run it with `--network host`, pass `HTTPS_PROXY`, and mount
-  `/root/.ccr/ca-bundle.crt` into the container's trust store.
+- **Container egress is intercepted transparently.** Containers reach the internet directly (no
+  proxy variables needed), but every TLS connection is terminated by the sandbox's egress gateway
+  (issuer "Egress Gateway SDS Issuing CA"). Trust `/root/.ccr/ca-bundle.crt` inside the container
+  (copy to `/usr/local/share/ca-certificates/` + `update-ca-certificates`) or TLS fails with
+  "self-signed certificate in certificate chain". WordPress verifies against its own bundled CA file,
+  so `cigarholic-core` points it at the system store in development (`https_ssl_verify` filter).
+  Image builds that download over HTTPS (pecl) get the CA as a build secret and `--network host`
+  so they can also use the host proxy; `scripts/runtime-up.sh` does all of this.
+- **Compose v5 delegates builds to bake**, which refuses `network: host` and secret files without
+  `--allow` entitlements. Build images with plain `docker build` (as `runtime-up.sh` does).
+- After a Docker daemon restart, recreate the stack with `make up` (or `scripts/runtime-up.sh
+  --no-build --no-seed`), not a bare `docker compose up`: the latter would mount an empty CA unless
+  `CA_BUNDLE_FILE` is present in `.env` (runtime-up.sh writes it).
+- `pecl.php.net` answers PEAR's HTTP/1.0 client with `426 Upgrade Required`; download pecl tarballs
+  with curl and build them with `docker-php-ext-install` instead.
 - Containers have no systemd, and `ulimit`, `swapon` and iptables (ufw) are not permitted.
+- Several stacks can run side by side from different worktrees with
+  `COMPOSE_PROJECT_NAME=<name> HTTP_PORT=<port> MAILPIT_PORT=<port> scripts/runtime-up.sh --no-build`.
 
 ## Network
 
@@ -62,6 +77,20 @@ the environment's setup script and applies the fixes below.
 - GitHub zip downloads (`codeload.github.com`, `api.github.com/.../zipball`) return 403 for
   repositories not attached to the session, so Composer falls back to `git clone` for
   GitHub-hosted packages. That works, but the first install of each package is slower.
+
+## Permission classifier and session lifecycle
+
+- The auto-mode classifier refuses commands that bypass the environment: `curl --noproxy`,
+  unsetting `HTTPS_PROXY`, `git push --force-with-lease`, and anything containing the word `eval`
+  (so `wp eval` and `wp eval-file` are refused; put ad-hoc WordPress code into a PHPUnit test or a
+  temporary WP-CLI command instead). Do not look for workarounds; design around it.
+- The container can restart mid-session (it did twice on 2026-10-30/31, once with a usage-limit
+  pause). The filesystem survived both times, but the Docker daemon, background processes and any
+  running subagents did not; subagent worktrees without committed changes were cleaned up. Commit
+  and push early, and tell subagents to push work-in-progress commits.
+- Playwright uses the preinstalled Chromium with `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`
+  (`make e2e` sets it). Chromium does not trust the gateway CA; `playwright.config.js` sets
+  `ignoreHTTPSErrors` when `CCR_AGENT_PROXY_ENABLED` is present.
 
 ## GitHub from the sandbox
 

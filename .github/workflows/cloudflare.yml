@@ -1,0 +1,54 @@
+# Cloudflare DNS, settings, redirects, WAF and cache purge (OPS-02, OPS-03, OPS-09; ADR 0008).
+# Nothing requires Cloudflare today: the scripts are idempotent and run once the owner adds the zones,
+# the CLOUDFLARE_API_TOKEN secret and the three CLOUDFLARE_* variables. `dry_run` prints the API calls.
+name: Cloudflare
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: Which script to run
+        type: choice
+        required: true
+        default: all
+        options: [dns, settings, redirects, waf, purge, all]
+      dry_run:
+        description: Print the API calls without sending them
+        type: boolean
+        default: true
+
+concurrency:
+  group: cloudflare
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: ${{ inputs.action }}${{ inputs.dry_run && ' (dry run)' || '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_ZONE_ID_CIGARHOLIC: ${{ vars.CLOUDFLARE_ZONE_ID_CIGARHOLIC }}
+      CLOUDFLARE_ZONE_ID_MAX2LAB: ${{ vars.CLOUDFLARE_ZONE_ID_MAX2LAB }}
+      ORIGIN_IP: ${{ secrets.SSH_HOST }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run
+        env:
+          ACTION: ${{ inputs.action }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          flag=""
+          [ "$DRY_RUN" = "true" ] && flag="--dry-run"
+          if [ "$ACTION" = all ]; then actions="dns settings redirects waf"; else actions="$ACTION"; fi
+          for a in $actions; do
+            echo "::group::$a"
+            bash "infra/cloudflare/$a.sh" $flag
+            echo "::endgroup::"
+          done

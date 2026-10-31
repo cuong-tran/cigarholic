@@ -48,4 +48,5 @@ if ( file_exists( $cigarholic_woocommerce ) ) {
 }
 
 // The mu-plugin loads from WP_CONTENT_DIR/mu-plugins through wp-settings.php; nothing to add here.
+
 require $cigarholic_wp_phpunit . '/includes/bootstrap.php';

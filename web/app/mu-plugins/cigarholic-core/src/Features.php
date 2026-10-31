@@ -24,35 +24,47 @@ final class Features {
 	 * @var array<string, array{class: class-string<Feature>, default: bool}>
 	 */
 	private const REGISTRY = array(
-		'development' => array(
+		'development'      => array(
 			'class'   => Dev\Development::class,
 			'default' => true,
 		),
-		'hardening'   => array(
+		'hardening'        => array(
 			'class'   => Security\Hardening::class,
 			'default' => true,
 		),
-		'catalog'     => array(
+		'signups'          => array(
+			'class'   => Signups\Signups::class,
+			'default' => true,
+		),
+		'announcement-bar' => array(
+			'class'   => Storefront\AnnouncementBar::class,
+			'default' => true,
+		),
+		'contact-form'     => array(
+			'class'   => Contact\ContactForm::class,
+			'default' => true,
+		),
+		'catalog'          => array(
 			'class'   => Catalog\DataModel::class,
 			'default' => true,
 		),
-		'sku'         => array(
+		'sku'              => array(
 			'class'   => Catalog\Sku::class,
 			'default' => true,
 		),
-		'spec-table'  => array(
+		'spec-table'       => array(
 			'class'   => Catalog\SpecTable::class,
 			'default' => true,
 		),
-		'csv'         => array(
+		'csv'              => array(
 			'class'   => Catalog\Csv::class,
 			'default' => true,
 		),
-		'check'       => array(
+		'check'            => array(
 			'class'   => Catalog\Check::class,
 			'default' => true,
 		),
-		'seed'        => array(
+		'seed'             => array(
 			'class'   => Catalog\Seed::class,
 			'default' => true,
 		),

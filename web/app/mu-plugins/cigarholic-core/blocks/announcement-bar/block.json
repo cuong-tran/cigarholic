@@ -1,0 +1,20 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "cigarholic/announcement-bar",
+	"version": "0.1.0",
+	"title": "Announcement bar",
+	"category": "theme",
+	"icon": "megaphone",
+	"description": "The site-wide announcement the manager edits under WooCommerce > Announcement bar. Renders nothing when disabled or outside its dates.",
+	"keywords": [ "announcement", "promo", "banner" ],
+	"textdomain": "cigarholic",
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"color": { "background": true, "text": true, "link": true }
+	},
+	"editorScript": "file:./editor.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}

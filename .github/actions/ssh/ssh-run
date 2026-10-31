@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Streams a local script to the VPS: `ssh cigarholic-vps 'bash -s' -- args < script`.
+# Put on the PATH by .github/actions/ssh. Secrets never touch a command line: the names listed in
+# FORWARD_ENV are prepended to the stream as `export NAME=value` lines (read from this process's
+# environment), together with INFRA_DIR pointing at the uploaded infra/ directory.
+#
+#   FORWARD_ENV="A B C" ssh-run [--sudo] <local-script> [args...]
+#
+#   --sudo   run as root through `sudo -n bash -s` when the SSH user is not root (the deploy user's
+#            sudoers do not allow this; provisioning actions need SSH_USER=root)
+set -euo pipefail
+
+SUDO=0
+if [ "${1:-}" = "--sudo" ]; then SUDO=1; shift; fi
+SCRIPT="${1:-}"; shift || true
+[ -n "$SCRIPT" ] && [ -f "$SCRIPT" ] || { echo "ssh-run: script not found: $SCRIPT" >&2; exit 2; }
+
+remote="bash -s"
+if [ "$SUDO" = 1 ] && [ "${SSH_RUN_USER:-}" != root ]; then remote="sudo -n bash -s"; fi
+if [ $# -gt 0 ]; then
+  remote="$remote --"
+  for a in "$@"; do remote="$remote $(printf '%q' "$a")"; done
+fi
+
+{
+  echo "set -a"
+  [ -n "${REMOTE_INFRA_DIR:-}" ] && printf 'INFRA_DIR=%q\n' "$REMOTE_INFRA_DIR"
+  for name in ${FORWARD_ENV:-}; do
+    [[ "$name" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || { echo "ssh-run: bad variable name $name" >&2; exit 2; }
+    if [ -n "${!name:-}" ]; then printf '%s=%q\n' "$name" "${!name}"; else echo "ssh-run: $name is empty, not forwarded" >&2; fi
+  done
+  echo "set +a"
+  cat "$SCRIPT"
+} | ssh cigarholic-vps "$remote"
