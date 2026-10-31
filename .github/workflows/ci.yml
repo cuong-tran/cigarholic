@@ -21,7 +21,7 @@ jobs:
       matrix:
         php: ["8.3", "8.5"]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Set up PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@v2
@@ -67,7 +67,7 @@ jobs:
     name: JS and CSS lint
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
@@ -82,7 +82,7 @@ jobs:
     name: Shell and workflow lint
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: shellcheck
         run: |
@@ -104,7 +104,7 @@ jobs:
       matrix:
         php: ${{ fromJSON(github.event_name == 'push' && '["8.5.12", "8.4.19"]' || '["8.5.12"]') }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Set up host PHP 8.3 (Composer and the phars run on the host, the store in containers)
         uses: shivammathur/setup-php@v2
