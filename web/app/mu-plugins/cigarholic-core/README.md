@@ -12,6 +12,10 @@ All custom PHP of the store, one class per feature ID from `docs/FEATURES.md`. L
 | `Dev\Development` | FND-02 | Development only: valid `wp_mail()` sender, HTTPS verified against the system CA store |
 | `Security\Hardening` | OPS-07 | XML-RPC off, no generator tags, generic login errors, no anonymous `/wp/v2/users` |
 
+## Blocks
+
+Dynamic blocks live in `blocks/<name>/` with a `block.json` (`render: file:./render.php`), a plain-JavaScript `editor.js` registered with `ServerSideRender` (dependencies in `editor.asset.php`, no build step), optional `view.js` and `style.css`. The theme references them by name.
+
 ## Adding a feature
 
 1. Create `src/<Area>/<Name>.php` implementing `Feature` (`id()` returns the feature ID, `register()` hooks everything). The class docblock names the ID.
