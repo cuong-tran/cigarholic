@@ -33,6 +33,10 @@ updates:
     commit-message:
       prefix: "chore(deps)"
     labels: ["dependencies", "npm"]
+    # @playwright/test is pinned to the Chromium build preinstalled in the Claude Code sandbox
+    # (docs/runbooks/sandbox.md); it is bumped by hand when that image changes.
+    ignore:
+      - dependency-name: "@playwright/test"
     groups:
       npm-tooling:
         patterns: ["*"]
