@@ -6,6 +6,8 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ### Added
 
+- FND-03: provisioning steps 10–80 (#14): WooCommerce general settings with HPOS and block pages, checkout rules, Shopify-compatible permalinks, nine draft policy/content pages plus home and journal, Primary navigation, Shop Manager capabilities, shipping classes and zones (contiguous US free humidors, placeholder accessory rate; Alaska/Hawaii/territories unshippable), tax settings for Stripe Tax, branded emails, whole-site coming-soon. Context helpers `page()`, `term()`, `navigation()`; RolesTest and ProvisionTest.
+- FND-13 (security subset, #15): Dependabot opens PRs for WordPress core and plugin releases daily (grouped), npm tooling and GitHub Actions weekly.
 - FND-01: Bedrock scaffold with WordPress 7.1.4, WooCommerce 11.2.1 and the launch plugin set pinned in `composer.lock`; environment configs; `.env.example`; `scripts/tools.sh` for the pinned PHPStan, PHPUnit and Deployer phars (#4).
 - FND-04: `AGENTS.md`, `CLAUDE.md`, issue and PR templates, this changelog, `docs/plugins.md`, `docs/versions.md`, ADRs 0001 to 0008.
 - FND-06: CI on every PR: PHP 8.3 + 8.5 lint, PHPCS, PHPStan, Composer audit, eslint, stylelint, shellcheck, actionlint (#6).
