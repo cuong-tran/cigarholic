@@ -101,6 +101,7 @@ final class Context {
 	 * @param string $content Block content used when creating.
 	 * @param string $status  Status used when creating: publish or draft.
 	 * @return int Page ID; 0 in a dry run when the page would be created.
+	 * @throws \RuntimeException When WordPress cannot create the page.
 	 */
 	public function page( string $slug, string $title, string $content, string $status = 'publish' ): int {
 		$existing = $this->find_post( 'page', $slug );
@@ -144,6 +145,7 @@ final class Context {
 	 * @param array<string, mixed> $args     Further wp_insert_term() / wp_update_term() arguments
 	 *                                       (description, parent). Only description is compared.
 	 * @return int Term ID; 0 in a dry run when the term would be created.
+	 * @throws \RuntimeException When WordPress cannot create or update the term.
 	 */
 	public function term( string $taxonomy, string $slug, string $name, array $args = array() ): int {
 		$term = get_term_by( 'slug', $slug, $taxonomy );
@@ -185,6 +187,7 @@ final class Context {
 	 * @param string                                  $slug  Menu slug (post_name).
 	 * @param list<array{label: string, url: string}> $items Links in order.
 	 * @return int Post ID; 0 in a dry run when the menu would be created.
+	 * @throws \RuntimeException When WordPress cannot create or update the navigation post.
 	 */
 	public function navigation( string $title, string $slug, array $items ): int {
 		$blocks = array();

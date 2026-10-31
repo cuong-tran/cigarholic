@@ -56,7 +56,7 @@ return static function ( Context $ctx ): void {
 	);
 
 	// Keep exactly one menu so the fallback cannot pick anything else.
-	$others = get_posts(
+	$others  = get_posts(
 		array(
 			'post_type'        => 'wp_navigation',
 			'post_status'      => 'any',

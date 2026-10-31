@@ -72,6 +72,10 @@
 	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_putenv">
 		<exclude-pattern>*/tests/phpunit/bootstrap.php</exclude-pattern>
 	</rule>
+	<!-- Tests assert WooCommerce capabilities by name (edit_products, edit_shop_orders, ...). -->
+	<rule ref="WordPress.WP.Capabilities">
+		<exclude-pattern>*/tests/*</exclude-pattern>
+	</rule>
 
 	<!-- A docblock followed by require_once is not recognised as a file comment by PHPCS. -->
 	<rule ref="Squiz.Commenting.FileComment">

@@ -59,11 +59,11 @@ return static function ( Context $ctx ): void {
 		$draft(
 			'Who makes Cigarholic humidors, where and how.',
 			array(
-				'Our workshop'                              => 'The artisans, the town, how long the workshop has made humidors and boxes.',
-				'The woods we use'                          => 'Exterior woods, Spanish cedar lining, veneers; how each wood behaves in a humidor.',
-				'How a humidor is made'                     => 'From seasoned timber to joinery, seal, finish and quality check.',
+				'Our workshop'          => 'The artisans, the town, how long the workshop has made humidors and boxes.',
+				'The woods we use'      => 'Exterior woods, Spanish cedar lining, veneers; how each wood behaves in a humidor.',
+				'How a humidor is made' => 'From seasoned timber to joinery, seal, finish and quality check.',
 				'Handcrafted in Vietnam, shipped from Texas' => 'Origin stated plainly; stock held and shipped from the US warehouse.',
-				'HuyLinh LLC'                               => $company,
+				'HuyLinh LLC'           => $company,
 			)
 		),
 		'draft'
@@ -75,9 +75,9 @@ return static function ( Context $ctx ): void {
 		$draft(
 			'How to reach us about an order, a product or a custom piece.',
 			array(
-				'Email and phone'  => 'support@cigarholic.com, +1 813 602 7585 (US Eastern business hours). Replies within one business day.',
-				'Mailing address'  => $company,
-				'Trade and press'  => 'Wholesale, corporate gifts and press requests: same address, mention the subject.',
+				'Email and phone' => 'support@cigarholic.com, +1 813 602 7585 (US Eastern business hours). Replies within one business day.',
+				'Mailing address' => $company,
+				'Trade and press' => 'Wholesale, corporate gifts and press requests: same address, mention the subject.',
 			)
 		) . "\n\n<!-- wp:cigarholic/contact-form {\"heading\":\"Send us a message\"} /-->",
 		'draft'
@@ -124,13 +124,13 @@ return static function ( Context $ctx ): void {
 		$draft(
 			'Our return window, who pays return shipping and how refunds work.',
 			array(
-				'Return window'              => 'Number of days from delivery (L-08).',
-				'Condition of returned items' => 'Unused, unseasoned, in original packaging with all accessories.',
-				'Return shipping'            => 'Who pays, how a label is issued, carrier for oversized items (L-08).',
-				'Refunds'                    => 'Refund to the original payment method within N business days of receipt; what is deducted.',
-				'Exchanges'                  => 'Wrong size or finish: how an exchange works.',
+				'Return window'                 => 'Number of days from delivery (L-08).',
+				'Condition of returned items'   => 'Unused, unseasoned, in original packaging with all accessories.',
+				'Return shipping'               => 'Who pays, how a label is issued, carrier for oversized items (L-08).',
+				'Refunds'                       => 'Refund to the original payment method within N business days of receipt; what is deducted.',
+				'Exchanges'                     => 'Wrong size or finish: how an exchange works.',
 				'Personalised and custom items' => 'Engraved or made-to-order pieces: returnable only if defective (L-08).',
-				'How to start a return'      => 'Email support@cigarholic.com with the order number; what happens next.',
+				'How to start a return'         => 'Email support@cigarholic.com with the order number; what happens next.',
 			)
 		),
 		'draft'
@@ -142,11 +142,11 @@ return static function ( Context $ctx ): void {
 		$draft(
 			'What our warranty covers on humidors, cigar boxes and accessories.',
 			array(
-				'What is covered'      => 'Workmanship and materials: joinery, hinges, seal, lining, finish.',
-				'Warranty period'      => 'Length from delivery date (L-08); registration not required, order number is proof.',
-				'What is not covered'  => 'Normal wear, humidity damage from misuse, modifications, accidents, hygrometer calibration.',
-				'How to make a claim'  => 'Email with photos and order number; repair, replacement or refund at our choice.',
-				'Limitations'          => 'State law rights are not affected; implied warranty disclaimers as advised by counsel.',
+				'What is covered'     => 'Workmanship and materials: joinery, hinges, seal, lining, finish.',
+				'Warranty period'     => 'Length from delivery date (L-08); registration not required, order number is proof.',
+				'What is not covered' => 'Normal wear, humidity damage from misuse, modifications, accidents, hygrometer calibration.',
+				'How to make a claim' => 'Email with photos and order number; repair, replacement or refund at our choice.',
+				'Limitations'         => 'State law rights are not affected; implied warranty disclaimers as advised by counsel.',
 			)
 		),
 		'draft'
@@ -159,13 +159,13 @@ return static function ( Context $ctx ): void {
 		$draft(
 			'What personal data we collect, why, and the choices you have.',
 			array(
-				'Who we are'                    => $company,
-				'What we collect'               => 'Order and contact data, account data, newsletter signups, analytics and payment data handled by Stripe and PayPal.',
-				'Why we use it'                 => 'Fulfilling orders, support, legal obligations, marketing with consent.',
-				'Who we share it with'          => 'Payment processors, carriers, email provider, analytics; never sold.',
-				'Cookies'                       => 'Consent banner and categories (CMP-03).',
-				'Your rights and choices'       => 'Access, correction, deletion, unsubscribe; state privacy rights.',
-				'Contact'                       => 'support@cigarholic.com for privacy requests.',
+				'Who we are'              => $company,
+				'What we collect'         => 'Order and contact data, account data, newsletter signups, analytics and payment data handled by Stripe and PayPal.',
+				'Why we use it'           => 'Fulfilling orders, support, legal obligations, marketing with consent.',
+				'Who we share it with'    => 'Payment processors, carriers, email provider, analytics; never sold.',
+				'Cookies'                 => 'Consent banner and categories (CMP-03).',
+				'Your rights and choices' => 'Access, correction, deletion, unsubscribe; state privacy rights.',
+				'Contact'                 => 'support@cigarholic.com for privacy requests.',
 			)
 		),
 		'draft'
@@ -177,14 +177,14 @@ return static function ( Context $ctx ): void {
 		$draft(
 			'The terms that apply when you buy from Cigarholic.',
 			array(
-				'Agreement'                   => 'Who the contract is with (HuyLinh LLC) and acceptance at checkout.',
-				'Products and descriptions'   => 'Natural wood variation, photos, specifications, no tobacco products sold.',
-				'Orders, pricing and payment' => 'Order acceptance, pricing errors, taxes, payment methods.',
-				'Shipping and risk of loss'   => 'Link to the shipping policy; when risk passes.',
-				'Returns and warranty'        => 'Links to the returns and warranty pages.',
+				'Agreement'                               => 'Who the contract is with (HuyLinh LLC) and acceptance at checkout.',
+				'Products and descriptions'               => 'Natural wood variation, photos, specifications, no tobacco products sold.',
+				'Orders, pricing and payment'             => 'Order acceptance, pricing errors, taxes, payment methods.',
+				'Shipping and risk of loss'               => 'Link to the shipping policy; when risk passes.',
+				'Returns and warranty'                    => 'Links to the returns and warranty pages.',
 				'Disclaimers and limitation of liability' => 'As advised by counsel.',
-				'Governing law'               => 'Florida law; dispute resolution.',
-				'Contact'                     => $company,
+				'Governing law'                           => 'Florida law; dispute resolution.',
+				'Contact'                                 => $company,
 			)
 		),
 		'draft'
@@ -196,10 +196,10 @@ return static function ( Context $ctx ): void {
 		$draft(
 			'Our commitment to a store everyone can use.',
 			array(
-				'Our commitment'     => 'WCAG 2.2 level AA as the target for every page and template (CMP-04).',
-				'Measures we take'   => 'Keyboard navigation, contrast, alternative text, form labels, testing with assistive technology.',
-				'Known limitations'  => 'Anything not yet conformant and when it will be fixed.',
-				'Feedback'           => 'support@cigarholic.com or +1 813 602 7585; we answer within N business days.',
+				'Our commitment'    => 'WCAG 2.2 level AA as the target for every page and template (CMP-04).',
+				'Measures we take'  => 'Keyboard navigation, contrast, alternative text, form labels, testing with assistive technology.',
+				'Known limitations' => 'Anything not yet conformant and when it will be fixed.',
+				'Feedback'          => 'support@cigarholic.com or +1 813 602 7585; we answer within N business days.',
 			)
 		),
 		'draft'
@@ -207,7 +207,7 @@ return static function ( Context $ctx ): void {
 
 	// Reading settings. The block theme renders front-page.html for the front page and home.html
 	// for the posts page, which WordPress only serves at /journal/ when the front page is a page.
-	$home_id = $ctx->page(
+	$home_id    = $ctx->page(
 		'home',
 		'Home',
 		$paragraph( 'The front page is designed in the theme template front-page.html; this page only holds the URL. Text entered here is not displayed.' )

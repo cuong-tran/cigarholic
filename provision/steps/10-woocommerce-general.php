@@ -130,7 +130,10 @@ return static function ( Context $ctx ): void {
 		}
 		$ctx->changed( 'WooCommerce pages created: ' . implode( ', ', $missing ) );
 	}
-	foreach ( array( 'cart' => 'woocommerce/cart', 'checkout' => 'woocommerce/checkout' ) as $page => $block ) {
+	foreach ( array(
+		'cart'     => 'woocommerce/cart',
+		'checkout' => 'woocommerce/checkout',
+	) as $page => $block ) {
 		$post = get_post( wc_get_page_id( $page ) );
 		if ( $post instanceof WP_Post && ! has_block( $block, $post ) ) {
 			$ctx->log( sprintf( 'warning: the %s page (#%d) does not contain the %s block; the classic shortcode is not supported', $page, $post->ID, $block ) );

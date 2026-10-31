@@ -59,7 +59,10 @@ final class ProvisionTest extends WP_UnitTestCase {
 		$this->assertSame( array( 'US' ), get_option( 'woocommerce_specific_allowed_countries' ) );
 		$this->assertSame( 'yes', get_option( 'woocommerce_custom_orders_table_enabled' ) );
 		$this->assertTrue( OrderUtil::custom_orders_table_usage_is_enabled() );
-		foreach ( array( 'cart' => 'woocommerce/cart', 'checkout' => 'woocommerce/checkout' ) as $page => $block ) {
+		foreach ( array(
+			'cart'     => 'woocommerce/cart',
+			'checkout' => 'woocommerce/checkout',
+		) as $page => $block ) {
 			$post = get_post( wc_get_page_id( $page ) );
 			$this->assertInstanceOf( \WP_Post::class, $post, $page );
 			$this->assertTrue( has_block( $block, $post ), sprintf( '%s page carries %s', $page, $block ) );
