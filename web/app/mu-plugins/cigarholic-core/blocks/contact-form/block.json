@@ -1,0 +1,35 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "cigarholic/contact-form",
+	"version": "0.1.0",
+	"title": "Contact form",
+	"category": "widgets",
+	"icon": "email",
+	"description": "Name, email, optional order number and message, protected by Turnstile, emailed to the support inbox. Nothing is stored on the site.",
+	"keywords": [ "contact", "support", "form" ],
+	"textdomain": "cigarholic",
+	"attributes": {
+		"heading": {
+			"type": "string",
+			"default": "Send us a message"
+		},
+		"buttonLabel": {
+			"type": "string",
+			"default": "Send message"
+		},
+		"showOrderNumber": {
+			"type": "boolean",
+			"default": true
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": [ "wide" ],
+		"spacing": { "margin": true, "padding": true }
+	},
+	"editorScript": "file:./editor.js",
+	"viewScript": "file:./view.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}
