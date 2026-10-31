@@ -1,0 +1,36 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "cigarholic/signup-form",
+	"version": "0.1.0",
+	"title": "Email signup",
+	"category": "widgets",
+	"icon": "email-alt",
+	"description": "Collects email addresses (coming-soon page, newsletter). Protected by Turnstile; stored by cigarholic-core and exported to the email platform.",
+	"keywords": [ "newsletter", "signup", "coming soon", "email" ],
+	"textdomain": "cigarholic",
+	"attributes": {
+		"heading": {
+			"type": "string",
+			"default": "Be the first to know when we open"
+		},
+		"buttonLabel": {
+			"type": "string",
+			"default": "Notify me"
+		},
+		"source": {
+			"type": "string",
+			"default": "coming-soon"
+		}
+	},
+	"supports": {
+		"html": false,
+		"align": [ "wide", "full" ],
+		"spacing": { "margin": true, "padding": true },
+		"color": { "background": true, "text": true }
+	},
+	"editorScript": "file:./editor.js",
+	"viewScript": "file:./view.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}
