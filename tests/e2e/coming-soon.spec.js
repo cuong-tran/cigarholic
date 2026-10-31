@@ -4,9 +4,12 @@ import { login, waitForTurnstile, uniqueEmail } from './helpers.js';
 
 test.describe( 'coming soon', () => {
 	test.beforeEach( async ( { request } ) => {
+		// Whole-site coming-soon mode (provisioning step 80) shows the launch page to anonymous visitors:
+		// a signup form and no primary navigation. Otherwise this environment is live; skip.
 		const home = await request.get( '/' );
 		const html = await home.text();
-		test.skip( ! html.includes( 'cigarholic-signup__form' ), 'coming-soon mode is off on this environment' );
+		const comingSoon = html.includes( 'cigarholic-signup__form' ) && ! html.includes( 'aria-label="Primary"' );
+		test.skip( ! comingSoon, 'coming-soon mode is off on this environment' );
 	} );
 
 	test( 'anonymous visitor sees the launch page with a working signup form', async ( { page } ) => {
