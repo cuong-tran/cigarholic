@@ -1,0 +1,18 @@
+/* cigarholic/announcement-bar (NAV-02): colours come from the block/theme settings. */
+.cigarholic-announcement-bar {
+	padding: 0.5rem 1rem;
+	text-align: center;
+	font-size: var(--wp--preset--font-size--small, 0.875rem);
+	background: var(--wp--preset--color--contrast, #1f1f1f);
+	color: var(--wp--preset--color--base, #fff);
+}
+
+.cigarholic-announcement-bar__text {
+	margin: 0;
+}
+
+.cigarholic-announcement-bar a {
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
