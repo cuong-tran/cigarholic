@@ -76,11 +76,10 @@ return static function ( Context $ctx ): void {
 			'How to reach us about an order, a product or a custom piece.',
 			array(
 				'Email and phone'  => 'support@cigarholic.com, +1 813 602 7585 (US Eastern business hours). Replies within one business day.',
-				'Contact form'     => 'The contact form block arrives with CNT-03 and is inserted here.',
 				'Mailing address'  => $company,
 				'Trade and press'  => 'Wholesale, corporate gifts and press requests: same address, mention the subject.',
 			)
-		),
+		) . "\n\n<!-- wp:cigarholic/contact-form {\"heading\":\"Send us a message\"} /-->",
 		'draft'
 	);
 
