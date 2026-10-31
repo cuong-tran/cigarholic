@@ -32,6 +32,30 @@ final class Features {
 			'class'   => Security\Hardening::class,
 			'default' => true,
 		),
+		'catalog'     => array(
+			'class'   => Catalog\DataModel::class,
+			'default' => true,
+		),
+		'sku'         => array(
+			'class'   => Catalog\Sku::class,
+			'default' => true,
+		),
+		'spec-table'  => array(
+			'class'   => Catalog\SpecTable::class,
+			'default' => true,
+		),
+		'csv'         => array(
+			'class'   => Catalog\Csv::class,
+			'default' => true,
+		),
+		'check'       => array(
+			'class'   => Catalog\Check::class,
+			'default' => true,
+		),
+		'seed'        => array(
+			'class'   => Catalog\Seed::class,
+			'default' => true,
+		),
 	);
 
 	/**

@@ -11,6 +11,12 @@ All custom PHP of the store, one class per feature ID from `docs/FEATURES.md`. L
 | `Provision\Runner`, `Provision\Context` | FND-03 | Runs `provision/steps/*.php`; helpers that compare before writing |
 | `Dev\Development` | FND-02 | Development only: valid `wp_mail()` sender, HTTPS verified against the system CA store |
 | `Security\Hardening` | OPS-07 | XML-RPC off, no generator tags, generic login errors, no anonymous `/wp/v2/users` |
+| `Catalog\DataModel` | CAT-03, CAT-02, CMP-11, CMP-06 | Categories with fixed slugs, `occasion` taxonomy, global attributes, "Specifications" product tab (`_ch_*` meta), private compliance fields, Prop 65 toggle and warning; `wp cigarholic catalog ensure` |
+| `Catalog\Sku` | INV-01, CAT-09 | SKU scheme `CH-{TYPE}-{CAPACITY}-{WOOD}-{FINISH}`, `SAMPLE-` sample data, validation on save |
+| `Catalog\SpecTable` | CAT-04 | Block `cigarholic/spec-table` (`blocks/spec-table/`), inches + cm and lb + kg, hides the "Additional information" tab |
+| `Catalog\Csv` | CAT-10 | `Occasions` and GTIN columns for the WooCommerce importer and exporter; template `docs/templates/products-import-template.csv` |
+| `Catalog\Check`, `Catalog\Cli` | CAT-09 | `wp cigarholic catalog check [--format]` (the brief's `catalog:check`), exit 1 on problems, fails on production while sample data exists |
+| `Catalog\Seed` | FND-02 | `wp cigarholic seed`: seven `SAMPLE-` products, idempotent, with placeholder images |
 
 ## Adding a feature
 

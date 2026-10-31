@@ -1,0 +1,23 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "cigarholic/spec-table",
+	"version": "0.1.0",
+	"title": "Specification table",
+	"category": "woocommerce",
+	"icon": "editor-table",
+	"description": "The current product's specifications from the catalog data model: capacity, cigar fit, exterior and interior dimensions, weight and every visible attribute, in inches and centimetres, pounds and kilograms. Renders nothing when the product has no data.",
+	"keywords": [ "specifications", "specs", "humidor", "dimensions", "product" ],
+	"textdomain": "cigarholic",
+	"usesContext": [ "postId", "postType" ],
+	"attributes": {},
+	"supports": {
+		"html": false,
+		"align": [ "wide" ],
+		"spacing": { "margin": true },
+		"typography": { "fontSize": true }
+	},
+	"editorScript": "file:./editor.js",
+	"style": "file:./style.css",
+	"render": "file:./render.php"
+}
