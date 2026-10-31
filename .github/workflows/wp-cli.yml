@@ -1,0 +1,67 @@
+# Runs one WP-CLI command in the current release of a site (OPS-01, for agents without SSH).
+# Production commands wait for the owner's approval on the `production` Environment. The command runs
+# as the deploy user (never as root) with --path set to the Bedrock core directory.
+#   Examples: "core is-installed", "option get blogname", "plugin list --status=active",
+#             "core install --url=https://staging.cigarholic.com --title=Cigarholic --admin_user=... --admin_email=..."
+name: WP-CLI
+
+on:
+  workflow_dispatch:
+    inputs:
+      site:
+        description: Site
+        type: choice
+        required: true
+        default: staging
+        options: [staging, production]
+      command:
+        description: wp subcommand and arguments (without the leading "wp")
+        type: string
+        required: true
+
+concurrency:
+  group: wp-cli-${{ inputs.site }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: wp ${{ inputs.command }} on ${{ inputs.site }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ${{ inputs.site }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Connect
+        uses: ./.github/actions/ssh
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          user: ${{ secrets.SSH_USER }}
+          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          upload_infra: "false"
+
+      - name: Run
+        env:
+          SITE: ${{ inputs.site }}
+          COMMAND: ${{ inputs.command }}
+          WP_OWNER_EMAIL: ${{ vars.WP_OWNER_EMAIL }}
+          WP_OWNER_INITIAL_PASSWORD: ${{ secrets.WP_OWNER_INITIAL_PASSWORD }}
+        run: |
+          set -euo pipefail
+          case "$COMMAND" in *$'\n'*) echo "::error::one command per run"; exit 1 ;; esac
+          # The command goes through stdin, so no quoting of the owner's input happens on a command line.
+          # $WP_OWNER_EMAIL and $WP_OWNER_INITIAL_PASSWORD may be referenced in the command (wp core install).
+          {
+            printf 'export WP_OWNER_EMAIL=%q WP_OWNER_INITIAL_PASSWORD=%q\n' "$WP_OWNER_EMAIL" "$WP_OWNER_INITIAL_PASSWORD"
+            printf 'cd /var/www/%s/current && wp --path=web/wp %s\n' "$SITE" "$COMMAND"
+          } > /tmp/wp-cmd.sh
+          if [ "$SSH_RUN_USER" = root ]; then
+            ssh cigarholic-vps 'sudo -n -u deploy -H bash -s' < /tmp/wp-cmd.sh
+          else
+            ssh cigarholic-vps 'bash -s' < /tmp/wp-cmd.sh
+          fi

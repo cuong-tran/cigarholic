@@ -1,0 +1,119 @@
+# Staging deploy (OPS-04, OPS-05, FND-09): every push to main that touches the application deploys
+# staging.cigarholic.com through Deployer over SSH. Before the deploy the application keys from GitHub
+# are upserted into the server .env (STAGING_* secrets become unprefixed keys; empty ones are skipped).
+name: Deploy staging
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - composer.json
+      - composer.lock
+      - "config/**"
+      - "web/**"
+      - "provision/**"
+      - "infra/deploy/**"
+      - "infra/server/env-upsert.sh"
+      - "infra/backup/snapshot.sh"
+      - ".github/workflows/deploy-staging.yml"
+      - ".github/actions/ssh/**"
+      - "scripts/tools.sh"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  # Staging deploys are switched on by committing the marker file infra/deploy/STAGING_ENABLED once the
+  # server is provisioned (Phase 1). Until then pushes to main do not produce failed deploy runs.
+  gate:
+    name: Staging deploy enabled?
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: infra/deploy
+      - id: check
+        run: |
+          if [ -f infra/deploy/STAGING_ENABLED ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Staging deploy skipped: infra/deploy/STAGING_ENABLED does not exist yet (Phase 1)."
+          fi
+
+  deploy:
+    name: Deploy ${{ github.sha }} to staging
+    needs: gate
+    if: needs.gate.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: staging
+      url: https://staging.cigarholic.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          tools: none
+          coverage: none
+
+      - name: Deployer phar (pinned, checksum verified)
+        run: scripts/tools.sh
+
+      - name: Connect
+        uses: ./.github/actions/ssh
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          user: ${{ secrets.SSH_USER }}
+          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Upsert application keys into the staging .env
+        env:
+          FORWARD_ENV: >-
+            STAGING_POSTMARK_SERVER_TOKEN STAGING_TURNSTILE_SITE_KEY STAGING_TURNSTILE_SECRET_KEY
+            STRIPE_TEST_PUBLISHABLE_KEY STRIPE_TEST_SECRET_KEY STRIPE_TAX_SECRET_KEY
+            PAYPAL_SANDBOX_CLIENT_ID PAYPAL_SANDBOX_CLIENT_SECRET GA4_MEASUREMENT_ID
+          STAGING_POSTMARK_SERVER_TOKEN: ${{ secrets.STAGING_POSTMARK_SERVER_TOKEN }}
+          STAGING_TURNSTILE_SITE_KEY: ${{ secrets.STAGING_TURNSTILE_SITE_KEY }}
+          STAGING_TURNSTILE_SECRET_KEY: ${{ secrets.STAGING_TURNSTILE_SECRET_KEY }}
+          STRIPE_TEST_PUBLISHABLE_KEY: ${{ secrets.STRIPE_TEST_PUBLISHABLE_KEY }}
+          STRIPE_TEST_SECRET_KEY: ${{ secrets.STRIPE_TEST_SECRET_KEY }}
+          STRIPE_TAX_SECRET_KEY: ${{ secrets.STRIPE_TAX_SECRET_KEY }}
+          PAYPAL_SANDBOX_CLIENT_ID: ${{ secrets.PAYPAL_SANDBOX_CLIENT_ID }}
+          PAYPAL_SANDBOX_CLIENT_SECRET: ${{ secrets.PAYPAL_SANDBOX_CLIENT_SECRET }}
+          GA4_MEASUREMENT_ID: ${{ vars.GA4_MEASUREMENT_ID }}
+        run: |
+          ssh-run infra/server/env-upsert.sh staging \
+            POSTMARK_SERVER_TOKEN=@STAGING_POSTMARK_SERVER_TOKEN \
+            TURNSTILE_SITE_KEY=@STAGING_TURNSTILE_SITE_KEY \
+            TURNSTILE_SECRET_KEY=@STAGING_TURNSTILE_SECRET_KEY \
+            STRIPE_TEST_PUBLISHABLE_KEY=@STRIPE_TEST_PUBLISHABLE_KEY \
+            STRIPE_TEST_SECRET_KEY=@STRIPE_TEST_SECRET_KEY \
+            STRIPE_TAX_SECRET_KEY=@STRIPE_TAX_SECRET_KEY \
+            PAYPAL_SANDBOX_CLIENT_ID=@PAYPAL_SANDBOX_CLIENT_ID \
+            PAYPAL_SANDBOX_CLIENT_SECRET=@PAYPAL_SANDBOX_CLIENT_SECRET \
+            GA4_MEASUREMENT_ID=@GA4_MEASUREMENT_ID
+
+      - name: dep deploy staging
+        env:
+          DEPLOY_HOST: ${{ secrets.SSH_HOST }}
+          DEPLOY_PORT: ${{ secrets.SSH_PORT }}
+          DEPLOY_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_IDENTITY_FILE: ~/.ssh/cigarholic
+          DEPLOY_REPOSITORY: https://github.com/${{ github.repository }}.git
+          HEALTH_BASIC_AUTH: ${{ secrets.STAGING_BASIC_AUTH_USER }}:${{ secrets.STAGING_BASIC_AUTH_PASSWORD }}
+        run: |
+          php tools/deployer.phar --file=infra/deploy/deploy.php deploy staging \
+            --revision="$GITHUB_SHA" --no-interaction -v

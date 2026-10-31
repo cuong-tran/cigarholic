@@ -1,0 +1,62 @@
+# Backups (OPS-07): run the production backup to B2 by hand, list the backups, or restore the latest
+# (or a named) production backup into staging (the restore drill). Restoring into production is not
+# offered here on purpose; see docs/runbooks/backup-restore.md.
+name: Backup and restore
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: What to do
+        type: choice
+        required: true
+        default: list
+        options: [backup-production, restore-production-to-staging, list]
+      backup:
+        description: Backup timestamp for the restore (default latest)
+        type: string
+        default: latest
+
+concurrency:
+  group: vps-backup
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: ${{ inputs.action }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      FORWARD_ENV: B2_BUCKET B2_KEY_ID B2_APPLICATION_KEY B2_S3_ENDPOINT
+      B2_BUCKET: ${{ secrets.B2_BUCKET }}
+      B2_KEY_ID: ${{ secrets.B2_KEY_ID }}
+      B2_APPLICATION_KEY: ${{ secrets.B2_APPLICATION_KEY }}
+      B2_S3_ENDPOINT: ${{ vars.B2_S3_ENDPOINT }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Connect
+        uses: ./.github/actions/ssh
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          user: ${{ secrets.SSH_USER }}
+          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: List backups
+        if: inputs.action == 'list'
+        run: ssh-run infra/backup/backup.sh production --list
+
+      - name: Back up production to B2
+        if: inputs.action == 'backup-production'
+        run: ssh-run infra/backup/backup.sh production
+
+      - name: Restore production backup into staging
+        if: inputs.action == 'restore-production-to-staging'
+        env:
+          BACKUP: ${{ inputs.backup }}
+        run: ssh-run infra/backup/restore.sh "${BACKUP:-latest}" --to staging

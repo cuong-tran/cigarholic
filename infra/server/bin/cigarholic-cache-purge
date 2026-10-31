@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Empties the Nginx FastCGI cache of one site. Root-owned helper, allowed to the deploy user through
+# /etc/sudoers.d/cigarholic-deploy. Installed to /usr/local/sbin/ by provision.sh.
+set -euo pipefail
+case "${1:-}" in
+  staging|production) ;;
+  *) echo "usage: cigarholic-cache-purge <staging|production>" >&2; exit 2 ;;
+esac
+dir="/var/cache/nginx/cigarholic-$1"
+if [ -d "$dir" ]; then
+  find "$dir" -mindepth 1 -delete
+  echo "purged $dir"
+else
+  echo "nothing to purge: $dir does not exist"
+fi

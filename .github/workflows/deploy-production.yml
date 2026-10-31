@@ -1,0 +1,111 @@
+# Production deploy (OPS-04, OPS-05, OPS-06): only from a release tag vX.Y.Z, with the owner's approval
+# on the `production` Environment (required reviewer). The workflow_dispatch form with a `tag` input is
+# the fallback the owner runs; it deploys that tag, never a branch. A database snapshot is taken
+# before the release switch; a failed health check rolls back automatically.
+name: Deploy production
+
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to deploy (vX.Y.Z, must exist)
+        type: string
+        required: true
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.tag || github.ref_name }} to production
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment:
+      name: production
+      url: https://cigarholic.com
+    steps:
+      - name: Resolve and verify the tag
+        id: tag
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ -n "$INPUT_TAG" ]; then tag="$INPUT_TAG"; else
+            [ "$REF_TYPE" = tag ] || { echo "::error::production deploys only from a tag, not from $REF_TYPE $REF_NAME"; exit 1; }
+            tag="$REF_NAME"
+          fi
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::'$tag' is not a release tag (vX.Y.Z)"; exit 1; }
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ steps.tag.outputs.tag }}
+
+      - name: Confirm the checkout is that tag
+        env:
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git fetch --force --depth=1 origin "refs/tags/$TAG:refs/tags/$TAG"
+          [ "$(git rev-parse HEAD)" = "$(git rev-parse "refs/tags/$TAG^{commit}")" ] || { echo "::error::HEAD is not $TAG"; exit 1; }
+          echo "deploying $TAG = $(git rev-parse --short HEAD)"
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.5"
+          tools: none
+          coverage: none
+
+      - name: Deployer phar (pinned, checksum verified)
+        run: scripts/tools.sh
+
+      - name: Connect
+        uses: ./.github/actions/ssh
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          user: ${{ secrets.SSH_USER }}
+          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Upsert application keys into the production .env
+        env:
+          FORWARD_ENV: >-
+            PRODUCTION_POSTMARK_SERVER_TOKEN PRODUCTION_TURNSTILE_SITE_KEY PRODUCTION_TURNSTILE_SECRET_KEY
+            GA4_MEASUREMENT_ID
+          PRODUCTION_POSTMARK_SERVER_TOKEN: ${{ secrets.PRODUCTION_POSTMARK_SERVER_TOKEN }}
+          PRODUCTION_TURNSTILE_SITE_KEY: ${{ secrets.PRODUCTION_TURNSTILE_SITE_KEY }}
+          PRODUCTION_TURNSTILE_SECRET_KEY: ${{ secrets.PRODUCTION_TURNSTILE_SECRET_KEY }}
+          GA4_MEASUREMENT_ID: ${{ vars.GA4_MEASUREMENT_ID }}
+        run: |
+          # Live Stripe and PayPal credentials never pass through here (ADR 0006): the owner connects
+          # them in WP admin on production.
+          ssh-run infra/server/env-upsert.sh production \
+            POSTMARK_SERVER_TOKEN=@PRODUCTION_POSTMARK_SERVER_TOKEN \
+            TURNSTILE_SITE_KEY=@PRODUCTION_TURNSTILE_SITE_KEY \
+            TURNSTILE_SECRET_KEY=@PRODUCTION_TURNSTILE_SECRET_KEY \
+            GA4_MEASUREMENT_ID=@GA4_MEASUREMENT_ID
+
+      - name: dep deploy production
+        env:
+          DEPLOY_HOST: ${{ secrets.SSH_HOST }}
+          DEPLOY_PORT: ${{ secrets.SSH_PORT }}
+          DEPLOY_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_IDENTITY_FILE: ~/.ssh/cigarholic
+          DEPLOY_REPOSITORY: https://github.com/${{ github.repository }}.git
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID_CIGARHOLIC: ${{ vars.CLOUDFLARE_ZONE_ID_CIGARHOLIC }}
+          CLOUDFLARE_ZONE_ID_MAX2LAB: ${{ vars.CLOUDFLARE_ZONE_ID_MAX2LAB }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          php tools/deployer.phar --file=infra/deploy/deploy.php deploy production \
+            --tag="$TAG" --no-interaction -v
