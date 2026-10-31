@@ -8,7 +8,7 @@ All custom PHP of the store, one class per feature ID from `docs/FEATURES.md`. L
 | `Features`, `Feature` | FND-05 | Registry of features with toggles: default in code, override from `CIGARHOLIC_FEATURES` in `.env` (`signups:on,engraving:off`), filter `cigarholic_feature_enabled` |
 | `Logger` | FND-05 | `wc_get_logger()` with source `cigarholic` |
 | `Cli\Commands` | FND-05, FND-03 | `wp cigarholic version`, `features`, `provision [--dry-run] [--step=<name>]` |
-| `Provision\Runner`, `Provision\Context` | FND-03 | Runs `provision/steps/*.php`; helpers that compare before writing |
+| `Provision\Runner`, `Provision\Context` | FND-03 | Runs `provision/steps/*.php`; helpers that compare before writing: `option()`, `page()` (create once, never overwrite), `term()`, `navigation()` (`wp_navigation` menu updated in place), `changed()` / `log()` for custom checks |
 | `Dev\Development` | FND-02 | Development only: valid `wp_mail()` sender, HTTPS verified against the system CA store |
 | `Security\Hardening` | OPS-07 | XML-RPC off, no generator tags, generic login errors, no anonymous `/wp/v2/users` |
 
