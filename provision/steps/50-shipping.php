@@ -171,14 +171,23 @@ return static function ( Context $ctx ): void {
 					$wanted[ 'class_cost_' . $classes[ $slug ] ] = $cost;
 				}
 			}
+			// Same shape as WooCommerce saves: every instance form field (defaults for the rest), so
+			// the REST API and the settings modal find the keys they expect.
+			$fields     = $flat_rate->get_instance_form_fields();
+			$defaults   = array_merge( array_fill_keys( array_keys( $fields ), '' ), wp_list_pluck( $fields, 'default' ) );
 			$option_key = $flat_rate->get_instance_option_key();
-			$current    = get_option( $option_key, array() );
-			$current    = is_array( $current ) ? $current : array();
-			if ( array_intersect_key( $current, $wanted ) === $wanted ) {
+			$stored     = get_option( $option_key, array() );
+			$stored     = is_array( $stored ) ? $stored : array();
+			$target     = array_merge( $defaults, $stored, $wanted );
+			$compare_a  = $stored;
+			$compare_b  = $target;
+			ksort( $compare_a, SORT_STRING );
+			ksort( $compare_b, SORT_STRING );
+			if ( $compare_a === $compare_b ) {
 				$ctx->log( 'ok: flat rate settings on "Contiguous US"' );
 			} else {
 				if ( ! $ctx->is_dry_run() ) {
-					update_option( $option_key, array_merge( $current, $wanted ) );
+					update_option( $option_key, $target );
 				}
 				$ctx->changed( sprintf( 'flat rate settings on "Contiguous US" (%s)', $option_key ) );
 			}
