@@ -6,6 +6,7 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ### Added
 
+- CAT-03 / CAT-02 / CAT-04 / CAT-09 / CAT-10 / CMP-06 / CMP-11 / INV-01 (#27): catalog data model (categories with fixed slugs, `occasion` taxonomy, eight global attributes, Specifications tab with `_ch_*` meta, private compliance fields, Prop 65 toggle), SKU scheme validation, `cigarholic/spec-table` block (in + cm, lb + kg), CSV import template and `docs/catalog.md`, `wp cigarholic catalog check` and `catalog ensure`, `wp cigarholic seed` (seven `SAMPLE-` products). Storefront smoke test now covers browse → cart → checkout → order email.
 - FND-03: provisioning steps 10–80 (#14): WooCommerce general settings with HPOS and block pages, checkout rules, Shopify-compatible permalinks, nine draft policy/content pages plus home and journal, Primary navigation, Shop Manager capabilities, shipping classes and zones (contiguous US free humidors, placeholder accessory rate; Alaska/Hawaii/territories unshippable), tax settings for Stripe Tax, branded emails, whole-site coming-soon. Context helpers `page()`, `term()`, `navigation()`; RolesTest and ProvisionTest.
 - FND-13 (security subset, #15): Dependabot opens PRs for WordPress core and plugin releases daily (grouped), npm tooling and GitHub Actions weekly.
 - FND-01: Bedrock scaffold with WordPress 7.1.4, WooCommerce 11.2.1 and the launch plugin set pinned in `composer.lock`; environment configs; `.env.example`; `scripts/tools.sh` for the pinned PHPStan, PHPUnit and Deployer phars (#4).
