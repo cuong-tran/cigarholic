@@ -2,16 +2,16 @@
 
 Progress tracker for the Cigarholic build (`docs/KICKOFF-BRIEF.md` rule 6). Updated at the end of every session. A fresh agent, in a new cloud session or on a laptop, starts here after reading `CLAUDE.md` (which imports `AGENTS.md`).
 
-Last updated: 2026-10-31, Turn 2 (Phase 0 nearly complete; see "Where we are").
+Last updated: 2026-10-31, end of Turn 2: **Phase 0 complete, milestone M0 reached**.
 
 ## Where we are
 
 | | |
 |---|---|
-| Current milestone | **Phase 0, Foundation**, one PR from done: FND-01/02/03/04/05/06/08/12/13, CNT-03, CNT-04, NAV-02 merged; CAT-03 (catalog model, spec table, CSV template, seed, catalog check) in review. **M0 "Repo green"** is reached when it lands and the storefront smoke test runs against seeded data |
+| Current milestone | **M0 "Repo green" reached** (2026-10-31): CI green on `main`; `scripts/runtime-up.sh` boots the store with seed data in the sandbox and in CI; the coming-soon page renders with email capture; deploy and provisioning workflows exist and were dry-run. Phase 1 (M1) has started and is blocked on the owner (see below) |
 | Live on production | Nothing. No server provisioned yet, domains on registrar hold (`docs/OWNER-ACTIONS.md` A5) |
 | Live on staging | Nothing. Provisioning and deploy workflows exist (#10) and have been dry-run in a container; the first real run needs the owner's go after M0 |
-| In progress | CAT-03 catalog data model (subagent, branch `feat/CAT-03-catalog-data-model`) |
+| In progress | Nothing in Phase 0. Phase 2 work (payments, checkout) waits for Stripe/PayPal test credentials (OWNER-ACTIONS B4, B5); P0 items that need no credentials are listed under "Next actions" |
 | Blocked (Phase 1) | `infra-provision.yml` → `status` (run 41157126002) reached the VPS but the pinned host key in `SSH_KNOWN_HOSTS` does not match the server after its OS reinstall; waits for the owner to refresh the secret (OWNER-ACTIONS A1). Everything DNS/TLS also waits for A5 |
 | Blocked | Phase 1 (M1) waits for A5 (domain hold) for anything DNS or TLS related; the VPS itself can be provisioned by IP as soon as the owner confirms Phase 1 may start |
 
@@ -32,6 +32,9 @@ Last updated: 2026-10-31, Turn 2 (Phase 0 nearly complete; see "Where we are").
 | #13 | CNT-03 | Contact form block emailed to the support inbox, Turnstile, REST + no-JS fallback, settings page |
 | #14 | FND-03, CHK-01/03/04/05, SEO-03, CNT-02, NAV-01, ORD-02/03/04/07, SHP-01/02, CMP-01, CNT-04 | Provisioning steps 10–80: WooCommerce settings incl. HPOS, checkout, permalinks, draft pages, navigation, Shop Manager role, shipping zones, tax, emails, whole-site coming-soon |
 | #15 | FND-13 | Dependabot for Composer (daily, grouped), npm and GitHub Actions |
+| #16–#20, #24–#26 | FND-13 | Dependabot updates merged after green CI (GitHub Actions majors, eslint 10, stylelint 17); #23 keeps `@playwright/test` pinned to the sandbox browser |
+| #22 | docs | STATUS and OWNER-ACTIONS after the first Phase 1 check (host-key mismatch) |
+| #27 | CAT-03, CAT-02, CAT-04, CAT-09, CAT-10, CMP-06, CMP-11, INV-01 | Catalog data model, spec table, CSV template, `wp cigarholic catalog check`, seed data; storefront smoke test active |
 | #13 | CNT-03 | Contact form block emailed to the support inbox, Turnstile, REST + no-JS fallback, settings page |
 | #14 | FND-03, CHK-01/03/04/05, SEO-03, CNT-02, NAV-01, ORD-02/03/04/07, SHP-01/02, CMP-01, CNT-04 | Provisioning steps 10–80: WooCommerce settings incl. HPOS, checkout, permalinks, draft pages, navigation, Shop Manager role, shipping zones, tax, emails, whole-site coming-soon |
 | #15 | FND-13 | Dependabot for Composer (daily, grouped), npm and GitHub Actions |
@@ -70,15 +73,15 @@ Last updated: 2026-10-31, Turn 2 (Phase 0 nearly complete; see "Where we are").
 - **Executed and passed:**
   - Static checks on every PR, locally and in CI: `composer check` (parallel-lint, PHPCS WordPress-Extra + Docs + PHPCompatibilityWP, PHPStan level 6), `npm run lint` (eslint, stylelint), shellcheck, actionlint. CI green on PRs 6 to 12 (PHP 8.3 and 8.5 legs).
   - Runtime in the sandbox: image build through the proxy, `make up` on `main` (WordPress 7.1.4 installed, 12 plugins active, theme active, provisioning applied 66 changes then 0, HPOS enabled, 9 draft pages + home/journal, Primary navigation, Cash on delivery in development), Valkey object cache connected, mail trapped by Mailpit, WordPress HTTP API reaching Turnstile and wordpress.org through the gateway CA; anonymous `/` is the coming-soon page with one signup form and no navigation.
-  - PHPUnit in the php container (`make test`): 33 tests on `main` (features/toggles, hardening, signups, announcement bar, contact form, roles, provisioning idempotency); also green in the CI runtime job on every PR.
-  - Playwright (`make e2e`): 6 passed on desktop and mobile (coming-soon page for visitors with a real signup through the Turnstile test widget, duplicate accepted, invalid refused, administrator sees the store); 4 storefront tests skip until the catalog is seeded.
+  - PHPUnit in the php container (`make test`): 71 tests / 839 assertions on `main` (features/toggles, hardening, signups, announcement bar, contact form, roles, provisioning idempotency, catalog data model, SKU rules, spec table, CSV import, catalog check, seed); also green in the CI runtime job on every PR.
+  - Playwright (`make e2e`): 10/10 on desktop and mobile, twice in a row: coming-soon page for visitors with a real signup through the Turnstile test widget, duplicate accepted, invalid refused, administrator sees the store; shop → product page with spec table → cart → Cash-on-delivery checkout → order received → order emails in Mailpit (the thin P0 vertical slice of brief section 2, with the development gateway).
   - Theme render on the stack: `/`, `/shop/`, `/cart/`, `/my-account/` 200 with the right h1, `/nonexistent/` 404, empty `/checkout/` 302, coming-soon template for anonymous visitors.
   - Infrastructure dry runs: full `provision.sh` + `site.sh staging|production` in an `ubuntu:26.04` container (idempotent second run; nginx 1.28.3, PHP 8.5.4, MariaDB 11.8.6, Valkey 9.0.4), Deployer recipe parsing (`list`, `tree deploy|rollback`, `config`), Cloudflare scripts `--dry-run`.
   - FEATURES priority recount after the reconciliation; RDAP and DNS checks of both domains.
 - **Executed and failed, then fixed:** PHPUnit 11 against the WordPress test suite (moved to 9.6); Composer source clones of PHPStan/PHPUnit too large for the sandbox (phars instead, ADR 0007); PEAR's HTTP/1.0 download of phpredis (curl + `docker-php-ext-install`); Compose bake entitlements (plain `docker build`); container TLS without the gateway CA (CA mounted, `https_ssl_verify` in development); `woocommerce_store_pages_only` defaulting to `yes` (provisioning pins `no`).
 - **Executed and failed (expected, owner action):** `infra-provision.yml` → `status` on 2026-10-31: SSH host key mismatch against the pinned `SSH_KNOWN_HOSTS` (server reinstalled after the scan); the workflow refused to connect, which is the intended behaviour of host-key pinning.
 - **Could not run here:** anything on the VPS beyond that check (no SSH from the sandbox by design): provisioning, Deployer end to end, Let's Encrypt, backups to B2; Stripe/PayPal test checkout (staging only, test keys not yet provided); the storefront smoke test end to end (needs seeded products from CAT-03); axe/Lighthouse budgets.
-- **Not implemented yet (Phase 0 leftovers):** CAT-03 catalog model in review; ORD-05 full manager guide (grows per feature), OPS-06 monitoring runbook.
+- **Not implemented yet:** ORD-05 full manager guide (grows per feature), OPS-06 monitoring runbook, the PHP 8.5 gate on staging (needs the server).
 
 ## Decisions made, and why
 
@@ -98,10 +101,9 @@ All in `docs/OWNER-ACTIONS.md`: A1 (confirmed), A2 (Cloudflare deferred), A3 (do
 
 ## Next actions
 
-1. Merge `feat/CAT-03-catalog-data-model` (review, CI, the storefront smoke test then runs against seeded data); then record **M0** here.
-2. Phase 1 (server access exists, so it starts without waiting): `infra-provision.yml` → `status` (verifies the SSH secrets), `provision`, then `site-staging` and `site-production` (TLS stays self-signed until A5 is lifted and the owner enters the A records from `docs/runbooks/server.md`); commit `infra/deploy/STAGING_ENABLED` to switch on staging deploys; first deploy; coming-soon page live on `cigarholic.com` once DNS exists (M1). Postmark (B1), backups (B2), monitoring (B3) as the accounts arrive.
-3. Phase 0 leftovers in parallel: CNT-03 contact form, scheduled WordPress/plugin update PRs (FND-13 security subset), monitoring runbook (OPS-06), manager guide sections as features land.
-4. Phase 2 (P0 store on staging): payments and checkout (PAY, CHK) once B4/B5 test credentials exist, then catalog, storefront, shipping and tax, operations, content/SEO/compliance, in the order of brief section 8.
+1. **Phase 1, blocked on the owner:** rerun `infra-provision.yml` → `status` once `SSH_KNOWN_HOSTS` is refreshed (OWNER-ACTIONS A1), then `provision`, `site-staging`, `site-production` (TLS stays self-signed until A5 is lifted and the owner enters the A records from `docs/runbooks/server.md`); commit `infra/deploy/STAGING_ENABLED` to switch on staging deploys; first deploy; coming-soon page live on `cigarholic.com` once DNS exists (M1). Postmark (B1), backups (B2), monitoring (B3) as the accounts arrive.
+3. **P0 work that needs no credentials, next in this order:** CHK-06 order-received next steps (theme template exists; wire ship-time text to a setting), SHP-03 ship-time messaging on product and cart, SEO-01/SEO-02 SEOPress provisioning (titles, sitemaps, Product/Organization schema), CMP-03 Complianz provisioning (cookie notice, Consent Mode), MKT-02 GA4 plugin provisioning from `GA4_MEASUREMENT_ID`, OPS-09 image settings (WebP/AVIF, sizes), ORD-05 manager guide sections (products, prices, sales, orders, refunds, tracking), OPS-06 monitoring runbook, WCAG/axe checks in the Playwright suite (CMP-04).
+4. **Phase 2 (P0 on staging) once B4/B5 arrive:** Stripe and PayPal test mode, wallets, refunds, webhooks (PAY-01..06), tax addresses (CMP-01), then the rest of brief section 8.
 
 ## Reproduce and validate the current state
 
