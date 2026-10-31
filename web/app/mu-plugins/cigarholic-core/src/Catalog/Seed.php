@@ -286,8 +286,9 @@ final class Seed implements Feature {
 		$map = get_option( self::IMAGES_OPTION, array() );
 		$map = is_array( $map ) ? $map : array();
 		if ( isset( $map[ $key ] ) && 'attachment' === get_post_type( (int) $map[ $key ] ) ) {
-			$id = (int) $map[ $key ];
-			if ( $alt !== get_post_meta( $id, '_wp_attachment_image_alt', true ) ) {
+			$id          = (int) $map[ $key ];
+			$current_alt = (string) get_post_meta( $id, '_wp_attachment_image_alt', true );
+			if ( $alt !== $current_alt ) {
 				update_post_meta( $id, '_wp_attachment_image_alt', $alt );
 			}
 			return $id;

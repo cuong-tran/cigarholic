@@ -113,6 +113,10 @@ final class Csv implements Feature {
 				$ids[] = (int) $term->term_id;
 				continue;
 			}
+			// Like WooCommerce's category import: only a user who may manage terms creates new ones.
+			if ( ! current_user_can( 'manage_product_terms' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce capability.
+				continue;
+			}
 			$inserted = wp_insert_term( $name, DataModel::TAXONOMY );
 			if ( ! is_wp_error( $inserted ) ) {
 				$ids[] = (int) $inserted['term_id'];

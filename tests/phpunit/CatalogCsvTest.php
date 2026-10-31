@@ -34,6 +34,8 @@ final class CatalogCsvTest extends WP_UnitTestCase {
 	 */
 	public function set_up(): void {
 		parent::set_up();
+		// The importer creates categories only for a user who may manage terms, as in WooCommerce > Products > Import.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		update_option( 'woocommerce_weight_unit', 'lbs' );
 		update_option( 'woocommerce_dimension_unit', 'in' );
 		DataModel::ensure();
@@ -91,12 +93,13 @@ final class CatalogCsvTest extends WP_UnitTestCase {
 		$unmapped = array_filter( $mapping, static fn( string $field ): bool => 1 === preg_match( '/[\s,()]/', $field ) );
 		$this->assertSame( array(), $unmapped, 'every column of the template is recognised' );
 
+		// "Update existing products" unticked, as for a first import: WooCommerce skips unknown SKUs when it is on.
 		$importer = new WC_Product_CSV_Importer(
 			$file,
 			array(
 				'mapping'         => $mapping,
 				'parse'           => true,
-				'update_existing' => true,
+				'update_existing' => false,
 			)
 		);
 		$result   = $importer->import();
