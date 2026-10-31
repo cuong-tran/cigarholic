@@ -137,7 +137,7 @@ jobs:
       - name: Build the PHP image (layer cache in GitHub Actions)
         uses: docker/setup-buildx-action@v3
 
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           context: docker/php
           build-args: PHP_VERSION=${{ matrix.php }}
