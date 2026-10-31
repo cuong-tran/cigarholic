@@ -36,7 +36,7 @@ jobs:
       CLOUDFLARE_ZONE_ID_MAX2LAB: ${{ vars.CLOUDFLARE_ZONE_ID_MAX2LAB }}
       ORIGIN_IP: ${{ secrets.SSH_HOST }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Run
         env:
