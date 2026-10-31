@@ -21,6 +21,14 @@ A single line at the top of every page, for a promotion, a shipping message or a
 3. Optionally set a **Start** and **End** in the store's timezone (Eastern Time, shown next to the field). Leave them empty to show the bar until you untick Enabled.
 4. **Save announcement bar**. The change is live immediately.
 
+## Contact form
+
+Messages from the **Contact** page arrive by email in the support inbox, with the visitor's address as Reply-To, so you answer by replying. Nothing is stored on the website.
+
+1. **WooCommerce → Contact form** sets the recipient address (default `support@cigarholic.com`) and the subject prefix.
+2. To place the form on a page, add the **Contact form** block in the editor; it offers a heading, the button label and whether to ask for an order number.
+3. Spam is filtered by Cloudflare Turnstile and a rate limit; nothing to do.
+
 ## Coming soon
 
 While **WooCommerce → Settings → Site visibility** is set to *Coming soon*, visitors see the launch page with the signup form and you (logged in as manager or admin) see the whole store. Only the owner decides when to switch it to *Live*.

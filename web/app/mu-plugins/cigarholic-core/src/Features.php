@@ -40,6 +40,10 @@ final class Features {
 			'class'   => Storefront\AnnouncementBar::class,
 			'default' => true,
 		),
+		'contact-form'     => array(
+			'class'   => Contact\ContactForm::class,
+			'default' => true,
+		),
 	);
 
 	/**
