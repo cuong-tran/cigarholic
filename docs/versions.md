@@ -25,6 +25,8 @@ Plugin versions: see `docs/plugins.md` (all pinned exactly in `composer.lock`).
 
 ## Upgrade routine
 
+Dependabot (`.github/dependabot.yml`) opens the PRs: WordPress core and plugins daily, npm tooling and GitHub Actions weekly. Review the plugin changelog for HPOS or checkout changes, let CI run (static checks and the runtime job with PHPUnit and Playwright), merge; staging deploys; production follows with the next approved tag. The phars in `scripts/tools.sh` are updated by hand.
+
 1. `composer update <package>` (or edit `scripts/tools.sh` for a phar) on a `chore/deps-<date>` branch.
 2. `composer check`, `make up`, `make test`, `make e2e`; read the plugin changelog for HPOS or checkout changes.
 3. PR, CI green, merge, staging deploys; run the Playwright suite against staging.
