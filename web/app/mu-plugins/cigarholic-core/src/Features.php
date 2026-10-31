@@ -24,12 +24,20 @@ final class Features {
 	 * @var array<string, array{class: class-string<Feature>, default: bool}>
 	 */
 	private const REGISTRY = array(
-		'development' => array(
+		'development'      => array(
 			'class'   => Dev\Development::class,
 			'default' => true,
 		),
-		'hardening'   => array(
+		'hardening'        => array(
 			'class'   => Security\Hardening::class,
+			'default' => true,
+		),
+		'signups'          => array(
+			'class'   => Signups\Signups::class,
+			'default' => true,
+		),
+		'announcement-bar' => array(
+			'class'   => Storefront\AnnouncementBar::class,
 			'default' => true,
 		),
 	);
