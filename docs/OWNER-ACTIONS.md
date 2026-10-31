@@ -7,9 +7,9 @@ The one place to see what the build needs from you (`docs/KICKOFF-BRIEF.md` rule
 - Secret and variable **names** are the contract (full inventory in `docs/runbooks/secrets.md`). Never put a value anywhere except GitHub, and never paste one into the session.
 - When you hand something over, reply in the session ("done A1, A2") or edit the Status column. I verify on first use and update this file.
 
-Last updated: 2026-10-30, start of Turn 2 (owner answered A1 to A5).
+Last updated: 2026-10-31, Turn 2 (Phase 0 nearly complete).
 
-**Phase 0 (the build in the sandbox) needs nothing from this list.** Phase 1 (coming-soon page live on `cigarholic.com`, milestone M1) needs A1 and A5. Cloudflare (A2) is deferred by the owner; until it arrives DNS points straight at the VPS and TLS comes from Let's Encrypt on the origin. The critical path is **A5 (domain hold)**; the VPS (A1) is provisioned without a domain as soon as Phase 0 is done.
+**Phase 0 (the build in the sandbox) needs nothing from this list.** Phase 1 needs your **go** (provisioning the clean VPS by IP: `infra-provision.yml` actions `provision`, `site-staging`, `site-production`, non-destructive) plus A6; the coming-soon page live on `cigarholic.com` (milestone M1) additionally needs A5 and the A records from `docs/runbooks/server.md`. Cloudflare (A2) is deferred by the owner; until it arrives DNS points straight at the VPS and TLS comes from Let's Encrypt on the origin. The critical path is **A5 (domain hold)**; the VPS (A1) is provisioned without a domain as soon as Phase 0 is done.
 
 ## How to hand over secrets and variables
 
