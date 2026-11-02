@@ -1,0 +1,81 @@
+# UptimeRobot monitors (OPS-06): creates or updates the cigarholic-<environment>-* monitors with
+# infra/monitoring/uptimerobot.sh. Needs the UPTIMEROBOT_API_KEY repository secret
+# (docs/OWNER-ACTIONS.md B3); staging also needs STAGING_BASIC_AUTH_USER/PASSWORD. The dry run
+# (default) prints the plan without calling the API. Runbook: docs/runbooks/monitoring.md.
+name: Monitoring
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which site's monitors to create or update
+        type: choice
+        required: true
+        default: staging
+        options: [staging, production]
+      dry_run:
+        description: Print the monitors without calling the UptimeRobot API
+        type: boolean
+        default: true
+      list:
+        description: Only list the existing monitors and alert contacts (ids and names; changes nothing, needs the key)
+        type: boolean
+        default: false
+
+concurrency:
+  group: monitoring
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: ${{ inputs.environment }}${{ inputs.list && ' (list)' || '' }}${{ !inputs.list && inputs.dry_run && ' (dry run)' || '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      UPTIMEROBOT_API_KEY: ${{ secrets.UPTIMEROBOT_API_KEY }}
+      UPTIMEROBOT_ALERT_CONTACTS: ${{ vars.UPTIMEROBOT_ALERT_CONTACTS }}
+      STAGING_BASIC_AUTH_USER: ${{ secrets.STAGING_BASIC_AUTH_USER }}
+      STAGING_BASIC_AUTH_PASSWORD: ${{ secrets.STAGING_BASIC_AUTH_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check the secrets
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          LIST: ${{ inputs.list }}
+        run: |
+          set -euo pipefail
+          preview=0
+          if [ "$DRY_RUN" = "true" ] && [ "$LIST" != "true" ]; then preview=1; fi
+          if [ -z "$UPTIMEROBOT_API_KEY" ]; then
+            if [ "$preview" = 1 ]; then
+              echo "::warning::UPTIMEROBOT_API_KEY is empty: the dry run works without it, a real run stops (docs/OWNER-ACTIONS.md B3)."
+            else
+              echo "::error::UPTIMEROBOT_API_KEY is empty: add the repository secret (docs/OWNER-ACTIONS.md B3, docs/runbooks/secrets.md) or run with dry_run."
+              exit 1
+            fi
+          fi
+          if [ "$ENVIRONMENT" = "staging" ] && [ "$LIST" != "true" ] && { [ -z "$STAGING_BASIC_AUTH_USER" ] || [ -z "$STAGING_BASIC_AUTH_PASSWORD" ]; }; then
+            if [ "$preview" = 1 ]; then
+              echo "::warning::STAGING_BASIC_AUTH_USER / STAGING_BASIC_AUTH_PASSWORD are empty: the staging monitor needs them (docs/OWNER-ACTIONS.md B8)."
+            else
+              echo "::error::STAGING_BASIC_AUTH_USER / STAGING_BASIC_AUTH_PASSWORD are empty: the staging monitor needs them (docs/OWNER-ACTIONS.md B8)."
+              exit 1
+            fi
+          fi
+
+      - name: Run
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          LIST: ${{ inputs.list }}
+        run: |
+          set -euo pipefail
+          flags=()
+          if [ "$LIST" = "true" ]; then flags+=(--list); fi
+          if [ "$DRY_RUN" = "true" ]; then flags+=(--dry-run); fi
+          bash infra/monitoring/uptimerobot.sh "$ENVIRONMENT" ${flags[@]+"${flags[@]}"}
