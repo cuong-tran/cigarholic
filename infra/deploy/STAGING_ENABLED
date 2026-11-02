@@ -1,0 +1,2 @@
+Marker file: while it exists, deploy-staging.yml deploys every push to main to staging.cigarholic.com (OPS-04).
+Created 2026-11-02 after infra-provision.yml provision / site-staging succeeded on the VPS. Delete it to pause staging deploys.
