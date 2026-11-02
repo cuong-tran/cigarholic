@@ -98,8 +98,14 @@ render() {
 # first staging deploy failed with "Access denied": the old charset default contained "}" which cut
 # the ${2:-...} expansion short, the leftover "?-}" was a range that includes the backslash, and
 # MariaDB read it as an escape while PHP read it literally). 32 characters are 190 bits, 64 are 380.
+# The finite read (head first) matters: `tr </dev/urandom | head -c N` kills tr with SIGPIPE, and under
+# pipefail that is exit 141, which stopped the next site.sh run before it changed anything.
 random_secret() {
-  LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c "$1"
+  local out=""
+  while [ "${#out}" -lt "$1" ]; do
+    out+=$(head -c 4096 /dev/urandom | LC_ALL=C tr -dc 'A-Za-z0-9')
+  done
+  printf '%s' "${out:0:$1}"
 }
 
 # =================================================================================================
@@ -168,7 +174,9 @@ else
     # Rotate it; step 3 below re-asserts the database user with the new value. Safe while WordPress
     # only ever reads the password from this file.
     DB_PASSWORD=$(random_secret 32)
-    ENV_FILE="$ENV_FILE" bash "$SERVER_DIR/env-upsert.sh" "$SITE" "DB_PASSWORD=$DB_PASSWORD" >/dev/null
+    # Passed by name (KEY=@VAR), so the value is not on a command line where ps could show it.
+    CIGARHOLIC_NEW_DB_PASSWORD="$DB_PASSWORD" ENV_FILE="$ENV_FILE" \
+      bash "$SERVER_DIR/env-upsert.sh" "$SITE" "DB_PASSWORD=@CIGARHOLIC_NEW_DB_PASSWORD" >/dev/null
     log "$ENV_FILE exists; DB_PASSWORD was not alphanumeric and has been rotated (database user updated below)"
   fi
 fi
