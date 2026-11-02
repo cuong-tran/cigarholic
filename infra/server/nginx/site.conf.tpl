@@ -49,6 +49,9 @@ server {
 
     # --- hard denies ----------------------------------------------------------------------------
     location ~ ^/(wp/)?xmlrpc\.php$ { deny all; }
+    # The web installer: WordPress is installed with WP-CLI (docs/runbooks/deploy.md), and until it is,
+    # whoever opens this page first owns the site. Matched on the normalised URI, so ../ cannot dodge it.
+    location ~ ^/(wp/)?wp-admin/(install|setup-config)\.php$ { deny all; }
     location ~ /\.(?!well-known/) { deny all; }
     location ~* ^/app/uploads/.*\.php$ { deny all; }
     location ~* ^/(wp-config\.php|composer\.(json|lock)|readme\.html|license\.txt)$ { deny all; }
