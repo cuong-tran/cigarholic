@@ -57,6 +57,13 @@ server {
     location ~* ^/(wp-config\.php|composer\.(json|lock)|readme\.html|license\.txt)$ { deny all; }
     location ~* ^/wp/(readme\.html|license\.txt|wp-config-sample\.php)$ { deny all; }
 
+    # --- short admin URLs: WordPress lives in /wp/ (Bedrock), so the familiar paths redirect there.
+    # After the hard denies on purpose: /wp-admin/install.php stays 403 (the first matching regex wins).
+    # The target always starts with /wp, so the redirect cannot leave this host.
+    location = /wp-login.php { return 301 /wp$request_uri; }
+    location = /wp-admin { return 301 /wp/wp-admin/$is_args$args; }
+    location ~ ^/wp-admin/ { return 301 /wp$request_uri; }
+
     # --- login: rate limited, never cached ----------------------------------------------------
     location ~ ^/(wp/)?wp-login\.php$ {
         limit_req zone=cigarholic_@@SITE@@_login burst=5 nodelay;

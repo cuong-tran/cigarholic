@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Checks the staging basic-auth exemptions and the installer deny against a real Nginx (OPS-07,
-# FND-08). The map block is taken verbatim from infra/server/nginx/conf.d/cigarholic-common.conf and
-# the deny location from infra/server/nginx/site.conf.tpl, so the test runs the shipped rules.
+# Checks the staging basic-auth exemptions, the installer deny and the short admin URL redirects
+# against a real Nginx (OPS-07, FND-08). The map block is taken verbatim from
+# infra/server/nginx/conf.d/cigarholic-common.conf, the deny location and the redirect block from
+# infra/server/nginx/site.conf.tpl, so the test runs the shipped rules.
 # Needs Docker (GitHub-hosted runners and the sandbox have it). Run: tests/infra/nginx-staging-auth.sh
 set -euo pipefail
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
@@ -20,6 +21,8 @@ map_block=$(sed -n '/^map \$request_uri \$cigarholic_staging_auth {/,/^}/p' "$RE
 deny_line=$(grep -E '^\s*location ~ \^/\(wp/\)\?wp-admin/\(install\|setup-config\)' "$REPO/infra/server/nginx/site.conf.tpl")
 [ -n "$map_block" ] || { echo "FAIL: staging auth map not found"; exit 1; }
 [ -n "$deny_line" ] || { echo "FAIL: installer deny location not found"; exit 1; }
+redirects=$(sed -n '/^    # --- short admin URLs/,/^$/p' "$REPO/infra/server/nginx/site.conf.tpl" | grep -E '^\s*location ')
+[ "$(printf '%s\n' "$redirects" | grep -c .)" -eq 3 ] || { echo "FAIL: short admin URL redirects not found"; exit 1; }
 
 # user "u", password "p" (apr1 hash generated here, never a real credential)
 printf 'u:%s\n' "$(openssl passwd -apr1 p)" >"$work/htpasswd"
@@ -41,6 +44,7 @@ server {
 
     location ^~ /.well-known/acme-challenge/ { auth_basic off; try_files /ok.txt =404; }
 $deny_line
+$redirects
     location ~ \.php\$ { try_files /ok.txt =404; }
     location / { try_files /nonexistent /index.php\$is_args\$args; }
 }
@@ -67,6 +71,22 @@ expect() {
     printf 'ok   %s %s%s\n' "$got" "$path" "${auth:+ (with credentials)}"
   else
     printf 'FAIL %s %s%s (expected %s)\n' "$got" "$path" "${auth:+ (with credentials)}" "$want"
+    fail=1
+  fi
+}
+
+# expect_redirect <path> <expected Location path>: a 301 whose Location (minus scheme and host) matches.
+expect_redirect() {
+  local path=$1 want=$2 head code location
+  head=$(curl -s --path-as-is -o /dev/null -D - "http://127.0.0.1:$PORT$path")
+  code=$(printf '%s\n' "$head" | awk 'NR == 1 { print $2 }')
+  location=$(printf '%s\n' "$head" | tr -d '\r' | sed -n 's/^[Ll]ocation: //p')
+  location=${location#http://127.0.0.1:$PORT}
+  location=${location#http://127.0.0.1}
+  if [ "$code" = 301 ] && [ "$location" = "$want" ]; then
+    printf 'ok   301 %s -> %s\n' "$path" "$location"
+  else
+    printf 'FAIL %s %s -> %s (expected 301 -> %s)\n' "$code" "$path" "$location" "$want"
     fail=1
   fi
 }
@@ -106,5 +126,17 @@ expect 403 '/wp/wp-admin/./install.php' 'u:p'
 expect 403 '/wp/wp-includes/../wp-admin/install.php' 'u:p'
 expect 403 '/wp/wp-admin/%69nstall.php' 'u:p'
 expect 200 '/wp/wp-login.php' 'u:p'
+
+echo "-- short admin URLs redirect into /wp/ (before basic auth: the target still asks for it)"
+expect_redirect '/wp-login.php' '/wp/wp-login.php'
+expect_redirect '/wp-login.php?action=lostpassword' '/wp/wp-login.php?action=lostpassword'
+expect_redirect '/wp-admin' '/wp/wp-admin/'
+expect_redirect '/wp-admin?x=1' '/wp/wp-admin/?x=1'
+expect_redirect '/wp-admin/' '/wp/wp-admin/'
+expect_redirect '/wp-admin/edit.php?post_type=product' '/wp/wp-admin/edit.php?post_type=product'
+expect 403 '/wp-admin/install.php'                 # the installer deny still wins
+expect 401 '/wp-adminx'                            # not an admin path: no redirect, auth as usual
+expect 200 '/wp/wp-login.php' 'u:p'                # the real login page is not redirected again
+expect 200 '/wp/wp-admin/index.php' 'u:p'
 
 if [ "$fail" = 0 ]; then echo "ALL PASSED"; else echo "SOME CHECKS FAILED"; exit 1; fi

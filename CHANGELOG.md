@@ -4,7 +4,13 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- OPS-07: `/wp-login.php` and `/wp-admin[/...]` redirect (301) to the same path under `/wp/`, where WordPress lives, on both sites and in the Compose runtime; query strings kept, `/wp-admin/install.php` still denied. Covered by `tests/infra/nginx-staging-auth.sh` (41 cases) and `tests/e2e/admin-urls.spec.js`.
+
+### Fixed
+
+- Docs: the manager guide said two-factor is required; the Two Factor plugin is active but enrolment is not enforced yet (OPS-07, next actions).
 
 ## [0.1.0] - 2026-11-02
 
