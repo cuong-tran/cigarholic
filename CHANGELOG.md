@@ -4,6 +4,12 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.1.0] - 2026-11-02
+
+First release, for the coming-soon site on `cigarholic.com` (milestone M1): the WooCommerce store built and provisioned as code, running whole-site coming-soon with email capture; the store itself stays hidden from visitors until the owner switches it to Live. Verified on staging first: WordPress installed with WP-CLI, 11 launch plugins active, provisioning applied and idempotent, seven `SAMPLE-` products for review (never on production).
+
 ### Added
 
 - OPS-01 (#37): `infra-provision.yml` → `status` lists the tables of each site database and counts web-installer requests by method and status from the access logs (counts only, no client addresses); `tests/infra/status-installer-log.sh`.
@@ -26,12 +32,13 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 - FND-08 / OPS-01 (#31), from the first real runs on the VPS: `infra-provision.yml` reads `LETSENCRYPT_EMAIL` from the repository secret or the variable; the deploy sudoers file no longer sets `requiretty` (sudo on Ubuntu 26.04 rejects it, which stopped `provision.sh` at the visudo check); `status.sh` prints `-` for tools that are not installed yet.
 - FND-08 (#34): the first staging deploy failed its health check with HTTP 500 because MariaDB rejected the password in `shared/.env`: `random_secret` in `site.sh` had a `}` inside its `${2:-...}` default, so `:,.<>?-}` was appended to every charset and the `?-}` range added the backslash, which MariaDB reads as an escape and PHP literally. Secrets are now alphanumeric; `site.sh` rotates a non-alphanumeric `DB_PASSWORD` and re-asserts the database user (both sites were affected and rotated). `wp` on the server is a wrapper that silences WP-CLI 2.12's PHP 8.5 deprecations for the CLI only.
-- FND-03 (2026-11-02): staging reported `blog_public = 1`: `DISALLOW_INDEXING` was defined for staging and development but nothing read it (the Bedrock plugin that does is not installed). Provisioning now sets Settings > Reading > search engine visibility from the constant; production stays visible. Staging was never indexable in practice (basic auth and `X-Robots-Tag: noindex`).
-- FND-08 (2026-11-02): the deploy activates the plugins (WooCommerce first, then every plugin the `--no-dev` release installed) before `wp wc update`; the first deploy after `wp core install` on staging failed with "'wc' is not a registered wp command" because a fresh install activates none.
+- FND-03 (#41): staging reported `blog_public = 1`: `DISALLOW_INDEXING` was defined for staging and development but nothing read it (the Bedrock plugin that does is not installed). Provisioning now sets Settings > Reading > search engine visibility from the constant; production stays visible. Staging was never indexable in practice (basic auth and `X-Robots-Tag: noindex`).
+- FND-08 (#40): the deploy activates the plugins (WooCommerce first, then every plugin the `--no-dev` release installed) before `wp wc update`; the first deploy after `wp core install` on staging failed with "'wc' is not a registered wp command" because a fresh install activates none.
 - FND-08 (#35): the #34 generator (`tr </dev/urandom | head -c`) exited 141 under `pipefail`; it now reads a finite 4 KiB and loops. `tests/infra/site-secret.sh` runs the shipped code under strict mode in CI.
 
 ### Security
 
+- FND-08 (#39): `wp-cli.yml` loads the owner email and initial password from secrets only, and only for a command that references them; `infra-provision.yml` reads `LETSENCRYPT_EMAIL` from the secret only. A repository variable's value is printed in the logs of this public repository.
 - OPS-07 / FND-08 (#36, 2026-11-02): the staging basic-auth exemptions for payment webhooks matched URI prefixes, so `/wp/wp-admin/install.php?wc-api=x` and `/wc-api/../wp/wp-admin/install.php` reached the WordPress installer of the freshly deployed, not yet installed staging site without credentials (verified from outside, HTTP 200). Staging was taken offline within minutes (the `current` symlink removed; no install had happened, the database was still empty). The exemptions now match whole URLs with no `.`, `%` or extra query string, `install.php` and `setup-config.php` are denied on both sites, and `tests/infra/nginx-staging-auth.sh` checks 31 cases against a real Nginx in CI. Evidence afterwards (`status`, #37): the staging database held only `wp_cigarholic_signups` (WordPress never installed) and the access logs show five installer requests, all GET, all from the verification probes; no POST.
 
 ### Not yet implemented

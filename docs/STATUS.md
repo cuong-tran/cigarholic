@@ -2,7 +2,7 @@
 
 Progress tracker for the Cigarholic build (`docs/KICKOFF-BRIEF.md` rule 6). Updated at the end of every session. A fresh agent, in a new cloud session or on a laptop, starts here after reading `CLAUDE.md` (which imports `AGENTS.md`).
 
-Last updated: 2026-11-02, Turn 3: **Phase 1 in progress** (M0 reached 2026-10-31; VPS provisioned, sites and certificates live, staging deployed; a staging security exposure found and closed the same hour; M1 waits for the owner's B8).
+Last updated: 2026-11-02, Turn 3: **Phase 1 in progress.** M0 reached 2026-10-31. The VPS is provisioned and both sites have certificates. Staging is installed, provisioned and seeded for review. Release `v0.1.0` (the coming-soon site on `cigarholic.com`, M1) waits for the owner's tag and approvals (OWNER-ACTIONS A7).
 
 ## Where we are
 
@@ -10,9 +10,9 @@ Last updated: 2026-11-02, Turn 3: **Phase 1 in progress** (M0 reached 2026-10-31
 |---|---|
 | Current milestone | **M0 "Repo green" reached** (2026-10-31). **M1 "Coming-soon live" in progress** (2026-11-02): VPS provisioned by `infra-provision.yml` (nginx 1.28.3, PHP 8.5.4, MariaDB 11.8.6, Valkey 9.0.4, certbot 4.0.0), `site-staging` and `site-production` done, Let's Encrypt certificates issued for `staging.cigarholic.com` and for `cigarholic.com` + `www` + both `max2lab.com` hosts (valid to 2027-01-31), staging deploys switched on (#32) |
 | Live on production | **Edge only.** `https://cigarholic.com` answers through Nginx with a valid certificate (HTTP 404 until the first release is deployed and WordPress installed); `http://` → `https://`, `www.cigarholic.com` and both `max2lab.com` hosts 301 to `https://cigarholic.com` in one hop keeping the path; `xmlrpc.php` 403; HSTS on. No application deployed: production deploys only from an owner-approved tag |
-| Live on staging | **Code deployed, WordPress not installed.** Release 3 (Deployer, run 41486663859) of `main`; every page redirects to the installer, which Nginx denies (403). Basic auth on everything except the exact payment-webhook URLs (#36), `X-Robots-Tag: noindex`, Let's Encrypt. `wp core install` waits for OWNER-ACTIONS B8 |
-| In progress | Phase 1 (M1): `wp core install` on staging (needs B8) and a redeploy so `update-db`, `wc update`, `provision` and the object cache run; then production deployed and installed back-to-back from an owner-approved tag (the coming-soon page on `cigarholic.com`). Phase 2 (payments, checkout) waits for Stripe/PayPal test credentials (B4, B5) |
-| Blocked (owner) | **B8** `WP_OWNER_EMAIL` + `WP_OWNER_INITIAL_PASSWORD` (WordPress cannot be installed on either site without them; M1 depends on it). Then B6 Turnstile keys (forms run without a bot challenge until then), B1 Postmark (domain verification can start now), B2 backups, B3 monitoring, B4/B5 payments |
+| Live on staging | **Installed and provisioned** (release 6 of `main`, run 41493330262). WordPress installed with WP-CLI (admin user `owner`, the B8 secrets); 11 launch plugins active; provisioning applied (76 changes on the first run, dry run 0 afterwards, then 1 for `blog_public`); whole-site coming-soon on, HPOS on, Valkey object cache on, search engine visibility off; 7 `SAMPLE-` products (2 variations) for review; health check HTTP 200. Basic auth on everything except the exact webhook URLs, `X-Robots-Tag: noindex`, web installer denied |
+| In progress | **M1, waiting for the owner (A7):** review staging, then tag `v0.1.0` → production deploy (approval) → `wp core install` on production (approval) → second deploy (approval) → coming-soon live on `cigarholic.com`. Phase 2 (payments, checkout) waits for Stripe/PayPal test credentials (B4, B5) |
+| Blocked (owner) | **A7** release `v0.1.0`: the tag and three approvals. Then B6 Turnstile keys (forms run without a bot challenge until then), B1 Postmark, B2 backups, B3 monitoring, B4/B5 payments |
 
 ### Merged so far (all squash-merged to `main`, CI green)
 
@@ -42,6 +42,11 @@ Last updated: 2026-11-02, Turn 3: **Phase 1 in progress** (M0 reached 2026-10-31
 | #35 | FND-08 | `random_secret` without SIGPIPE (#34's version exited 141 under `pipefail`); `tests/infra/site-secret.sh` in CI |
 | #36 | OPS-07, FND-08 | Security: staging basic-auth bypass closed, web installer denied on both sites; `tests/infra/nginx-staging-auth.sh` (31 cases) in CI |
 | #37 | OPS-01 | `status` lists tables per database and counts web-installer requests from the access logs |
+| #38 | docs | Phase 1 status, the staging incident write-up |
+| #39 | FND-08 | Owner credentials and the Let's Encrypt contact from secrets only, never printed in the public logs |
+| #40 | FND-08 | The deploy activates the plugins (WooCommerce first, then every plugin of the `--no-dev` release) before `wp wc update` |
+| #41 | FND-03 | Search engine visibility follows `DISALLOW_INDEXING` (staging off, production on) |
+| #42 | docs | Release notes `v0.1.0`, this status |
 
 ## Server (Phase 1, 2026-11-02)
 
@@ -65,6 +70,13 @@ All runs of `infra-provision.yml` on the Hostinger VPS (`srv2109040`, Ubuntu 26.
 | 41486044724, 41486154545, 41486290227 | `site-staging`, `site-production`, `provision` | #36 applied: installer denied in both vhosts, exact webhook exemptions in the shared config |
 | 41486571888 | `status` | Staging database: 1 table (`wp_cigarholic_signups`), WordPress never installed. Installer requests in the access logs: 5, all GET, all from the verification probes, no POST; production none |
 | 41486663859 | deploy staging | Release 3: staging back with the fixed Nginx rules. Probes from outside: `/` 401; the installer 403 plain, with `?wc-api=x` and via `/wc-api/../`; `/wc-api/%2e%2e/wp/wp-login.php` and `/wp/wp-login.php?wc-api=x` 401; `/?wc-api=wc_stripe` and `/wp-json/paypal/v1/incoming` reach WordPress without credentials (302 to the denied installer until it is installed); production installer 403 |
+| 41489863286 | `wp-cli.yml` (branch of #39) | Owner secrets present (values masked); on the server the email is a valid address and the password 12+ characters |
+| 41490772614 | `wp-cli.yml` `core install` (staging) | "Success: WordPress installed successfully." |
+| 41490867026 | deploy staging | Release 4 stopped before the switch: `wp wc update` found no WooCommerce, because a fresh install activates no plugins (#40). Staging kept release 3 |
+| 41491965149 | deploy staging (merge of #40) | Release 5: WooCommerce plus 10 plugins activated, "Provisioning complete: 76 change(s) applied", object cache enabled, health HTTP 200 |
+| 41492338926, 41492761834 | `wp-cli.yml` checks | Coming-soon on, store pages only off, HPOS on, USD, theme `cigarholic`, 11 active plugins, external object cache; provisioning dry run 0 changes |
+| 41493330262 | deploy staging (merge of #41) | Release 6: activation no-op, provisioning 1 change (`blog_public`), health HTTP 200 |
+| 41493526902 | `wp-cli.yml` `cigarholic seed` (staging) | 7 `SAMPLE-` products created (one variable with 2 variations); the command refuses production |
 
 Verified from the sandbox afterwards: `https://staging.cigarholic.com/` 401 + HSTS + `noindex`; `https://cigarholic.com/` 404 (no release yet) with the Let's Encrypt chain; `www`, `max2lab.com`, `www.max2lab.com` and `http://` each 301 to `https://cigarholic.com/...` in one hop; `xmlrpc.php` 403. The server `.env` files hold random database credentials and salts; application keys arrive through `env-upsert.sh` on each deploy and are empty until the owner sets the secrets. `SSH_USER` stays `root` until the first deploys are verified, then `disable-root-login` (OWNER-ACTIONS A1).
 
@@ -135,6 +147,7 @@ Verified from the sandbox afterwards: `https://staging.cigarholic.com/` 401 + HS
 10. **WordPress is installed with WP-CLI only**; the web installer is denied on both sites for good (#36). Production is deployed and installed back-to-back.
 11. **Server secrets are alphanumeric** (32 characters for passwords, 64 for salts): the same value is read by bash, MariaDB and PHP's dotenv, and only alphanumerics mean the same thing to all three (#34).
 12. **Infra shell code gets tests** in `tests/infra/`, run by CI's shell job under `set -euo pipefail` (#35, #36, #37): two of today's three server failures were shell bugs that lint could not see.
+13. **The deploy activates plugins** (WooCommerce first, then every plugin of the `--no-dev` release): the plugin set is `composer.json` plus `docs/plugins.md`, never a manual activation on a server (#40).
 
 ## Open owner decisions and inputs
 
@@ -142,9 +155,9 @@ All in `docs/OWNER-ACTIONS.md`: A1, A3, A5, A6 done; A2 (Cloudflare) deferred by
 
 ## Next actions
 
-1. **Phase 1 (M1), in order:** owner sets B8 → `wp-cli.yml` `core install` on staging (command in `docs/runbooks/deploy.md`), deploy again so `update-db`, `wc update`, `provision` and the object cache run, verify the coming-soon page behind basic auth; then the owner approves the first production deploy (tag `v0.1.0`), immediately followed by `core install` on production and a second deploy → coming-soon live on `cigarholic.com` = M1. Then `disable-root-login` and `SSH_USER=deploy`. Postmark (B1), backups (B2) and monitoring (B3, `monitoring.yml`) as the accounts arrive.
+1. **M1 (owner, A7):** review staging; tag `v0.1.0` on `main`; approve the production deploy. Then I dispatch `wp core install` on production and a second production deploy (`deploy-production.yml`, tag `v0.1.0`); the owner approves each; I verify the coming-soon page, the redirects and the headers from outside and report M1. Until the install, production answers 403 (the redirect target is the denied installer); between the install and the second deploy, the theme's home page without WooCommerce. Then `disable-root-login` and `SSH_USER=deploy`.
 2. **Small follow-up:** `cigarholic-core` creates `wp_cigarholic_signups` on `init` even before WordPress is installed (seen during the incident review); guard it with `is_blog_installed()`.
-3. **P0 work that needs no credentials, next in this order:** CHK-06 order-received next steps (theme template exists; wire ship-time text to a setting), SHP-03 ship-time messaging on product and cart, SEO-01/SEO-02 SEOPress provisioning (titles, sitemaps, Product/Organization schema), CMP-03 Complianz provisioning (cookie notice, Consent Mode), MKT-02 GA4 plugin provisioning from `GA4_MEASUREMENT_ID`, OPS-09 image settings (WebP/AVIF, sizes), ORD-05 manager guide sections (products, prices, sales, orders, refunds, tracking), WCAG/axe checks in the Playwright suite (CMP-04).
+3. **P0 work that needs no credentials, next in this order:** CHK-06 order-received next steps, SHP-03 ship-time messaging on product and cart, SEO-01/SEO-02 SEOPress provisioning (titles, sitemaps, Product/Organization schema), CMP-03 Complianz provisioning (cookie notice, Consent Mode), MKT-02 GA4 plugin provisioning from `GA4_MEASUREMENT_ID`, OPS-09 image settings (WebP/AVIF, sizes), ORD-05 manager guide sections (products, prices, sales, orders, refunds, tracking), WCAG/axe checks in the Playwright suite (CMP-04), a Playwright smoke run against staging from a workflow (basic auth from the secrets).
 4. **Phase 2 (P0 on staging) once B4/B5 arrive:** Stripe and PayPal test mode, wallets, refunds, webhooks (PAY-01..06), tax addresses (CMP-01), then the rest of brief section 8.
 
 ## Reproduce and validate the current state
