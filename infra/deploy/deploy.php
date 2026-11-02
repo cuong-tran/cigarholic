@@ -119,14 +119,22 @@ function wpInstalled(): bool
     return test('cd {{release_or_current_path}} && {{bin/wp}} core is-installed >/dev/null 2>&1');
 }
 
-desc('Runs wp core update-db, wp wc update, wp cigarholic provision and wp redis enable in the new release');
+desc('Runs wp core update-db, activates the plugins, wp wc update, wp cigarholic provision and wp redis enable in the new release');
 task('cigarholic:wp:prepare', function () {
     if (!wpInstalled()) {
-        warning('WordPress is not installed in this database yet: skipping update-db, wc update, provision and redis enable. Install it with wp-cli.yml (wp core install ...), then deploy again.');
+        warning('WordPress is not installed in this database yet: skipping update-db, plugin activation, wc update, provision and redis enable. Install it with wp-cli.yml (wp core install ...), then deploy again.');
         return;
     }
     cd('{{release_path}}');
     run('{{bin/wp}} core update-db', timeout: 900);
+
+    // Plugins as code: every plugin this release installed is meant to be active (docs/plugins.md; the
+    // release is `composer install --no-dev`, so development plugins are not there). `wp core install`
+    // activates none. Same order as scripts/runtime-up.sh: WooCommerce first, its extensions refuse to
+    // activate without it. Both commands are no-ops when everything is already active.
+    run('{{bin/wp}} plugin activate woocommerce', timeout: 300);
+    run('{{bin/wp}} plugin activate --all', timeout: 300);
+
     run('{{bin/wp}} wc update', timeout: 900);
 
     $provision = run('{{bin/wp}} cigarholic provision 2>&1 || true', timeout: 900);
@@ -216,7 +224,7 @@ task('deploy', [
     'deploy:prepare',           // info, setup, lock, release, update_code, env, shared, writable
     'deploy:vendors',           // composer install --no-dev --prefer-dist --no-interaction
     'cigarholic:snapshot',      // production only, before the schema changes
-    'cigarholic:wp:prepare',    // wp core update-db, wp wc update, wp cigarholic provision, wp redis enable
+    'cigarholic:wp:prepare',    // wp core update-db, plugin activate, wp wc update, wp cigarholic provision, wp redis enable
     'deploy:symlink',           // atomic switch of current/
     'cigarholic:php-fpm:reload',
     'cigarholic:cache:purge',
