@@ -52,7 +52,10 @@ sudo fail2ban-client status wp-login
 
 ## Monitoring (UptimeRobot, owner account; B3)
 
-Monitors: `https://cigarholic.com/` (keyword from the coming-soon page, then the home page),
-`https://cigarholic.com/checkout/` (expects 200), SSL expiry on `cigarholic.com` and
-`staging.cigarholic.com` (staging needs the basic auth user in the monitor URL). Alerts go to the
-owner and the agent channel.
+External monitoring is in `monitoring.md` (OPS-06): keyword check on `https://cigarholic.com/`
+(`Handcrafted in Vietnam`, present on the coming-soon page and on the home page), HTTP checks on
+`https://cigarholic.com/checkout/` and on the Store API, `https://staging.cigarholic.com/` behind
+basic auth, SSL expiry reminders on both hostnames. Alerts go to the owner's email and app or
+phone; the agent has no inbox, so the owner relays an alert into the session. The monitors are
+created by the **Monitoring** workflow (`infra/monitoring/uptimerobot.sh`) or by hand from that
+runbook; it also says what to do when each alert fires.

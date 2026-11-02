@@ -41,7 +41,8 @@ here. Hand-over instructions live in `docs/OWNER-ACTIONS.md`.
 | `B2_KEY_ID` | secret | repository | Backblaze application key id, restricted to the bucket | Not set |
 | `B2_APPLICATION_KEY` | secret | repository | Backblaze application key | Not set |
 | `B2_S3_ENDPOINT` | variable | repository | S3 endpoint of the bucket's region (added 2026-10-30; the S3-compatible client needs it) | Not set |
-| `UPTIMEROBOT_API_KEY` | secret | repository | Creates the monitors; optional if the owner creates them by hand | Not set |
+| `UPTIMEROBOT_API_KEY` | secret | repository | Main API key; `monitoring.yml` creates and updates the monitors (OPS-06, `docs/runbooks/monitoring.md`); optional if the owner creates them by hand | Not set |
+| `UPTIMEROBOT_ALERT_CONTACTS` | variable | repository | Optional (added 2026-11-02, OPS-06): alert contact ids the monitors notify, `123-456` (the workflow's *list* run prints them); every active alert contact on the account when unset | Not set |
 | `STRIPE_TEST_PUBLISHABLE_KEY` | secret | repository | Stripe test mode, written to staging only | Not set |
 | `STRIPE_TEST_SECRET_KEY` | secret | repository | Stripe test mode, written to staging only | Not set |
 | `STRIPE_TAX_SECRET_KEY` | secret | repository | Only if the Stripe Tax plugin accepts a key instead of its Connect flow | Not set |
@@ -66,6 +67,7 @@ here. Hand-over instructions live in `docs/OWNER-ACTIONS.md`.
 | `cloudflare.yml` | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_ZONE_ID_CIGARHOLIC`, `CLOUDFLARE_ZONE_ID_MAX2LAB`, `SSH_HOST` as the origin address | nothing on the server |
 | `backup-restore.yml` | `SSH_*`, `B2_BUCKET`, `B2_KEY_ID`, `B2_APPLICATION_KEY`, `B2_S3_ENDPOINT` | `/etc/cigarholic/backup.env` (root only) so the nightly timer can upload |
 | `wp-cli.yml` | `SSH_*`, `WP_OWNER_EMAIL`, `WP_OWNER_INITIAL_PASSWORD` (exported for the one command, for `wp core install`) | whatever the WP-CLI command does |
+| `monitoring.yml` | `UPTIMEROBOT_API_KEY`, `UPTIMEROBOT_ALERT_CONTACTS`; `staging`: `STAGING_BASIC_AUTH_USER`, `STAGING_BASIC_AUTH_PASSWORD` (credentials of the basic-auth monitor, sent to UptimeRobot) | nothing on the server; monitors in the owner's UptimeRobot account |
 
 Secrets travel to the server inside the streamed script (`.github/actions/ssh/ssh-run`), never on a
 command line.
