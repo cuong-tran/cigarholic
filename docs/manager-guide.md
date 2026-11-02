@@ -2,7 +2,7 @@
 
 How to run the Cigarholic store from WP admin. Written for the store manager; grows with every feature. Screenshots are added from staging once it exists.
 
-Log in at `/wp/wp-login.php` with your account and your authenticator app (two-factor is required for every manager and admin account).
+Log in at `/wp-admin` (for example `https://cigarholic.com/wp-admin`; it takes you to the login page) with your username or email address and your password. On staging the browser first asks for the staging password; that is a separate gate, not your WordPress account. Set up two-factor under Users → Profile right after your first login. It will be required for every manager and admin account; that enforcement is not switched on yet (OPS-07).
 
 ## Email signups (coming-soon page and newsletter form)
 

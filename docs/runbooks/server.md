@@ -53,6 +53,8 @@ closes root (it refuses while the deploy user cannot log in). Provisioning actio
   (`tests/infra/nginx-staging-auth.sh`). `X-Robots-Tag: noindex` on every response.
 - Both sites: `wp-admin/install.php` and `setup-config.php` are denied; WordPress is installed with
   WP-CLI only (`deploy.md`, "First deploy of a site").
+- Both sites: `/wp-login.php` and `/wp-admin[/...]` 301 to the same path under `/wp/`, where WordPress
+  lives (Bedrock), query string kept; `/wp-admin/install.php` stays denied.
 - Cloudflare is additive (ADR 0008): when it arrives, `cloudflare.yml` adds the same rules at the edge.
 
 ## DNS records the owner creates at the registrar (while Cloudflare is deferred)
