@@ -89,6 +89,10 @@ jobs:
           shellcheck --version | head -2
           git ls-files -z '*.sh' | xargs -0 -r shellcheck -S warning
 
+      - name: Shell tests (infra scripts under set -euo pipefail)
+        run: |
+          for t in tests/infra/*.sh; do echo "== $t"; bash "$t"; done
+
       - name: actionlint
         run: |
           bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12 /usr/local/bin
