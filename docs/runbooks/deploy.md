@@ -56,7 +56,9 @@ A branch name is refused in the workflow and again in the recipe (`cigarholic:gu
    ```
 
    The owner changes the password at first login; 2FA is enforced by the Two Factor plugin.
-4. Deploy again: `update-db`, `wc update`, `provision` and the object cache now run.
+4. Deploy again: `update-db`, plugin activation (WooCommerce first, then every plugin the release
+   installed), `wc update`, `provision` and the object cache now run. `wp core install` activates
+   no plugins; the deploy does, on every run, so a plugin added in a release becomes active with it.
 
 ## From a laptop or the VPS
 
