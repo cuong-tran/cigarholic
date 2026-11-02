@@ -43,7 +43,10 @@ A branch name is refused in the workflow and again in the recipe (`cigarholic:gu
 
 1. `infra-provision.yml` → `provision`, then `site-staging` / `site-production` (creates user,
    directories, `.env`, database, PHP-FPM pool, Nginx, certificate).
-2. Deploy. WordPress is not installed yet, so the WP tasks are skipped with a warning.
+2. Deploy. WordPress is not installed yet, so the WP tasks are skipped with a warning and every
+   page redirects to the web installer. Nginx denies the installer on both sites (#36, after the
+   2026-11-02 staging incident in `docs/STATUS.md`); still run step 3 straight after this one,
+   on production above all, so the site never sits uninstalled.
 3. Install WordPress with `wp-cli.yml` (site `staging`, command below). The workflow exports
    `WP_OWNER_EMAIL` and `WP_OWNER_INITIAL_PASSWORD` on the server for this one command, so the
    password never appears in the form or the log:
