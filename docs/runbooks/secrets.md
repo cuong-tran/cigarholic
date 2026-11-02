@@ -54,7 +54,7 @@ here. Hand-over instructions live in `docs/OWNER-ACTIONS.md`.
 | `WP_OWNER_INITIAL_PASSWORD` | secret | repository | Initial owner password on both sites, changed at first login | Not set |
 | `GSC_VERIFICATION_TOKEN` | variable | repository | Search Console DNS verification | Not set |
 | `BING_VERIFICATION_TOKEN` | variable | repository | Bing Webmaster verification | Not set |
-| `LETSENCRYPT_EMAIL` | variable | repository | Optional (added 2026-10-30, FND-08): contact for Let's Encrypt expiry notices; without it `site.sh` registers without an email | Not set |
+| `LETSENCRYPT_EMAIL` | secret or variable | repository | Optional (added 2026-10-30, FND-08): contact for Let's Encrypt expiry notices; without it `site.sh` registers without an email. `infra-provision.yml` reads the secret first, then the variable | Set as a repository secret (owner, 2026-11-02) |
 
 ## Which workflow reads what (FND-08)
 
