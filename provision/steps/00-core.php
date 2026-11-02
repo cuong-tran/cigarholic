@@ -21,6 +21,11 @@ return static function ( Context $ctx ): void {
 	$ctx->option( 'comment_moderation', '1' );
 	$ctx->option( 'uploads_use_yearmonth_folders', '1' );
 
+	// Search engine visibility (Settings > Reading). Staging and development define DISALLOW_INDEXING
+	// (config/environments/*) and nothing else reads that constant, so it is applied here on every
+	// provisioning run. Production leaves it undefined and stays visible.
+	$ctx->option( 'blog_public', ( defined( 'DISALLOW_INDEXING' ) && DISALLOW_INDEXING ) ? '0' : '1' );
+
 	// URL structure (ADR 0002): /%postname%/ for pages and journal posts.
 	if ( '/%postname%/' !== get_option( 'permalink_structure' ) ) {
 		if ( ! $ctx->is_dry_run() ) {
