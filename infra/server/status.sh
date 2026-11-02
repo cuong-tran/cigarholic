@@ -6,6 +6,8 @@ set -uo pipefail
 
 section() { printf '\n== %s\n' "$*"; }
 try() { "$@" 2>/dev/null || echo "n/a"; }
+# ver <command> <args...>: the command's output (stderr included: nginx and certbot print there), or "-" when it is not installed.
+ver() { if command -v "$1" >/dev/null 2>&1; then "$@" 2>&1; else echo "-"; fi; }
 
 HAS_SYSTEMD=0
 [ -d /run/systemd/system ] && command -v systemctl >/dev/null 2>&1 && HAS_SYSTEMD=1
@@ -17,11 +19,11 @@ echo "uptime  $(uptime -p 2>/dev/null || true)"
 echo "time    $(date -u +%Y-%m-%dT%H:%M:%SZ) (local zone $(date +%Z))"
 
 section "Versions"
-printf '  %-10s %s\n' nginx "$(nginx -v 2>&1 | sed 's#.*/##')"
+printf '  %-10s %s\n' nginx "$(ver nginx -v | sed 's#.*/##')"
 printf '  %-10s %s\n' php "$(php -v 2>/dev/null | head -n1 | awk '{print $2}')"
 printf '  %-10s %s\n' mariadb "$(mariadb --version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+\.[0-9]+-MariaDB' | sed -n '1s/-MariaDB//p')"
 printf '  %-10s %s\n' valkey "$(valkey-server --version 2>/dev/null | awk '{print $3}' | sed 's/^v=//')"
-printf '  %-10s %s\n' certbot "$(certbot --version 2>&1 | awk '{print $2}')"
+printf '  %-10s %s\n' certbot "$(ver certbot --version | awk '{print $2}')"
 printf '  %-10s %s\n' fail2ban "$(fail2ban-client --version 2>/dev/null | head -n1 | awk '{print $2}')"
 printf '  %-10s %s\n' rclone "$(rclone --version 2>/dev/null | head -n1 | awk '{print $2}')"
 printf '  %-10s %s\n' wp-cli "$(wp --version --allow-root 2>/dev/null | awk '{print $2}')"

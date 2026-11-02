@@ -1,5 +1,6 @@
 # Server provisioning over SSH (FND-08, OPS-01). The sandbox has no SSH, so every server operation is a
-# workflow_dispatch job. Reads the SSH_* repository secrets (docs/runbooks/secrets.md).
+# workflow_dispatch job. Reads the SSH_* repository secrets (docs/runbooks/secrets.md). LETSENCRYPT_EMAIL may be
+# a repository secret or a repository variable (the secret wins).
 #
 #   provision           base packages, hardening, deploy user (needs SSH_USER=root)
 #   site-staging        staging.cigarholic.com: user, dirs, .env, DB, PHP-FPM pool, Nginx, TLS
@@ -65,14 +66,14 @@ jobs:
           FORWARD_ENV: STAGING_BASIC_AUTH_USER STAGING_BASIC_AUTH_PASSWORD LETSENCRYPT_EMAIL
           STAGING_BASIC_AUTH_USER: ${{ secrets.STAGING_BASIC_AUTH_USER }}
           STAGING_BASIC_AUTH_PASSWORD: ${{ secrets.STAGING_BASIC_AUTH_PASSWORD }}
-          LETSENCRYPT_EMAIL: ${{ vars.LETSENCRYPT_EMAIL }}
+          LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL || vars.LETSENCRYPT_EMAIL }}
         run: ssh-run --sudo infra/server/site.sh staging
 
       - name: site.sh production
         if: inputs.action == 'site-production'
         env:
           FORWARD_ENV: LETSENCRYPT_EMAIL
-          LETSENCRYPT_EMAIL: ${{ vars.LETSENCRYPT_EMAIL }}
+          LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL || vars.LETSENCRYPT_EMAIL }}
         run: ssh-run --sudo infra/server/site.sh production
 
       - name: status.sh
