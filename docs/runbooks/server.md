@@ -17,7 +17,7 @@ with separate system user, database, database user, PHP-FPM pool, `.env`, Nginx 
 | fail2ban | `fail2ban` | `provision.sh` | jails sshd, nginx-http-auth, nginx-botsearch, nginx-limit-req, nginx-bad-request, wp-login (`infra/server/fail2ban/`) |
 | unattended-upgrades | `unattended-upgrades` | `provision.sh` | security pockets only, no automatic reboot |
 | rclone | `rclone` | — | B2 uploads (`infra/backup/backup.sh`) |
-| WP-CLI 2.12, Composer 2.8 | phars in `/usr/local/bin` | `provision.sh` | checksum verified |
+| WP-CLI 2.12, Composer 2.8 | phars in `/usr/local/bin` (`wp` is a wrapper around `wp-cli.phar` that silences PHP 8.5 deprecations for the CLI process only) | `provision.sh` | checksum verified |
 | Backup timer | `cigarholic-backup.timer` 03:17 UTC | `provision.sh` | `/usr/local/bin/cigarholic-backup production` |
 
 Paths: `/var/www/<site>/{releases,shared,current,letsencrypt}`; logs in `/var/log/nginx/cigarholic-<site>.*.log`

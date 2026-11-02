@@ -400,10 +400,18 @@ install_phar() { # install_phar <name> <version> <url> <sha-algo> <sha-url> <ver
   rm -rf "$tmp"
   log "installed $name $version"
 }
-install_phar wp "$WP_CLI_VERSION" \
+install_phar wp-cli.phar "$WP_CLI_VERSION" \
   "https://github.com/wp-cli/wp-cli/releases/download/v${WP_CLI_VERSION}/wp-cli-${WP_CLI_VERSION}.phar" \
   sha512 "https://github.com/wp-cli/wp-cli/releases/download/v${WP_CLI_VERSION}/wp-cli-${WP_CLI_VERSION}.phar.sha512" \
   "--version --allow-root"
+# `wp` is a wrapper, as in the Compose image (docker/php/wp): WP-CLI 2.12's bundled libraries emit PHP 8.5
+# deprecation notices of their own on every call, which land in the site's debug.log. They are silenced for
+# the CLI process only (E_ALL & ~E_DEPRECATED = 24575); PHP-FPM keeps E_ALL.
+write_file /usr/local/bin/wp 0755 <<'EOF' || true
+#!/bin/sh
+# Managed by infra/server/provision.sh
+exec php -d error_reporting=24575 /usr/local/bin/wp-cli.phar "$@"
+EOF
 install_phar composer "$COMPOSER_VERSION" \
   "https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar" \
   sha256 "https://getcomposer.org/download/${COMPOSER_VERSION}/composer.phar.sha256sum" \
