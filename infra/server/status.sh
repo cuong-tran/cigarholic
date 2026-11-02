@@ -97,9 +97,47 @@ done
 
 section "Database"
 if mariadb-admin ping --silent >/dev/null 2>&1; then
-  try mariadb --batch --skip-column-names -e "SELECT table_schema, ROUND(SUM(data_length+index_length)/1024/1024,1) AS mb FROM information_schema.tables WHERE table_schema LIKE 'cigarholic_%' GROUP BY table_schema" | sed 's/^/  /'
+  # Size, table count and (up to 12) table names per site database: an installed WordPress has its
+  # core tables (wp_options, wp_users, ...); a database with only wp_cigarholic_signups was never
+  # installed (cigarholic-core creates that table on `init`, which the installer page also runs).
+  try mariadb --batch --skip-column-names -e "SELECT table_schema, ROUND(SUM(data_length+index_length)/1024/1024,1), COUNT(*), SUBSTRING_INDEX(GROUP_CONCAT(table_name ORDER BY table_name SEPARATOR ' '), ' ', 12) FROM information_schema.tables WHERE table_schema LIKE 'cigarholic_%' GROUP BY table_schema" \
+    | awk -F'\t' 'NF >= 4 { printf "  %-22s %5s MB  %3s tables  %s%s\n", $1, $2, $3, $4, ($3 > 12 ? " ..." : "") } NF < 4 { print "  " $0 }'
 else
   echo "  not reachable from $(id -un)"
+fi
+
+section "Web installer requests (denied by Nginx; WordPress is installed with WP-CLI only)"
+# Counts by method and status from every access log, rotated ones included. A POST answered with
+# 200 would mean someone ran the installer. Counts only: Actions logs of a public repository are
+# public, so client addresses are not printed.
+if [ "$(id -u)" -eq 0 ]; then
+  for site in staging production; do
+    shopt -s nullglob
+    logs=(/var/log/nginx/cigarholic-"$site".access.log*)
+    shopt -u nullglob
+    if [ "${#logs[@]}" -eq 0 ]; then
+      printf '  %-11s no access log\n' "$site"
+      continue
+    fi
+    summary=$(zcat -f "${logs[@]}" 2>/dev/null | awk '
+      index($0, "wp-admin/install.php") || index($0, "wp-admin/setup-config.php") {
+        n = split($0, q, "\"")
+        if (n < 3) next
+        split(q[2], r, " "); split(q[3], t, " ")
+        path = r[2]; sub(/\?.*/, "", path)
+        if (path !~ /wp-admin\/(install|setup-config)\.php$/) next
+        count[r[1] " " t[1]]++; ip[$1] = 1; total++
+      }
+      END {
+        if (!total) { print "none"; exit }
+        for (k in count) out = out sprintf("%s:%d  ", k, count[k])
+        clients = 0; for (a in ip) clients++
+        printf "%s(%d requests from %d clients)", out, total, clients
+      }' || true)
+    printf '  %-11s %s\n' "$site" "${summary:-none}"
+  done
+else
+  echo "  n/a (needs root)"
 fi
 
 section "Valkey"
