@@ -2,18 +2,17 @@
 
 Progress tracker for the Cigarholic build (`docs/KICKOFF-BRIEF.md` rule 6). Updated at the end of every session. A fresh agent, in a new cloud session or on a laptop, starts here after reading `CLAUDE.md` (which imports `AGENTS.md`).
 
-Last updated: 2026-10-31, end of Turn 2: **Phase 0 complete, milestone M0 reached**.
+Last updated: 2026-11-02, Turn 3: **Phase 1 in progress** (M0 reached 2026-10-31; VPS provisioned, sites and certificates live, staging deploys on; M1 waits for the owner's B8).
 
 ## Where we are
 
 | | |
 |---|---|
-| Current milestone | **M0 "Repo green" reached** (2026-10-31): CI green on `main`; `scripts/runtime-up.sh` boots the store with seed data in the sandbox and in CI; the coming-soon page renders with email capture; deploy and provisioning workflows exist and were dry-run. Phase 1 (M1) has started and is blocked on the owner (see below) |
-| Live on production | Nothing. No server provisioned yet, domains on registrar hold (`docs/OWNER-ACTIONS.md` A5) |
-| Live on staging | Nothing. Provisioning and deploy workflows exist (#10) and have been dry-run in a container; the first real run needs the owner's go after M0 |
-| In progress | Nothing in Phase 0. Phase 2 work (payments, checkout) waits for Stripe/PayPal test credentials (OWNER-ACTIONS B4, B5); P0 items that need no credentials are listed under "Next actions" |
-| Blocked (Phase 1) | `infra-provision.yml` → `status` (run 41157126002) reached the VPS but the pinned host key in `SSH_KNOWN_HOSTS` does not match the server after its OS reinstall; waits for the owner to refresh the secret (OWNER-ACTIONS A1). Everything DNS/TLS also waits for A5 |
-| Blocked | Phase 1 (M1) waits for A5 (domain hold) for anything DNS or TLS related; the VPS itself can be provisioned by IP as soon as the owner confirms Phase 1 may start |
+| Current milestone | **M0 "Repo green" reached** (2026-10-31). **M1 "Coming-soon live" in progress** (2026-11-02): VPS provisioned by `infra-provision.yml` (nginx 1.28.3, PHP 8.5.4, MariaDB 11.8.6, Valkey 9.0.4, certbot 4.0.0), `site-staging` and `site-production` done, Let's Encrypt certificates issued for `staging.cigarholic.com` and for `cigarholic.com` + `www` + both `max2lab.com` hosts (valid to 2027-01-31), staging deploys switched on (#32) |
+| Live on production | **Edge only.** `https://cigarholic.com` answers through Nginx with a valid certificate (HTTP 404 until the first release is deployed and WordPress installed); `http://` → `https://`, `www.cigarholic.com` and both `max2lab.com` hosts 301 to `https://cigarholic.com` in one hop keeping the path; `xmlrpc.php` 403; HSTS on. No application deployed: production deploys only from an owner-approved tag |
+| Live on staging | **Edge only.** `https://staging.cigarholic.com` answers HTTP 401 (basic auth) with `X-Robots-Tag: noindex` over a Let's Encrypt certificate. First Deployer release follows the merge of #32; WordPress install waits for OWNER-ACTIONS B8 |
+| In progress | Phase 1: first staging deploy, then `wp core install` on staging and production (needs B8), then the coming-soon page on `cigarholic.com` from an approved tag (M1). OPS-06 monitoring runbook and UptimeRobot script (PR open). Phase 2 (payments, checkout) waits for Stripe/PayPal test credentials (B4, B5) |
+| Blocked (owner) | **B8** `WP_OWNER_EMAIL` + `WP_OWNER_INITIAL_PASSWORD` (WordPress cannot be installed on either site without them; M1 depends on it). Then B6 Turnstile keys (forms run without a bot challenge until then), B1 Postmark (domain verification can start now), B2 backups, B3 monitoring, B4/B5 payments |
 
 ### Merged so far (all squash-merged to `main`, CI green)
 
@@ -35,9 +34,24 @@ Last updated: 2026-10-31, end of Turn 2: **Phase 0 complete, milestone M0 reache
 | #16–#20, #24–#26 | FND-13 | Dependabot updates merged after green CI (GitHub Actions majors, eslint 10, stylelint 17); #23 keeps `@playwright/test` pinned to the sandbox browser |
 | #22 | docs | STATUS and OWNER-ACTIONS after the first Phase 1 check (host-key mismatch) |
 | #27 | CAT-03, CAT-02, CAT-04, CAT-09, CAT-10, CMP-06, CMP-11, INV-01 | Catalog data model, spec table, CSV template, `wp cigarholic catalog check`, seed data; storefront smoke test active |
-| #13 | CNT-03 | Contact form block emailed to the support inbox, Turnstile, REST + no-JS fallback, settings page |
-| #14 | FND-03, CHK-01/03/04/05, SEO-03, CNT-02, NAV-01, ORD-02/03/04/07, SHP-01/02, CMP-01, CNT-04 | Provisioning steps 10–80: WooCommerce settings incl. HPOS, checkout, permalinks, draft pages, navigation, Shop Manager role, shipping zones, tax, emails, whole-site coming-soon |
-| #15 | FND-13 | Dependabot for Composer (daily, grouped), npm and GitHub Actions |
+| #30 | docs | M0 status report |
+| #31 | FND-08, OPS-01 | First real VPS runs: `LETSENCRYPT_EMAIL` as a secret, sudoers `requiretty` removed (Ubuntu 26.04 sudo rejects it), `status.sh` output on a clean server |
+| #32 | OPS-04 | Staging deploys switched on (`infra/deploy/STAGING_ENABLED`) |
+
+## Server (Phase 1, 2026-11-02)
+
+All runs of `infra-provision.yml` on the Hostinger VPS (`srv2109040`, Ubuntu 26.04.1, 4 vCPU class, 15 GB RAM, 193 GB disk), as root over the pinned host key:
+
+| Run | Action | Result |
+|---|---|---|
+| 41157126002 (2026-10-31) | `status` | Failed as designed: host key changed after the OS reinstall; owner refreshed `SSH_KNOWN_HOSTS` |
+| 41476850934 | `status` | Logged in; clean server, nothing installed |
+| 41477334914 | `provision` | Installed every package and wrote every config, then stopped at `visudo -cf`: sudo on Ubuntu 26.04 rejects `Defaults:deploy !requiretty` (fixed in #31) |
+| 41478868463 | `provision` | Success and idempotent ("all packages already installed"); versions nginx 1.28.3, PHP 8.5.4, MariaDB 11.8.6, Valkey 9.0.4, certbot 4.0.0, WP-CLI 2.12.0, Composer 2.8.12; sshd keys only, `PermitRootLogin prohibit-password`; ufw allows SSH, 80, 443 |
+| 41479080934 | `site-staging` | System user, `/var/www/staging`, `shared/.env`, database, PHP-FPM pool, Nginx vhost with basic auth, Let's Encrypt certificate (expires 2027-01-31) |
+| 41479292394 | `site-production` | Same for `/var/www/production`; Nginx vhost plus redirect vhost; one Let's Encrypt certificate for `cigarholic.com`, `www.cigarholic.com`, `max2lab.com`, `www.max2lab.com` |
+
+Verified from the sandbox afterwards: `https://staging.cigarholic.com/` 401 + HSTS + `noindex`; `https://cigarholic.com/` 404 (no release yet) with the Let's Encrypt chain; `www`, `max2lab.com`, `www.max2lab.com` and `http://` each 301 to `https://cigarholic.com/...` in one hop; `xmlrpc.php` 403. The server `.env` files hold random database credentials and salts; application keys arrive through `env-upsert.sh` on each deploy and are empty until the owner sets the secrets. `SSH_USER` stays `root` until the first deploys are verified, then `disable-root-login` (OWNER-ACTIONS A1).
 
 ## Environment report (sandbox, measured 2026-10-30 and 2026-10-31; details in `docs/runbooks/sandbox.md`)
 
@@ -97,13 +111,13 @@ Last updated: 2026-10-31, end of Turn 2: **Phase 0 complete, milestone M0 reache
 
 ## Open owner decisions and inputs
 
-All in `docs/OWNER-ACTIONS.md`: A1 (confirmed), A2 (Cloudflare deferred), A3 (done), A4 (answered: GitHub Free, repository secrets, repository public), A5 (domain hold, pending), A6 (`LETSENCRYPT_EMAIL`, new); B1 to B12 within two weeks; C1 to C5 before go-live. Defaults D-01 to D-10 are in force. Server provisioning by IP is pre-approved by the brief ("server provisioning once I have given access") and starts as soon as Phase 0 closes; the owner is told what changed.
+All in `docs/OWNER-ACTIONS.md`: A1, A3, A5, A6 done; A2 (Cloudflare) deferred by the owner; A4 answered (GitHub Free, repository secrets, repository public). **B8 is the critical path** (WordPress install on both sites); B1 to B12 within two weeks; C1 to C5 before go-live. Defaults D-01 to D-10 are in force. The VPS was provisioned on 2026-11-02 under the brief's pre-approval; this file and OWNER-ACTIONS say what changed.
 
 ## Next actions
 
-1. **Phase 1, blocked on the owner:** rerun `infra-provision.yml` → `status` once `SSH_KNOWN_HOSTS` is refreshed (OWNER-ACTIONS A1), then `provision`, `site-staging`, `site-production` (TLS stays self-signed until A5 is lifted and the owner enters the A records from `docs/runbooks/server.md`); commit `infra/deploy/STAGING_ENABLED` to switch on staging deploys; first deploy; coming-soon page live on `cigarholic.com` once DNS exists (M1). Postmark (B1), backups (B2), monitoring (B3) as the accounts arrive.
-3. **P0 work that needs no credentials, next in this order:** CHK-06 order-received next steps (theme template exists; wire ship-time text to a setting), SHP-03 ship-time messaging on product and cart, SEO-01/SEO-02 SEOPress provisioning (titles, sitemaps, Product/Organization schema), CMP-03 Complianz provisioning (cookie notice, Consent Mode), MKT-02 GA4 plugin provisioning from `GA4_MEASUREMENT_ID`, OPS-09 image settings (WebP/AVIF, sizes), ORD-05 manager guide sections (products, prices, sales, orders, refunds, tracking), OPS-06 monitoring runbook, WCAG/axe checks in the Playwright suite (CMP-04).
-4. **Phase 2 (P0 on staging) once B4/B5 arrive:** Stripe and PayPal test mode, wallets, refunds, webhooks (PAY-01..06), tax addresses (CMP-01), then the rest of brief section 8.
+1. **Phase 1 (M1), in order:** watch the first staging deploy (merge of #32); owner sets B8 → `wp-cli.yml` `core install` on staging (command in `docs/runbooks/deploy.md`), deploy again so `update-db`, `wc update`, `provision` and the object cache run, verify the coming-soon page behind basic auth; same on production; tag `v0.1.0` for the owner's approval → coming-soon live on `cigarholic.com` = M1. Then `disable-root-login` and `SSH_USER=deploy`. Postmark (B1), backups (B2) and monitoring (B3, OPS-06 PR) as the accounts arrive.
+2. **P0 work that needs no credentials, next in this order:** CHK-06 order-received next steps (theme template exists; wire ship-time text to a setting), SHP-03 ship-time messaging on product and cart, SEO-01/SEO-02 SEOPress provisioning (titles, sitemaps, Product/Organization schema), CMP-03 Complianz provisioning (cookie notice, Consent Mode), MKT-02 GA4 plugin provisioning from `GA4_MEASUREMENT_ID`, OPS-09 image settings (WebP/AVIF, sizes), ORD-05 manager guide sections (products, prices, sales, orders, refunds, tracking), WCAG/axe checks in the Playwright suite (CMP-04).
+3. **Phase 2 (P0 on staging) once B4/B5 arrive:** Stripe and PayPal test mode, wallets, refunds, webhooks (PAY-01..06), tax addresses (CMP-01), then the rest of brief section 8.
 
 ## Reproduce and validate the current state
 
