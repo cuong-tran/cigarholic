@@ -124,6 +124,7 @@ final class ProvisionTest extends WP_UnitTestCase {
 		$new_order = get_option( 'woocommerce_new_order_settings' );
 		$this->assertSame( get_option( 'admin_email' ), $new_order['recipient'] );
 		$this->assertSame( 'yes', get_option( 'woocommerce_coming_soon' ) );
+		$this->assertSame( ( defined( 'DISALLOW_INDEXING' ) && DISALLOW_INDEXING ) ? '0' : '1', get_option( 'blog_public' ) );
 		$this->assertSame( 'no', get_option( 'woocommerce_store_pages_only' ) );
 	}
 
