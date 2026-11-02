@@ -45,12 +45,37 @@ jobs:
           known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
           upload_infra: "false"
 
+      # The owner credentials are loaded only for a command that references them (wp core install), and
+      # only from secrets: a repository variable's value would be printed in this public repository's
+      # logs. This step prints true/false, never a value.
+      - name: Owner credentials (only for commands that use them)
+        if: contains(inputs.command, 'WP_OWNER_')
+        env:
+          EMAIL_SECRET_SET: ${{ secrets.WP_OWNER_EMAIL != '' }}
+          EMAIL_VARIABLE_SET: ${{ vars.WP_OWNER_EMAIL != '' }}
+          PASSWORD_SET: ${{ secrets.WP_OWNER_INITIAL_PASSWORD != '' }}
+        run: |
+          set -euo pipefail
+          echo "WP_OWNER_EMAIL secret: $EMAIL_SECRET_SET (variable: $EMAIL_VARIABLE_SET); WP_OWNER_INITIAL_PASSWORD secret: $PASSWORD_SET"
+          if [ "$PASSWORD_SET" != true ]; then
+            echo "::error::WP_OWNER_INITIAL_PASSWORD is not set: add it as a repository secret (docs/OWNER-ACTIONS.md B8)."
+            exit 1
+          fi
+          if [ "$EMAIL_SECRET_SET" != true ]; then
+            if [ "$EMAIL_VARIABLE_SET" = true ]; then
+              echo "::error::WP_OWNER_EMAIL exists only as a repository variable, whose value would be printed in this public log. Add a repository secret named WP_OWNER_EMAIL with the same value, then delete the variable (docs/OWNER-ACTIONS.md B8)."
+            else
+              echo "::error::WP_OWNER_EMAIL is not set: add it as a repository secret (docs/OWNER-ACTIONS.md B8)."
+            fi
+            exit 1
+          fi
+
       - name: Run
         env:
           SITE: ${{ inputs.site }}
           COMMAND: ${{ inputs.command }}
-          WP_OWNER_EMAIL: ${{ vars.WP_OWNER_EMAIL }}
-          WP_OWNER_INITIAL_PASSWORD: ${{ secrets.WP_OWNER_INITIAL_PASSWORD }}
+          WP_OWNER_EMAIL: ${{ contains(inputs.command, 'WP_OWNER_') && secrets.WP_OWNER_EMAIL || '' }}
+          WP_OWNER_INITIAL_PASSWORD: ${{ contains(inputs.command, 'WP_OWNER_') && secrets.WP_OWNER_INITIAL_PASSWORD || '' }}
         run: |
           set -euo pipefail
           case "$COMMAND" in *$'\n'*) echo "::error::one command per run"; exit 1 ;; esac
