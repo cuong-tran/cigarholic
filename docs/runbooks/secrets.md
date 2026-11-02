@@ -51,11 +51,11 @@ here. Hand-over instructions live in `docs/OWNER-ACTIONS.md`.
 | `STAGING_TURNSTILE_SITE_KEY`, `PRODUCTION_TURNSTILE_SITE_KEY` | secret | repository | Turnstile widget per site; sandbox and CI use Cloudflare's public always-pass test keys | Not set |
 | `STAGING_TURNSTILE_SECRET_KEY`, `PRODUCTION_TURNSTILE_SECRET_KEY` | secret | repository | Turnstile server-side verification per site | Not set |
 | `GA4_MEASUREMENT_ID` | variable | repository | GA4 web stream id | Not set |
-| `WP_OWNER_EMAIL` | variable | repository | Owner admin account | Not set |
-| `WP_OWNER_INITIAL_PASSWORD` | secret | repository | Initial owner password on both sites, changed at first login | Not set |
+| `WP_OWNER_EMAIL` | secret | repository | Owner admin account (`wp core install`). A secret, not a variable: variable values are printed in the logs of this public repository, and `wp-cli.yml` refuses to read it from a variable | Set (owner, 2026-11-02) |
+| `WP_OWNER_INITIAL_PASSWORD` | secret | repository | Initial owner password on both sites, changed at first login | Set (owner, 2026-11-02) |
 | `GSC_VERIFICATION_TOKEN` | variable | repository | Search Console DNS verification | Not set |
 | `BING_VERIFICATION_TOKEN` | variable | repository | Bing Webmaster verification | Not set |
-| `LETSENCRYPT_EMAIL` | secret or variable | repository | Optional (added 2026-10-30, FND-08): contact for Let's Encrypt expiry notices; without it `site.sh` registers without an email. `infra-provision.yml` reads the secret first, then the variable | Set as a repository secret (owner, 2026-11-02) |
+| `LETSENCRYPT_EMAIL` | secret | repository | Optional (added 2026-10-30, FND-08): contact for Let's Encrypt account notices; without it `site.sh` registers without an email. Secret only, so the address never appears in the public logs | Set as a repository secret (owner, 2026-11-02) |
 
 ## Which workflow reads what (FND-08)
 
@@ -66,7 +66,7 @@ here. Hand-over instructions live in `docs/OWNER-ACTIONS.md`.
 | `deploy-production.yml` | `SSH_*`, `PRODUCTION_POSTMARK_SERVER_TOKEN` → `POSTMARK_SERVER_TOKEN`, `PRODUCTION_TURNSTILE_SITE_KEY` → `TURNSTILE_SITE_KEY`, `PRODUCTION_TURNSTILE_SECRET_KEY` → `TURNSTILE_SECRET_KEY`, `GA4_MEASUREMENT_ID`; `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ZONE_ID_CIGARHOLIC` (purge, optional) | `shared/.env` keys; never Stripe or PayPal live credentials |
 | `cloudflare.yml` | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_ZONE_ID_CIGARHOLIC`, `CLOUDFLARE_ZONE_ID_MAX2LAB`, `SSH_HOST` as the origin address | nothing on the server |
 | `backup-restore.yml` | `SSH_*`, `B2_BUCKET`, `B2_KEY_ID`, `B2_APPLICATION_KEY`, `B2_S3_ENDPOINT` | `/etc/cigarholic/backup.env` (root only) so the nightly timer can upload |
-| `wp-cli.yml` | `SSH_*`, `WP_OWNER_EMAIL`, `WP_OWNER_INITIAL_PASSWORD` (exported for the one command, for `wp core install`) | whatever the WP-CLI command does |
+| `wp-cli.yml` | `SSH_*`; `WP_OWNER_EMAIL`, `WP_OWNER_INITIAL_PASSWORD` (secrets, loaded and exported only when the command references them, for `wp core install`) | whatever the WP-CLI command does |
 | `monitoring.yml` | `UPTIMEROBOT_API_KEY`, `UPTIMEROBOT_ALERT_CONTACTS`; `staging`: `STAGING_BASIC_AUTH_USER`, `STAGING_BASIC_AUTH_PASSWORD` (credentials of the basic-auth monitor, sent to UptimeRobot) | nothing on the server; monitors in the owner's UptimeRobot account |
 
 Secrets travel to the server inside the streamed script (`.github/actions/ssh/ssh-run`), never on a
