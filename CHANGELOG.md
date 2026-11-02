@@ -20,6 +20,10 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 - FND-05: block theme `cigarholic` (#8) and the `cigarholic-core` mu-plugin skeleton: loader, feature registry with `CIGARHOLIC_FEATURES` toggles, logger, `wp cigarholic version|features|provision`, provisioning runner with the first step (`00-core`), development feature (valid mail sender, system CA for HTTPS in the sandbox), hardening feature (OPS-07: XML-RPC off, no generator tags, generic login errors, no anonymous user listing), PHPUnit harness on the WordPress test suite.
 - Docs: `docs/OWNER-ACTIONS.md`, `docs/STATUS.md`, runbooks for the sandbox and the secrets inventory; `docs/FEATURES.md` reconciled with the kickoff brief (#3).
 
+### Security
+
+- OPS-07 / FND-08 (2026-11-02): the staging basic-auth exemptions for payment webhooks matched URI prefixes, so `/wp/wp-admin/install.php?wc-api=x` and `/wc-api/../wp/wp-admin/install.php` reached the WordPress installer of the freshly deployed, not yet installed staging site without credentials (verified from outside, HTTP 200). Staging was taken offline within minutes (the `current` symlink removed; no install had happened, the database was still empty). The exemptions now match whole URLs with no `.`, `%` or extra query string, `install.php` and `setup-config.php` are denied on both sites, and `tests/infra/nginx-staging-auth.sh` checks 31 cases against a real Nginx in CI.
+
 ### Not yet implemented
 
 Everything that serves a page: runtime (FND-02), CI (FND-06), the `cigarholic-core` mu-plugin (FND-05), the theme, provisioning, catalog model, infrastructure and tests. See `docs/STATUS.md`.

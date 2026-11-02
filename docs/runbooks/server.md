@@ -46,9 +46,13 @@ closes root (it refuses while the deploy user cannot log in). Provisioning actio
   444, HTTP → HTTPS, `www.cigarholic.com`, `max2lab.com`, `www.max2lab.com` → `https://cigarholic.com`
   in one 301 hop, security headers, FastCGI cache bypassed for cart, checkout, account, logged-in
   users, REST and `wc-api`.
-- Staging: HTTP basic auth (`STAGING_BASIC_AUTH_*`) except `/.well-known/`, `/wc-api/`,
-  `?wc-api=` (Stripe webhooks), `/wp-json/paypal/v1/` (PayPal webhooks), `/wp-json/wc-stripe/` and
-  `/wp-json/wc/v3/webhooks` (precaution); `X-Robots-Tag: noindex` on every response.
+- Staging: HTTP basic auth (`STAGING_BASIC_AUTH_*`) except ACME challenges and the exact webhook
+  URLs `/?wc-api=<name>` (Stripe), `/wc-api/<name>`, `/wp-json/paypal/v1/<route>` (PayPal),
+  `/wp-json/wc-stripe/<route>` and `/wp-json/wc/v3/webhooks[/<id>]` (precaution). The exempt patterns
+  allow no `.`, `%` or extra query string, so nothing can borrow them to reach another URL
+  (`tests/infra/nginx-staging-auth.sh`). `X-Robots-Tag: noindex` on every response.
+- Both sites: `wp-admin/install.php` and `setup-config.php` are denied; WordPress is installed with
+  WP-CLI only (`deploy.md`, "First deploy of a site").
 - Cloudflare is additive (ADR 0008): when it arrives, `cloudflare.yml` adds the same rules at the edge.
 
 ## DNS records the owner creates at the registrar (while Cloudflare is deferred)
