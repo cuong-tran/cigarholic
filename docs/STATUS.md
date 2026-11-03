@@ -2,17 +2,17 @@
 
 Progress tracker for the Cigarholic build (`docs/KICKOFF-BRIEF.md` rule 6). Updated at the end of every session. A fresh agent, in a new cloud session or on a laptop, starts here after reading `CLAUDE.md` (which imports `AGENTS.md`).
 
-Last updated: 2026-11-03, end of Turn 3 (handoff to a new session): **Phase 1 in progress.** M0 reached 2026-10-31. The VPS is provisioned and both sites have certificates. Staging is installed, provisioned and seeded for review; `/wp-admin` and `/wp-login.php` redirect into `/wp/` on both sites. Release `v0.1.0` (the coming-soon site on `cigarholic.com`, M1) waits for the owner's tag and approvals (OWNER-ACTIONS A7). No PR is open.
+Last updated: 2026-11-03, end of Turn 4: **M1 "Coming-soon live" reached.** The owner tagged `v0.1.0`; production is deployed, installed and provisioned, and `https://cigarholic.com` serves the coming-soon page with the email signup to every visitor. Post-launch fixes merged to `main` and live on staging: no login name leaks, sample post removed (#45), two-factor required for admins and shop managers (#46). They reach production with `v0.1.1` (OWNER-ACTIONS A8). **The `production` Environment has no required reviewer yet (A4):** production runs start without the owner's click.
 
 ## Where we are
 
 | | |
 |---|---|
-| Current milestone | **M0 "Repo green" reached** (2026-10-31). **M1 "Coming-soon live" in progress** (2026-11-02): VPS provisioned by `infra-provision.yml` (nginx 1.28.3, PHP 8.5.4, MariaDB 11.8.6, Valkey 9.0.4, certbot 4.0.0), `site-staging` and `site-production` done, Let's Encrypt certificates issued for `staging.cigarholic.com` and for `cigarholic.com` + `www` + both `max2lab.com` hosts (valid to 2027-01-31), staging deploys switched on (#32) |
-| Live on production | **Edge only.** `https://cigarholic.com` answers through Nginx with a valid certificate (HTTP 404 until the first release is deployed and WordPress installed); `http://` → `https://`, `www.cigarholic.com` and both `max2lab.com` hosts 301 to `https://cigarholic.com` in one hop keeping the path; `xmlrpc.php` 403; HSTS on. No application deployed: production deploys only from an owner-approved tag |
-| Live on staging | **Installed and provisioned** (release 6 of `main`, run 41493330262). WordPress installed with WP-CLI (admin user `owner`, the B8 secrets); 11 launch plugins active; provisioning applied (76 changes on the first run, dry run 0 afterwards, then 1 for `blog_public`); whole-site coming-soon on, HPOS on, Valkey object cache on, search engine visibility off; 7 `SAMPLE-` products (2 variations) for review; health check HTTP 200. Basic auth on everything except the exact webhook URLs, `X-Robots-Tag: noindex`, web installer denied |
-| In progress | **M1, waiting for the owner (A7):** review staging, then tag `v0.1.0` → production deploy (approval) → `wp core install` on production (approval) → second deploy (approval) → coming-soon live on `cigarholic.com`. Phase 2 (payments, checkout) waits for Stripe/PayPal test credentials (B4, B5) |
-| Blocked (owner) | **A7** release `v0.1.0`: the tag and three approvals. Then B6 Turnstile keys (forms run without a bot challenge until then), B1 Postmark, B2 backups, B3 monitoring, B4/B5 payments |
+| Current milestone | **M1 "Coming-soon live" reached 2026-11-03** (M0 2026-10-31). Next: M2 "Payments on staging" (Phase 2, waits for B4/B5); meanwhile the P0 work that needs no credentials |
+| Live on production | **`v0.1.0` (release 2, `854a25a`)**: WordPress 7.1.4 installed with WP-CLI (admin `owner`, B8 secrets), 11 launch plugins active, provisioning applied (77 changes), HPOS on, Valkey object cache on, whole-site coming-soon on, search engines allowed (`blog_public` 1). Every page (`/`, `/shop/`, `/cart/`, `/my-account/`, `/journal/`) shows the coming-soon page with the signup form; `/checkout/` 302 to the cart; FastCGI cache HIT on `/`. Edge: HSTS, `X-Frame-Options`, `nosniff`, referrer and permissions policies; `http://`, `www`, `max2lab.com`, `www.max2lab.com` 301 to `https://cigarholic.com` keeping the path; installer, `setup-config.php` and `xmlrpc.php` 403; `/wp-admin` and `/wp-login.php` 301 into `/wp/`; REST users 404. No products (no `SAMPLE-` data on production). Pending `v0.1.1`: `/?author=1` still names `owner`, the "Hello world!" post is still public in the feed and REST |
+| Live on staging | **Release 8 of `main` (#45, #46)**: everything above plus the seven `SAMPLE-` products; "Hello world!" trashed by provisioning; basic auth, `noindex` |
+| In progress | **Owner, A8:** log in on production, change the password, set up two-factor, tag `v0.1.1`. **Me:** next actions 3 onward |
+| Blocked (owner) | **A4** required reviewer on `production` (now), **A8** tag `v0.1.1`; B6 Turnstile keys (forms run with honeypot and rate limit only), B1 Postmark (no transactional mail on the servers yet), B2 backups, B3 monitoring, B4/B5 payments |
 
 ### Merged so far (all squash-merged to `main`, CI green)
 
@@ -48,9 +48,12 @@ Last updated: 2026-11-03, end of Turn 3 (handoff to a new session): **Phase 1 in
 | #41 | FND-03 | Search engine visibility follows `DISALLOW_INDEXING` (staging off, production on) |
 | #42 | docs | Release notes `v0.1.0`, staging installed and seeded |
 | #43 | OPS-07 | `/wp-login.php` and `/wp-admin[/...]` 301 into `/wp/` (both vhosts, Compose runtime with relative redirects); `tests/e2e/admin-urls.spec.js`; manager guide no longer claims two-factor is enforced |
-| #44 | docs | This handoff update |
+| #44 | docs | Turn 3 handoff |
+| #45 | OPS-07, FND-03, CNT-04 | After the production install: author archives 404 and no `?author=N` redirect, front-end author links to home, no users sitemap, site name instead of a login in feeds and oEmbed; provisioning trashes the untouched "Hello world!" post; the signups table waits for an installed WordPress |
+| #46 | OPS-07, FND-03 | Two-factor required for administrators and shop managers (`Security\TwoFactorRequired`, 3-day grace, then profile-only); provisioning offers Authenticator App and Recovery Codes only; runbook `two-factor.md` |
+| #47 | docs | This status update (M1) |
 
-## Server (Phase 1, 2026-11-02)
+## Server (Phase 1, 2026-11-02 / 03)
 
 All runs of `infra-provision.yml` on the Hostinger VPS (`srv2109040`, Ubuntu 26.04.1, 4 vCPU class, 15 GB RAM, 193 GB disk), as root over the pinned host key:
 
@@ -80,6 +83,12 @@ All runs of `infra-provision.yml` on the Hostinger VPS (`srv2109040`, Ubuntu 26.
 | 41493330262 | deploy staging (merge of #41) | Release 6: activation no-op, provisioning 1 change (`blog_public`), health HTTP 200 |
 | 41493526902 | `wp-cli.yml` `cigarholic seed` (staging) | 7 `SAMPLE-` products created (one variable with 2 variations); the command refuses production |
 | 41502548317, 41502652155 | `site-staging`, `site-production` | #43 vhosts applied. From outside on both hosts: `/wp-admin` → 301 `/wp/wp-admin/`, `/wp-login.php` → 301 `/wp/wp-login.php` (query kept), `/wp-admin/install.php` 403 |
+| 41580693167 (2026-11-03 04:53) | deploy production, tag `v0.1.0` (owner's tag push) | Started 14 s after the tag: **no approval asked** (A4). Release 1 built and switched; WordPress not installed, so the WP tasks were skipped; health HTTP 302 (to the denied installer). Pre-deploy snapshot taken. From outside: `/` 302, installer 403 |
+| 41582839987 (05:15) | `wp-cli.yml` production `core install` | "Success: WordPress installed successfully." (owner secrets loaded, values masked). Also a database error from `cigarholic-core` writing an option before `wp_options` existed (fixed in #45) |
+| 41582927297 (05:16) | deploy production, tag `v0.1.0` (dispatch) | Release 2: snapshot (20K), `update-db` current, WooCommerce then 10 plugins activated, `wc update` none needed, "Provisioning complete: 77 change(s) applied", object cache enabled, cache flushed, health HTTP 200 |
+| 41584244003, 41584247205 | `wp-cli.yml` `user meta get owner _two_factor_enabled_providers` | Staging `[]`, production no value (exit 1): nobody had a two-factor method stored, so switching emailed codes off (#46) locks no one out |
+| 41584712880 | deploy staging (merge of #45) | Release 7: "Hello world!" trashed; three WooCommerce email colour options re-applied (see next actions); health HTTP 200 |
+| 41585778385 | deploy staging (merge of #46) | Release 8: provisioning 1 change (`two_factor_enabled_providers`), health HTTP 200. Two-factor is now required on staging; the owner's grace period starts at the next admin page view |
 
 Verified from the sandbox afterwards: `https://staging.cigarholic.com/` 401 + HSTS + `noindex`; `https://cigarholic.com/` 404 (no release yet) with the Let's Encrypt chain; `www`, `max2lab.com`, `www.max2lab.com` and `http://` each 301 to `https://cigarholic.com/...` in one hop; `xmlrpc.php` 403. The server `.env` files hold random database credentials and salts; application keys arrive through `env-upsert.sh` on each deploy and are empty until the owner sets the secrets. `SSH_USER` stays `root` until the first deploys are verified, then `disable-root-login` (OWNER-ACTIONS A1).
 
@@ -121,7 +130,16 @@ Verified from the sandbox afterwards: `https://staging.cigarholic.com/` 401 + HS
 | Environments and Actions-settings API | 403 "not permitted through this proxy" | The owner answers OWNER-ACTIONS A4 |
 | `cigarholic.com`, `max2lab.com` | NXDOMAIN: both domains are on registrar `clientHold` (RDAP, iNET Software, registered 2026-10-03) | OWNER-ACTIONS A5; M1 impossible until lifted |
 
-## Tests executed this session (2026-10-30 / 31)
+## Tests executed in Turn 4 (2026-11-03)
+
+- **Executed and passed:**
+  - Production from outside after release 2 (curl through the sandbox proxy): the table in "Where we are". Also `wp-json/wc/store/v1/products` 200 `[]`, `/robots.txt` 404 (see next actions), `/feed/` and oEmbed reachable during coming-soon (they named `owner` and served the sample post, fixed in #45 for `v0.1.1`).
+  - `composer check` on both PRs; `make test` 76 tests (#45) then 82 tests / 918 assertions (#46); `make e2e` 14/14 on both PRs; CI green on #45 (5 jobs).
+  - On the Compose stack: author URLs 404, users sitemap 404, feed and oEmbed show "Cigarholic" for a probe post. Two-factor in a real browser (Playwright script): grace notice with the deadline and full access; grace moved into the past → `edit.php` redirects to `profile.php#two-factor-options`, menu Dashboard and Profile only, `/wp/v2/settings` 403 with a valid nonce; TOTP enrolled from that state with a computed code → `wp two-factor status admin` `using_2fa true`, products page back at once.
+- **Executed and failed, then fixed:** the new ProvisionTest first failed (earlier tests leave `$wp_rewrite` at `/%postname%/` in memory after the rollback; the test resets it); the first restricted-state browser run stopped at WordPress's "not allowed" page because `wp-admin/menu.php` refuses pages before `admin_init` (now also hooked on `admin_page_access_denied`, asserted in the test).
+- **Could not run here:** a login on production (the owner's account; I never use the owner password); the `v0.1.1` production deploy (needs the owner's tag).
+
+## Tests executed in Turns 1–2 (2026-10-30 / 31)
 
 - **Executed and passed:**
   - Static checks on every PR, locally and in CI: `composer check` (parallel-lint, PHPCS WordPress-Extra + Docs + PHPCompatibilityWP, PHPStan level 6), `npm run lint` (eslint, stylelint), shellcheck, actionlint. CI green on PRs 6 to 12 (PHP 8.3 and 8.5 legs).
@@ -151,18 +169,22 @@ Verified from the sandbox afterwards: `https://staging.cigarholic.com/` 401 + HS
 11. **Server secrets are alphanumeric** (32 characters for passwords, 64 for salts): the same value is read by bash, MariaDB and PHP's dotenv, and only alphanumerics mean the same thing to all three (#34).
 12. **Infra shell code gets tests** in `tests/infra/`, run by CI's shell job under `set -euo pipefail` (#35, #36, #37): two of today's three server failures were shell bugs that lint could not see.
 13. **The deploy activates plugins** (WooCommerce first, then every plugin of the `--no-dev` release): the plugin set is `composer.json` plus `docs/plugins.md`, never a manual activation on a server (#40).
+14. **Two-factor is enforced by withholding capabilities, not by route lists** (#46): after the grace period a privileged account without a method keeps only `read` and `view_admin_dashboard`, so WP admin, REST, admin-ajax, admin-post and application passwords all follow from WordPress's own capability checks; roles are never changed. Emailed codes are off while there is no transactional mail. Without the plugin nothing is enforced (fail open with a notice) rather than locking every admin out of a broken release.
+15. **Root SSH stays on for now** (key only, `prohibit-password`). `disable-root-login` closes root, and with it every `provision` and `site-*` workflow run (they need root; afterwards only the provider console works), while Nginx changes are still coming (robots.txt and sitemaps for SEO-01, Cloudflare later, backups). The switch to `SSH_USER=deploy` plus `disable-root-login` happens once the server configuration settles, before launch.
+16. **Own PRs are still merged once CI is green** although production exists: merging to `main` deploys staging only; production moves only with a tag the owner creates (brief rule 3). Say so if you want to review PRs before merge from now on.
 
 ## Open owner decisions and inputs
 
-All in `docs/OWNER-ACTIONS.md`: A1, A3, A5, A6 done; A2 (Cloudflare) deferred by the owner; A4 answered (GitHub Free, repository secrets, repository public). **B8 is the critical path** (WordPress install on both sites); B1 to B12 within two weeks; C1 to C5 before go-live. Defaults D-01 to D-10 are in force. The VPS was provisioned on 2026-11-02 under the brief's pre-approval; this file and OWNER-ACTIONS say what changed.
+All in `docs/OWNER-ACTIONS.md`: A1, A3, A5, A6, A7 done; A2 (Cloudflare) deferred by the owner. **Now: A4** (required reviewer on `production`, missing) and **A8** (production login, password, two-factor, tag `v0.1.1`). B1 to B12 within two weeks (B6 Turnstile and B1 Postmark first); C1 to C5 before go-live. Defaults D-01 to D-10 are in force.
 
 ## Next actions
 
-1. **M1 (owner, A7):** review staging; tag `v0.1.0` on `main`; approve the production deploy. Then I dispatch `wp core install` on production and a second production deploy (`deploy-production.yml`, tag `v0.1.0`); the owner approves each; I verify the coming-soon page, the redirects and the headers from outside and report M1. Until the install, production answers 403 (the redirect target is the denied installer); between the install and the second deploy, the theme's home page without WooCommerce. Then `disable-root-login` and `SSH_USER=deploy`.
-2. **OPS-07 two-factor enforcement (P0, before launch):** the Two Factor plugin is active but nothing requires enrolment; require a second factor for administrators and shop managers (grace period at first login), with a test. The manager guide said it was required already; corrected.
-3. **Small follow-up:** `cigarholic-core` creates `wp_cigarholic_signups` on `init` even before WordPress is installed (seen during the incident review); guard it with `is_blog_installed()`.
-4. **P0 work that needs no credentials, next in this order:** CHK-06 order-received next steps, SHP-03 ship-time messaging on product and cart, SEO-01/SEO-02 SEOPress provisioning (titles, sitemaps, Product/Organization schema), CMP-03 Complianz provisioning (cookie notice, Consent Mode), MKT-02 GA4 plugin provisioning from `GA4_MEASUREMENT_ID`, OPS-09 image settings (WebP/AVIF, sizes), ORD-05 manager guide sections (products, prices, sales, orders, refunds, tracking), WCAG/axe checks in the Playwright suite (CMP-04), a Playwright smoke run against staging from a workflow (basic auth from the secrets).
-5. **Phase 2 (P0 on staging) once B4/B5 arrive:** Stripe and PayPal test mode, wallets, refunds, webhooks (PAY-01..06), tax addresses (CMP-01), then the rest of brief section 8.
+1. **Owner:** A4 (required reviewer on `production`), then A8 (log in, password, two-factor, tag `v0.1.1`). When the `v0.1.1` deploy waits for approval and runs, verify from outside: `/?author=1` 404 without a redirect, `/feed/` without "Hello world!" or `owner`, oEmbed without the login, coming-soon unchanged. Report.
+2. **Nginx: `robots.txt` and XML sitemaps reach WordPress** (before SEO-01): the static-file location in `infra/server/nginx/site.conf.tpl` ends in `try_files $uri =404` for `txt` and `xml`, so WordPress's virtual `robots.txt` and any sitemap answer 404 on both sites. Fall back to `/index.php` for those (keep real files served statically), add cases to `tests/infra/nginx-staging-auth.sh`, then re-run `site-staging` and `site-production`. Root SSH is still needed for that (decision 15).
+3. **WooCommerce first-admin defaults vs provisioning (FND-03):** WooCommerce runs its `woocommerce_newly_installed` callbacks on the first `admin_init` after install and turns email theme sync back on (`woocommerce_email_auto_sync_with_theme`, base and background colours). Provisioning restores them on the next deploy (seen on staging release 7 and locally), and production will do the same once the owner opens WP admin. Run `WC_Install::newly_installed()` at the start of `10-woocommerce-general` so the defaults happen once before the settings, with a test.
+4. **P0 work that needs no credentials, in this order:** CHK-06 order-received next steps, SHP-03 ship-time messaging on product and cart, SEO-01/SEO-02 SEOPress provisioning (titles, sitemaps, Product/Organization schema; after 2), CMP-03 Complianz provisioning (cookie notice, Consent Mode), MKT-02 GA4 plugin provisioning from `GA4_MEASUREMENT_ID`, OPS-09 image settings (WebP/AVIF, sizes), ORD-05 manager guide sections (products, prices, sales, orders, refunds, tracking), WCAG/axe checks in the Playwright suite (CMP-04), a Playwright smoke run against staging from a workflow (basic auth from the secrets), a Playwright spec for the two-factor restricted flow.
+5. **Before launch:** `SSH_USER=deploy` (owner) and `disable-root-login` once the server configuration settles (decision 15); B2 backups and B3 monitoring live.
+6. **Phase 2 (P0 on staging) once B4/B5 arrive:** Stripe and PayPal test mode, wallets, refunds, webhooks (PAY-01..06), tax addresses (CMP-01), then the rest of brief section 8.
 
 ## Reproduce and validate the current state
 
@@ -182,9 +204,13 @@ make check && make test && make e2e
 make wp ARGS="cigarholic features" && make wp ARGS="cigarholic provision --dry-run"
 ```
 
+```bash
+for u in / /shop/ '/?author=1' /feed/ /wp-admin /wp/wp-admin/install.php /xmlrpc.php; do printf '%-28s ' "$u"; curl -sS -o /dev/null -w '%{http_code} %{redirect_url}\n' "https://cigarholic.com$u"; done   # production from outside
+```
+
 ## Starting a new session
 
-Everything is merged and pushed; nothing lives only in a conversation. A new session reads `CLAUDE.md` (which imports `AGENTS.md`), this file and `docs/OWNER-ACTIONS.md`, then continues from "Next actions". Server work runs through the workflows (`infra-provision.yml`, `wp-cli.yml`, `deploy-*.yml`); `docs/runbooks/` has the commands. For the production release (next action 1) follow `docs/runbooks/deploy.md`, "First deploy of a site": deploy, `core install` with the owner secrets, deploy again; every production run waits for the owner's approval.
+Everything is merged and pushed; nothing lives only in a conversation. A new session reads `CLAUDE.md` (which imports `AGENTS.md`), this file and `docs/OWNER-ACTIONS.md`, then continues from "Next actions". Server work runs through the workflows (`infra-provision.yml`, `wp-cli.yml`, `deploy-*.yml`); `docs/runbooks/` has the commands. A production release is the owner's tag on `main`; after its deploy, check the live site from outside with the commands below and record the run IDs in "Server".
 
 ## If the session is reopened after the VM expired
 
