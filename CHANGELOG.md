@@ -4,6 +4,10 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+### Added
+
+- OPS-07: two-factor authentication is required for administrators and shop managers (`Security\TwoFactorRequired`, toggle `two-factor`, on). A privileged account without a method gets a 3-day grace period from its first login, with a notice naming the deadline; after it, the account keeps only `read` and the admin dashboard, so its profile (where the Two Factor setup lives) is the only admin page and the REST API, admin-ajax, admin-post and application passwords refuse store management. Enrolling restores everything at once; roles are never changed. Provisioning step `45-two-factor` offers Authenticator App and Recovery Codes only (emailed codes would lock managers out while there is no transactional mail). Runbook `docs/runbooks/two-factor.md`, manager guide section, `TwoFactorRequiredTest`.
+
 ### Fixed
 
 - OPS-07: no login name reaches a visitor after a fresh install. `?author=N` no longer redirects to `/author/<login>/`, author archives answer 404, author links on the front end point at the home page, the core users sitemap is gone, and feeds (`dc:creator`) and oEmbed cards show the site name while a user's display name is still the login. Found on production right after the `v0.1.0` install: `/?author=1`, `/feed/` and `/wp-json/oembed/1.0/embed` named the administrator.

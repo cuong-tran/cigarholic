@@ -13,7 +13,7 @@ Versions are pinned in `composer.lock`; `docs/versions.md` has the tested dates.
 | 3 | WooCommerce PayPal Payments | `wpackagist-plugin/woocommerce-paypal-payments` | 4.2.0 | PAY-03, PAY-04, PAY-05 | PayPal, Venmo, Pay Later; official plugin | Owner (account), agents (config) | yes |
 | 4 | Stripe Tax for WooCommerce | `wpackagist-plugin/stripe-tax-for-woocommerce` | 2.2.0 | CMP-01, CMP-08 | Sales tax per nexus state (D-07); TaxJar is the fallback | Owner (registrations), agents | yes |
 | 5 | SEOPress | `wpackagist-plugin/wp-seopress` | 10.4 | SEO-01, SEO-02, SEO-07 | Titles, sitemaps, canonicals, Open Graph, redirects (D-09); the one SEO plugin | Agents | yes |
-| 6 | Two Factor | `wpackagist-plugin/two-factor` | 0.17.0 | OPS-07, ORD-04 | 2FA for every admin and shop manager; WordPress-maintained | Agents | n/a |
+| 6 | Two Factor | `wpackagist-plugin/two-factor` | 0.17.0 | OPS-07, ORD-04 | 2FA for every admin and shop manager; WordPress-maintained. Methods provisioned by `45-two-factor` (Authenticator App, Recovery Codes); enrolment required by `cigarholic-core` (`Security\TwoFactorRequired`, 3-day grace, `docs/runbooks/two-factor.md`) | Agents | n/a |
 | 7 | Redis Object Cache | `wpackagist-plugin/redis-cache` | 3.0.0 | OPS-09 | Object cache in Valkey (Redis protocol, `php-redis`) | Agents | n/a |
 | 8 | FluentSMTP | `wpackagist-plugin/fluent-smtp` | 2.4.1 | OPS-04, ORD-03 | Transactional mail through Postmark | Agents | n/a |
 | 9 | Complianz | `wpackagist-plugin/complianz-gdpr` | 7.5.6 | CMP-03, MKT-02 | Cookie notice and Google Consent Mode; Premium only when ad pixels arrive (MKT-09) | Agents | n/a |

@@ -2,7 +2,14 @@
 
 How to run the Cigarholic store from WP admin. Written for the store manager; grows with every feature. Screenshots are added from staging once it exists.
 
-Log in at `/wp-admin` (for example `https://cigarholic.com/wp-admin`; it takes you to the login page) with your username or email address and your password. On staging the browser first asks for the staging password; that is a separate gate, not your WordPress account. Set up two-factor under Users → Profile right after your first login. It will be required for every manager and admin account; that enforcement is not switched on yet (OPS-07).
+Log in at `/wp-admin` (for example `https://cigarholic.com/wp-admin`; it takes you to the login page) with your username or email address and your password. On staging the browser first asks for the staging password; that is a separate gate, not your WordPress account. Set up two-factor under **Users → Profile** right after your first login: it is required for every manager and admin account. Until you do, every admin page shows a yellow notice with your deadline (three days after your first login); after that only your profile opens, with a red notice, until two-factor is set up. Nothing is lost in the meantime, and your access comes back the moment you finish.
+
+1. Install an authenticator app on your phone (Google Authenticator, Microsoft Authenticator, 1Password, Authy).
+2. In **Users → Profile → Two-Factor Options**, at **Authenticator App**, scan the QR code with the app, type the six-digit code it shows and click **Verify**.
+3. At **Recovery Codes**, click **Generate new recovery codes** and download or copy them into your password manager. Each code works once and gets you in if your phone is lost.
+4. From then on, the login asks for the six-digit code from the app after your password.
+
+Lost your phone and your recovery codes? Ask the owner: an administrator can switch your two-factor off so you can set it up again (`docs/runbooks/two-factor.md`).
 
 ## Email signups (coming-soon page and newsletter form)
 
