@@ -4,6 +4,10 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-03
+
+Post-launch hardening of the coming-soon site. Tagged by the owner at `813d144` and deployed to production the same day (release 3, approved on the `production` Environment): no administrator login name for visitors, the installer's sample post removed, two-factor required for administrators and shop managers.
+
 ### Added
 
 - OPS-07: two-factor authentication is required for administrators and shop managers (`Security\TwoFactorRequired`, toggle `two-factor`, on). A privileged account without a method gets a 3-day grace period from its first login, with a notice naming the deadline; after it, the account keeps only `read` and the admin dashboard, so its profile (where the Two Factor setup lives) is the only admin page and the REST API, admin-ajax, admin-post and application passwords refuse store management. Enrolling restores everything at once; roles are never changed. Provisioning step `45-two-factor` offers Authenticator App and Recovery Codes only (emailed codes would lock managers out while there is no transactional mail). Runbook `docs/runbooks/two-factor.md`, manager guide section, `TwoFactorRequiredTest`.
