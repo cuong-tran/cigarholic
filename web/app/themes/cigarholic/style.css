@@ -103,6 +103,166 @@ Tags: e-commerce, block-patterns, block-styles, full-site-editing, accessibility
 	text-align: start;
 }
 
+/*
+ * Between the phone and the desktop layout the signup column is narrower than
+ * the Cloudflare Turnstile widget (about 270 px, drawn in its own frame), which
+ * pushed the page 24 px sideways at 782 to 850 px. There the three menus share
+ * a row and the signup takes the full row below them.
+ */
+@media (min-width: 782px) and (max-width: 1023px) {
+
+	.site-footer > .wp-block-columns {
+		flex-wrap: wrap !important;
+	}
+
+	.site-footer > .wp-block-columns > .wp-block-column:has(.cigarholic-signup) {
+		flex-basis: 100% !important;
+	}
+
+	.site-footer .cigarholic-signup {
+		margin-inline: 0;
+	}
+}
+
+/*
+ * WooCommerce surfaces (CNT-01). WooCommerce paints its classic templates from
+ * --wc-* custom properties (purple primary, grey-violet secondary, #767676 sub
+ * text, which is 3.9:1 on Ash); they follow the brand tokens here. Form fields
+ * on light grounds: Ash tint fill, Stone border (5.89:1, WCAG 1.4.11), Ink text,
+ * 3 px corners, 16 px text so phones do not zoom on focus.
+ */
+body {
+	--woocommerce: var(--wp--preset--color--accent, #9c5034);
+	--wc-primary: var(--wp--preset--color--accent, #9c5034);
+	--wc-primary-text: #fff;
+	--wc-secondary: var(--wp--preset--color--neutral-1, #f7f4ef);
+	--wc-secondary-text: var(--wp--preset--color--contrast, #1a1815);
+	--wc-content-bg: var(--wp--preset--color--base, #eee9e0);
+	--wc-subtext: var(--wp--preset--color--neutral-2, #5e574e);
+	--wc-form-color-background: var(--wp--preset--color--neutral-1, #f7f4ef);
+	--wc-form-color-text: var(--wp--preset--color--contrast, #1a1815);
+	--wc-form-border-color: var(--wp--preset--color--neutral-2, #5e574e);
+	--wc-form-border-radius: 3px;
+}
+
+.woocommerce-page form .form-row :is(input.input-text, select, textarea.input-text) {
+	font-size: 1rem;
+}
+
+body :is(.wc-block-components-form, .wc-block-components-totals-coupon, .wc-block-checkout, .wc-block-cart) .wc-block-components-text-input input:not([type="hidden"]),
+body .wc-blocks-components-select .wc-blocks-components-select__select,
+body .wc-block-components-textarea {
+	border-color: var(--wp--preset--color--neutral-2, #5e574e);
+	border-radius: 3px;
+	background-color: var(--wp--preset--color--neutral-1, #f7f4ef);
+	color: var(--wp--preset--color--contrast, #1a1815);
+}
+
+body .wc-block-components-checkbox .wc-block-components-checkbox__input[type="checkbox"],
+body .wc-block-components-checkbox .wc-block-components-checkbox__input[type="checkbox"]:checked,
+body .wc-block-components-radio-control .wc-block-components-radio-control__input,
+body .wc-block-components-radio-control .wc-block-components-radio-control__input:checked {
+	border-color: var(--wp--preset--color--neutral-2, #5e574e);
+	background: var(--wp--preset--color--neutral-1, #f7f4ef);
+}
+
+/*
+ * Cart and checkout validation in the brand error colour (#9b1c1c, 6.74:1 on
+ * Ash) instead of WooCommerce's #cc1818 (4.6:1), as in the signup and contact forms.
+ */
+body .wc-block-components-validation-error,
+body .wc-block-components-text-input.has-error label,
+body .wc-block-components-checkbox.has-error,
+body .wc-block-components-checkbox.has-error a,
+body .has-error .wc-blocks-components-select .wc-blocks-components-select__label {
+	color: var(--cigarholic-error, #9b1c1c);
+}
+
+body :is(.wc-block-components-form, .wc-block-components-totals-coupon, .wc-block-checkout, .wc-block-cart) .wc-block-components-text-input.has-error input:not([type="hidden"]),
+body .wc-block-components-checkbox.has-error .wc-block-components-checkbox__input,
+body .has-error .wc-blocks-components-select .wc-blocks-components-select__container {
+	border-color: var(--cigarholic-error, #9b1c1c);
+}
+
+/* Shop sorting: the bare browser select becomes a field like the others, 44 px high. */
+.woocommerce.wc-block-catalog-sorting select.orderby {
+	min-block-size: 44px;
+	padding-block: 0;
+	padding-inline: 0.75rem 0.5rem;
+	border: 1px solid var(--wp--preset--color--neutral-2, #5e574e);
+	border-radius: 3px;
+	background-color: var(--wp--preset--color--neutral-1, #f7f4ef);
+	color: var(--wp--preset--color--contrast, #1a1815);
+}
+
+/*
+ * Quantity: WooCommerce dims the - and + to 60 % (4.35:1, under AA) and draws the
+ * box at 30 % Ink (1.9:1). Full Ink signs, Stone box. A disabled sign (- at the
+ * minimum) stays dimmed: inactive controls are exempt and it should look inactive.
+ */
+.wc-block-add-to-cart-with-options__quantity-selector,
+.wc-block-components-quantity-selector:has(input:not([type="hidden"])) {
+	border-color: var(--wp--preset--color--neutral-2, #5e574e);
+	border-radius: 3px;
+	background-color: var(--wp--preset--color--neutral-1, #f7f4ef);
+}
+
+.wc-block-components-quantity-selector .wc-block-components-quantity-selector__button:not(:disabled) {
+	opacity: 1;
+}
+
+/* Product gallery: fill its column (WooCommerce caps it at 512 px). */
+.woocommerce .wp-block-woocommerce-product-image-gallery {
+	max-width: none;
+}
+
+/*
+ * Product tabs: no grey-violet folder tabs. Stone labels on the page ground,
+ * the open tab in Ink over a Cedar rule, a Line hairline under the row.
+ */
+.woocommerce div.product .woocommerce-tabs ul.tabs {
+	padding: 0;
+}
+
+.woocommerce div.product .woocommerce-tabs ul.tabs::before {
+	border-bottom-color: var(--wp--preset--color--line, #d6cec1);
+}
+
+.woocommerce div.product .woocommerce-tabs ul.tabs li,
+.woocommerce div.product .woocommerce-tabs ul.tabs li.active {
+	margin: 0 var(--wp--preset--spacing--50, 2rem) 0 0;
+	padding: 0;
+	border: 0;
+	border-bottom: 2px solid transparent;
+	border-radius: 0;
+	background: transparent;
+}
+
+.woocommerce div.product .woocommerce-tabs ul.tabs li.active {
+	border-bottom-color: var(--wp--preset--color--accent, #9c5034);
+}
+
+.woocommerce div.product .woocommerce-tabs ul.tabs li::before,
+.woocommerce div.product .woocommerce-tabs ul.tabs li::after {
+	display: none;
+}
+
+.woocommerce div.product .woocommerce-tabs ul.tabs li a {
+	padding: 0.75rem 0;
+	font-weight: 600;
+	color: var(--wp--preset--color--neutral-2, #5e574e);
+}
+
+.woocommerce div.product .woocommerce-tabs ul.tabs li a:hover,
+.woocommerce div.product .woocommerce-tabs ul.tabs li.active a {
+	color: var(--wp--preset--color--contrast, #1a1815);
+}
+
+/* Cart: WooCommerce caps the page title at 1000 px; it lines up with the wide cart instead. */
+.woocommerce-cart .wp-block-post-title.alignwide {
+	max-width: var(--wp--style--global--wide-size, 1400px);
+}
+
 /* Headings break into even lines, as on the canvas (theme.json has no text-wrap setting). */
 :where(h1, h2, h3) {
 	text-wrap: balance;

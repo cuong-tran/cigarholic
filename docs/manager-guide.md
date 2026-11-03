@@ -52,6 +52,8 @@ The colours and fonts are part of the theme; you choose them by name in the edit
 - **On dark backgrounds** (*Forest*, *Forest raised*) text is *Ash*, *Mist* (quieter text) or *Gold* (labels, buttons).
 - Never put *Gold* text on a light background or *Cedar* text on Forest: both are too faint to read. *Line* is for dividers only.
 
+The shop pages follow the same rules: form fields have a light fill and a dark grey border, the open product tab is underlined in Cedar, and the checkout has its own short Forest header (the logo and a cart link, no menu, so buyers are not pulled away). It is under **Appearance → Editor → Patterns → Template parts → Checkout header**; as with the main header, a copy saved there hides later theme updates, and the deploy log names it.
+
 To make a section dark, select the group and pick **Forest** under *Styles*: the background, text, links, buttons and focus outline all switch together. The small uppercase label above a heading is the paragraph style **Eyebrow**; boxed panels are the group style **Card**. Headings use Young Serif and body text Hanken Grotesk; both are served from our own site, so there is nothing to install or license.
 
 ## Coming next in this guide

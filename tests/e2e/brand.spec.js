@@ -8,11 +8,26 @@ import { login, waitForTurnstile } from './helpers.js';
 const FOREST = 'rgb(31, 43, 37)';
 const GOLD = 'rgb(193, 144, 79)';
 const ERROR_ON_FOREST = 'rgb(242, 160, 138)';
+const ERROR_ON_LIGHT = 'rgb(155, 28, 28)';
+const ASH_TINT = 'rgb(247, 244, 239)';
+const STONE = 'rgb(94, 87, 78)';
+const CEDAR = 'rgb(156, 80, 52)';
 
 /** Whether anonymous visitors get the coming-soon page here (provisioning step 80). */
 async function comingSoonIsOn( request ) {
 	const html = await ( await request.get( '/' ) ).text();
 	return html.includes( 'cigarholic-signup__form' ) && ! html.includes( 'aria-label="Primary"' );
+}
+
+/** Empties the cart, adds the first simple product (Store API) and returns that product's path. */
+async function cartWithOneProduct( page ) {
+	const products = await ( await page.request.get( '/wp-json/wc/store/v1/products?type=simple&per_page=1' ) ).json();
+	test.skip( ! products.length, 'no simple product in the catalog yet' );
+	const cart = await page.request.get( '/wp-json/wc/store/v1/cart' );
+	const headers = { Nonce: cart.headers().nonce || '' };
+	await page.request.delete( '/wp-json/wc/store/v1/cart/items', { headers } );
+	await page.request.post( '/wp-json/wc/store/v1/cart/add-item', { headers, data: { id: products[ 0 ].id, quantity: 1 } } );
+	return new URL( products[ 0 ].permalink ).pathname;
 }
 
 /**
@@ -92,6 +107,9 @@ async function contrastFailures( page ) {
 			const el = text.parentElement;
 			if ( ! el || ! text.textContent.trim() || el.closest( 'script, style, noscript, [aria-hidden="true"]' ) ) {
 				continue;
+			}
+			if ( el.closest( ':disabled, [aria-disabled="true"]' ) ) {
+				continue; // WCAG 1.4.3 exempts inactive controls (the quantity "−" at the minimum is dimmed on purpose).
 			}
 			const range = document.createRange();
 			range.selectNodeContents( text );
@@ -349,10 +367,84 @@ test.describe( 'brand system', () => {
 		}
 	} );
 
-	test( 'store pages pass AA contrast for every visible text', async ( { page } ) => {
+	test( 'WooCommerce pages follow the brand (CNT-01)', async ( { page } ) => {
 		await login( page );
-		for ( const path of [ '/', '/shop/' ] ) {
+		const product = await cartWithOneProduct( page );
+
+		// Shop: the sorting select is a 44 px field; product cards line up on the left like the homepage cards.
+		await page.goto( '/shop/' );
+		const sorting = page.locator( 'select.orderby' );
+		await expect( sorting ).toHaveCSS( 'background-color', ASH_TINT );
+		await expect( sorting ).toHaveCSS( 'border-top-color', STONE );
+		expect( ( await sorting.boundingBox() ).height ).toBeGreaterThanOrEqual( 44 );
+		await expect( page.locator( 'main .wp-block-post-title' ).first() ).toHaveCSS( 'text-align', /^(start|left)$/ );
+
+		// Product: the gallery fills its column (WooCommerce caps it at 512 px), full-Ink quantity signs
+		// in a Stone box (WooCommerce dims them to 4.35:1), and plain tabs with the open one on a Cedar rule.
+		await page.goto( product );
+		const gallery = page.locator( '.wp-block-woocommerce-product-image-gallery' );
+		const column = gallery.locator( 'xpath=ancestor::*[contains(@class, "wp-block-column")][1]' );
+		expect( ( await gallery.boundingBox() ).width ).toBeGreaterThan( ( await column.boundingBox() ).width - 2 );
+		const quantity = page.locator( '.wc-block-add-to-cart-with-options__quantity-selector' );
+		await expect( quantity ).toHaveCSS( 'border-top-color', STONE );
+		await expect( quantity.locator( '.wc-block-components-quantity-selector__button--plus' ) ).toHaveCSS( 'opacity', '1' );
+		const activeTab = page.locator( '.woocommerce-tabs ul.tabs li.active' );
+		await expect( activeTab ).toHaveCSS( 'border-bottom-color', CEDAR );
+		await expect( activeTab ).toHaveCSS( 'background-color', 'rgba(0, 0, 0, 0)' );
+
+		// Cart: the title lines up with the cart (WooCommerce caps it at 1000 px).
+		await page.goto( '/cart/' );
+		await expect( page.locator( '.wc-block-cart-items .wc-block-components-product-name' ).first() ).toBeVisible();
+		const [ title, cart ] = await Promise.all( [ page.locator( 'main h1' ).boundingBox(), page.locator( '.wp-block-woocommerce-cart' ).boundingBox() ] );
+		expect( Math.abs( title.x - cart.x ) ).toBeLessThanOrEqual( 1 );
+
+		// Checkout: the Forest header with the logo, Ash tint fields with a Stone border, brand error colour.
+		await page.goto( '/checkout/' );
+		const header = page.locator( '.checkout-header' );
+		await expect( header ).toHaveCSS( 'background-color', FOREST );
+		await expect( header.locator( '.wp-block-site-logo img' ) ).toBeVisible();
+		const email = page.getByLabel( 'Email address' );
+		await expect( email ).toHaveCSS( 'background-color', ASH_TINT );
+		await expect( email ).toHaveCSS( 'border-top-color', STONE );
+		await email.fill( '' );
+		await page.getByRole( 'button', { name: /place order/i } ).click();
+		await expect( page.locator( '.wc-block-components-validation-error' ).first() ).toHaveCSS( 'color', ERROR_ON_LIGHT );
+	} );
+
+	test( 'no store page scrolls sideways from 320 px up', async ( { page } ) => {
+		test.setTimeout( 120_000 );
+		await login( page );
+		const product = await cartWithOneProduct( page );
+		// 782 to 850 px used to overflow by up to 24 px: the footer signup column was narrower than the Turnstile widget.
+		for ( const path of [ '/shop/', product ] ) {
 			await page.goto( path );
+			for ( const width of [ 320, 390, 782, 800, 834, 1024, 1440 ] ) {
+				await page.setViewportSize( { width, height: 900 } );
+				await expect.poll(
+					() => page.evaluate( () => document.documentElement.scrollWidth - document.documentElement.clientWidth ),
+					{ message: `${ path } at ${ width }px` }
+				).toBe( 0 );
+			}
+		}
+	} );
+
+	test( 'store pages pass AA contrast for every visible text', async ( { page } ) => {
+		test.setTimeout( 120_000 );
+		await login( page );
+		const product = await cartWithOneProduct( page );
+		const pages = [
+			[ '/' ],
+			[ '/shop/' ],
+			[ product, '.wc-block-add-to-cart-with-options' ],
+			[ '/cart/', '.wc-block-cart-items .wc-block-components-product-name' ],
+			[ '/checkout/', '.wc-block-components-order-summary-item' ],
+			[ '/my-account/' ],
+		];
+		for ( const [ path, ready ] of pages ) {
+			await page.goto( path );
+			if ( ready ) {
+				await expect( page.locator( ready ).first() ).toBeVisible();
+			}
 			await page.evaluate( () => document.fonts.ready );
 			expect( await contrastFailures( page ), path ).toEqual( [] );
 		}
