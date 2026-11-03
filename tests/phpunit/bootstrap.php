@@ -47,6 +47,17 @@ if ( file_exists( $cigarholic_woocommerce ) ) {
 	);
 }
 
+// Two Factor (OPS-07): TwoFactorRequired and the 45-two-factor step run against the real plugin.
+$cigarholic_two_factor = $cigarholic_root . '/web/app/plugins/two-factor/two-factor.php';
+if ( file_exists( $cigarholic_two_factor ) ) {
+	tests_add_filter(
+		'muplugins_loaded',
+		static function () use ( $cigarholic_two_factor ): void {
+			require $cigarholic_two_factor;
+		}
+	);
+}
+
 // The mu-plugin loads from WP_CONTENT_DIR/mu-plugins through wp-settings.php; nothing to add here.
 
 require $cigarholic_wp_phpunit . '/includes/bootstrap.php';

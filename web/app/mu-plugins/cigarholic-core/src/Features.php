@@ -32,6 +32,10 @@ final class Features {
 			'class'   => Security\Hardening::class,
 			'default' => true,
 		),
+		'two-factor'       => array(
+			'class'   => Security\TwoFactorRequired::class,
+			'default' => true,
+		),
 		'signups'          => array(
 			'class'   => Signups\Signups::class,
 			'default' => true,

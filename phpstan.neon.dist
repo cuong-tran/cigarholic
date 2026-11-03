@@ -17,6 +17,8 @@ parameters:
     - tests/phpstan/wp-cli-stubs.php
     - vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
     - vendor/php-stubs/woocommerce-stubs/woocommerce-packages-stubs.php
+    # Two Factor (OPS-07, Security\TwoFactorRequired): the plugin's core class, for its static API.
+    - web/app/plugins/two-factor/class-two-factor-core.php
   treatPhpDocTypesAsCertain: false
   reportUnmatchedIgnoredErrors: true
   tmpDir: .phpstan-cache

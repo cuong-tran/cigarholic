@@ -88,6 +88,9 @@ final class ProvisionTest extends WP_UnitTestCase {
 		$this->assertSame( 'terms-of-service', get_post_field( 'post_name', (int) get_option( 'woocommerce_terms_page_id' ) ) );
 		$this->assertSame( 'privacy-policy', get_post_field( 'post_name', (int) get_option( 'wp_page_for_privacy_policy' ) ) );
 
+		// 45: authenticator app and backup codes only (OPS-07).
+		$this->assertSame( array( 'Two_Factor_Totp', 'Two_Factor_Backup_Codes' ), get_option( 'two_factor_enabled_providers' ) );
+
 		// 30: exactly one navigation post, with the primary links.
 		$menus = get_posts(
 			array(
