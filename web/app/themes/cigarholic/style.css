@@ -31,6 +31,9 @@ Tags: e-commerce, block-patterns, block-styles, full-site-editing, accessibility
 	--cigarholic-focus: var(--wp--preset--color--contrast, #1a1815);
 	--cigarholic-error: #9b1c1c;
 	--cigarholic-eyebrow: var(--wp--preset--color--accent, #9c5034);
+
+	/* Hairlines on Forest (header, footer, coming soon): Gold at 35 %, following the gold token. */
+	--cigarholic-hairline: color-mix(in srgb, var(--wp--preset--color--gold, #c1904f) 35%, transparent);
 }
 
 .is-style-forest {
@@ -73,7 +76,8 @@ Tags: e-commerce, block-patterns, block-styles, full-site-editing, accessibility
 /*
  * Header (NAV-01). The search toggle is an icon like the account and cart
  * icons, not a Gold button: transparent, Ash icon, 44 px target, Gold on
- * hover. On phones the menu button moves to the far right, after the icons.
+ * hover. On phones the menu button stays where the markup puts it (after the
+ * logo), so the visual order and the keyboard order match (WCAG 2.4.3).
  */
 .site-header .wp-block-search__button {
 	min-inline-size: 44px;
@@ -92,13 +96,6 @@ Tags: e-commerce, block-patterns, block-styles, full-site-editing, accessibility
 .site-header .wp-block-search__button:focus {
 	background-color: transparent;
 	color: var(--wp--preset--color--gold, #c1904f);
-}
-
-@media (max-width: 599px) {
-
-	.site-header .wp-block-navigation {
-		order: 1;
-	}
 }
 
 /* Footer (NAV-03): the signup heading lines up with the footer columns. */

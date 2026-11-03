@@ -137,25 +137,37 @@ final class ProvisionTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A coming-soon template saved in the Site Editor hides theme changes; the run warns and keeps it (CNT-01).
+	 * Step 85: a coming-soon template or a header/footer part saved in the Site Editor hides theme
+	 * changes; the run names each one and keeps it (CNT-01, NAV-01, NAV-03).
 	 */
-	public function test_saved_coming_soon_template_is_reported_not_deleted(): void {
+	public function test_saved_theme_files_are_reported_not_deleted(): void {
 		$this->runner()->run( true );
-		$this->assertEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'warning: the coming-soon template' ) ) );
+		$this->assertEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'was saved in the Site Editor' ) ) );
 
-		$saved = self::factory()->post->create(
-			array(
-				'post_type'    => 'wp_template',
-				'post_name'    => 'coming-soon',
-				'post_status'  => 'publish',
-				'post_content' => '<!-- wp:paragraph --><p>Saved in the Site Editor</p><!-- /wp:paragraph -->',
-			)
-		);
-		wp_set_post_terms( $saved, get_stylesheet(), 'wp_theme' );
+		$saved = array();
+		foreach ( array(
+			'coming-soon' => 'wp_template',
+			'header'      => 'wp_template_part',
+		) as $slug => $type ) {
+			$saved[ $slug ] = self::factory()->post->create(
+				array(
+					'post_type'    => $type,
+					'post_name'    => $slug,
+					'post_status'  => 'publish',
+					'post_content' => '<!-- wp:paragraph --><p>Saved in the Site Editor</p><!-- /wp:paragraph -->',
+				)
+			);
+			wp_set_post_terms( $saved[ $slug ], get_stylesheet(), 'wp_theme' );
+		}
+		wp_set_post_terms( $saved['header'], 'header', 'wp_template_part_area' );
 
 		$this->runner()->run( false );
-		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'warning: the coming-soon template was saved in the Site Editor (post ' . $saved . ')' ) ) );
-		$this->assertSame( 'publish', get_post_status( $saved ) );
+		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'warning: the coming-soon template was saved in the Site Editor (post ' . $saved['coming-soon'] . ')' ) ) );
+		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'warning: the header template part was saved in the Site Editor (post ' . $saved['header'] . ')' ) ) );
+		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'ok: footer comes from the theme' ) ) );
+		foreach ( $saved as $post ) {
+			$this->assertSame( 'publish', get_post_status( $post ) );
+		}
 	}
 
 	/**

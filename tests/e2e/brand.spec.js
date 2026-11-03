@@ -249,17 +249,34 @@ test.describe( 'brand system', () => {
 		await expect( firstLink ).toHaveCSS( 'outline-color', GOLD );
 	} );
 
-	test( 'phone header: one row, menu button last, Forest menu', async ( { page } ) => {
+	test( 'phone header: one row, focus order matches what you see, Forest menu', async ( { page } ) => {
 		await page.setViewportSize( { width: 390, height: 844 } );
 		await login( page );
 		await page.goto( '/' );
 		const header = page.locator( '.site-header' );
 		const open = header.getByRole( 'button', { name: /open menu/i } );
 		const logo = header.locator( '.wp-block-site-logo' );
-		const [ logoBox, openBox, searchBox ] = await Promise.all( [ logo.boundingBox(), open.boundingBox(), header.locator( '.wp-block-search__button' ).boundingBox() ] );
-		// Everything on the logo's row, the menu button to the right of the icons.
+		const [ logoBox, openBox ] = await Promise.all( [ logo.boundingBox(), open.boundingBox() ] );
+		// Everything on the logo's row.
 		expect( Math.abs( ( openBox.y + openBox.height / 2 ) - ( logoBox.y + logoBox.height / 2 ) ) ).toBeLessThan( 12 );
-		expect( openBox.x ).toBeGreaterThan( searchBox.x );
+		// The gold hairline follows the gold token at 35 %.
+		expect( await header.evaluate( ( el ) => getComputedStyle( el ).borderBottomColor ) ).toMatch( /0\.35\)$/ );
+
+		// Keyboard focus visits the header controls left to right (WCAG 2.4.3): no CSS reordering.
+		const xs = [];
+		await page.locator( 'body' ).focus();
+		for ( let i = 0; i < 12 && xs.length < 5; i++ ) {
+			await page.keyboard.press( 'Tab' );
+			const x = await page.evaluate( () => {
+				const el = document.activeElement;
+				return el && el.closest( '.site-header' ) && ! el.closest( '.cigarholic-announcement-bar' ) ? el.getBoundingClientRect().x : null;
+			} );
+			if ( null !== x ) {
+				xs.push( x );
+			}
+		}
+		expect( xs.length ).toBe( 5 ); // Logo, menu, search, account, cart.
+		expect( xs ).toEqual( [ ...xs ].sort( ( a, b ) => a - b ) );
 
 		await open.click();
 		const menu = page.locator( '.wp-block-navigation__responsive-container.is-menu-open' );
