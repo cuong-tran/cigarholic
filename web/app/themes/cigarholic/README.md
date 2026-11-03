@@ -16,11 +16,12 @@ functions.php              theme supports, pattern category "cigarholic", block 
                            font preloads, stylesheet
 templates/                 index, front-page, page, single (journal post), archive, home (/journal/),
                            search, 404, single-product, archive-product, taxonomy-product_cat,
-                           order-confirmation, coming-soon
+                           order-confirmation, coming-soon, page-checkout (checkout with its own header)
 parts/                     header on Forest (announcement bar, logo, primary menu, search, account, mini cart;
                            Forest phone menu)
                            footer on Forest (logo, shop/help/company menus, newsletter, company + warehouse, social,
                            payment methods)
+                           checkout-header on Forest (logo and cart link only, used by page-checkout)
 patterns/                  hero, category-grid, best-sellers, craftsmanship-story, trust-bar,
                            product-content, gift-landing, newsletter, faq, coming-soon-content
 styles/sections/forest.json  the Forest section style (dark sections: header, hero, footer, coming soon)

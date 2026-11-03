@@ -7,7 +7,7 @@
  * replaces the theme file, so theme changes to it would not show. Saved work is never deleted here; the run names it, and the owner
  * resets it under Appearance > Editor (Templates or Patterns > Template parts > the item > Reset).
  *
- * Feature IDs: FND-03, CNT-01, CNT-04, NAV-01, NAV-03, NAV-04.
+ * Feature IDs: FND-03, CNT-01, CNT-04, NAV-01, NAV-03, NAV-04, CHK-01.
  *
  * @package Cigarholic
  */
@@ -20,10 +20,12 @@ return static function ( Context $ctx ): void {
 		return;
 	}
 	$watched = array(
-		'coming-soon' => 'wp_template',
-		'front-page'  => 'wp_template',
-		'header'      => 'wp_template_part',
-		'footer'      => 'wp_template_part',
+		'coming-soon'     => 'wp_template',
+		'front-page'      => 'wp_template',
+		'page-checkout'   => 'wp_template',
+		'header'          => 'wp_template_part',
+		'footer'          => 'wp_template_part',
+		'checkout-header' => 'wp_template_part',
 	);
 	foreach ( $watched as $slug => $type ) {
 		$saved = get_block_template( get_stylesheet() . '//' . $slug, $type );

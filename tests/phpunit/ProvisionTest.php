@@ -167,6 +167,7 @@ final class ProvisionTest extends WP_UnitTestCase {
 		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'warning: the front-page template was saved in the Site Editor (post ' . $saved['front-page'] . ')' ) ) );
 		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'warning: the header template part was saved in the Site Editor (post ' . $saved['header'] . ')' ) ) );
 		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'ok: footer comes from the theme' ) ) );
+		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'ok: checkout-header comes from the theme' ) ) );
 		foreach ( $saved as $post ) {
 			$this->assertSame( 'publish', get_post_status( $post ) );
 		}
