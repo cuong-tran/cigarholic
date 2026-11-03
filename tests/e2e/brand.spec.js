@@ -376,6 +376,7 @@ test.describe( 'brand system', () => {
 		const sorting = page.locator( 'select.orderby' );
 		await expect( sorting ).toHaveCSS( 'background-color', ASH_TINT );
 		await expect( sorting ).toHaveCSS( 'border-top-color', STONE );
+		await expect( sorting ).toHaveCSS( 'font-size', '16px' ); // Under 16 px, phones zoom in on focus.
 		expect( ( await sorting.boundingBox() ).height ).toBeGreaterThanOrEqual( 44 );
 		await expect( page.locator( 'main .wp-block-post-title' ).first() ).toHaveCSS( 'text-align', /^(start|left)$/ );
 
@@ -387,7 +388,9 @@ test.describe( 'brand system', () => {
 		expect( ( await gallery.boundingBox() ).width ).toBeGreaterThan( ( await column.boundingBox() ).width - 2 );
 		const quantity = page.locator( '.wc-block-add-to-cart-with-options__quantity-selector' );
 		await expect( quantity ).toHaveCSS( 'border-top-color', STONE );
-		await expect( quantity.locator( '.wc-block-components-quantity-selector__button--plus' ) ).toHaveCSS( 'opacity', '1' );
+		const plus = quantity.locator( '.wc-block-components-quantity-selector__button--plus' );
+		await expect( plus ).toHaveCSS( 'opacity', '1' );
+		await expect( plus ).toHaveCSS( 'color', 'rgb(26, 24, 21)' );
 		const activeTab = page.locator( '.woocommerce-tabs ul.tabs li.active' );
 		await expect( activeTab ).toHaveCSS( 'border-bottom-color', CEDAR );
 		await expect( activeTab ).toHaveCSS( 'background-color', 'rgba(0, 0, 0, 0)' );

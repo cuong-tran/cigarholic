@@ -139,6 +139,7 @@ body {
 	--wc-secondary-text: var(--wp--preset--color--contrast, #1a1815);
 	--wc-content-bg: var(--wp--preset--color--base, #eee9e0);
 	--wc-subtext: var(--wp--preset--color--neutral-2, #5e574e);
+	--wc-red: var(--cigarholic-error, #9b1c1c);
 	--wc-form-color-background: var(--wp--preset--color--neutral-1, #f7f4ef);
 	--wc-form-color-text: var(--wp--preset--color--contrast, #1a1815);
 	--wc-form-border-color: var(--wp--preset--color--neutral-2, #5e574e);
@@ -163,7 +164,7 @@ body .wc-block-components-checkbox .wc-block-components-checkbox__input[type="ch
 body .wc-block-components-radio-control .wc-block-components-radio-control__input,
 body .wc-block-components-radio-control .wc-block-components-radio-control__input:checked {
 	border-color: var(--wp--preset--color--neutral-2, #5e574e);
-	background: var(--wp--preset--color--neutral-1, #f7f4ef);
+	background-color: var(--wp--preset--color--neutral-1, #f7f4ef);
 }
 
 /*
@@ -180,8 +181,22 @@ body .has-error .wc-blocks-components-select .wc-blocks-components-select__label
 
 body :is(.wc-block-components-form, .wc-block-components-totals-coupon, .wc-block-checkout, .wc-block-cart) .wc-block-components-text-input.has-error input:not([type="hidden"]),
 body .wc-block-components-checkbox.has-error .wc-block-components-checkbox__input,
-body .has-error .wc-blocks-components-select .wc-blocks-components-select__container {
+body .has-error .wc-blocks-components-select .wc-blocks-components-select__container,
+body .wc-block-components-notice-banner.is-error {
 	border-color: var(--cigarholic-error, #9b1c1c);
+}
+
+/* Error banners (cart, checkout, store notices): the icon disc in the error colour; classic notices too. */
+body .wc-block-components-notice-banner.is-error > svg {
+	background-color: var(--cigarholic-error, #9b1c1c);
+}
+
+.woocommerce-error {
+	border-top-color: var(--cigarholic-error, #9b1c1c);
+}
+
+.woocommerce-error::before {
+	color: var(--cigarholic-error, #9b1c1c);
 }
 
 /* Shop sorting: the bare browser select becomes a field like the others, 44 px high. */
@@ -193,6 +208,7 @@ body .has-error .wc-blocks-components-select .wc-blocks-components-select__conta
 	border-radius: 3px;
 	background-color: var(--wp--preset--color--neutral-1, #f7f4ef);
 	color: var(--wp--preset--color--contrast, #1a1815);
+	font-size: 1rem;
 }
 
 /*
