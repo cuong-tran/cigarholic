@@ -4,6 +4,10 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+### Fixed
+
+- SEO-01: `/robots.txt` and the XML sitemaps answered Nginx's own 404 on both VPS sites (found on production after `v0.1.1`): the vhost's static-asset regex caught every `.txt` and `.xml` and found no file, because WordPress builds them in `index.php`. `site.conf.tpl` now routes `/robots.txt` (exact match) and the core and SEOPress sitemap names (`/sitemap.xml`, `/wp-sitemap*.xml`, `/sitemaps.xml`, `/<type>-sitemap<n>.xml`, `/sitemap_index.xml`) to PHP ahead of that regex, through the same FastCGI cache rules and headers as other pages; real files of those names are still served directly, the hard denies still win, staging keeps basic auth and `noindex`. The Compose runtime never listed `txt` or `xml` as static and needed no change. `tests/infra/nginx-staging-auth.sh` now runs every hard deny and the new locations with the static regex in template order (69 cases, 40 before), and `tests/e2e/robots.spec.js` checks `/robots.txt` on the Compose stack. Reaches the servers through `infra-provision.yml` → `site-staging` and `site-production`.
+
 ## [0.1.1] - 2026-11-03
 
 Post-launch hardening of the coming-soon site. Tagged by the owner at `813d144` and deployed to production the same day (release 3, approved on the `production` Environment): no administrator login name for visitors, the installer's sample post removed, two-factor required for administrators and shop managers.
