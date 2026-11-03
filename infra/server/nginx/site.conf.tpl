@@ -82,6 +82,24 @@ server {
         try_files $uri /index.php$is_args$args;
     }
 
+    # --- virtual files WordPress answers: robots.txt and the XML sitemaps (SEO-01) ---------------
+    # Not on disk: index.php builds them (robots.txt from blog_public, so staging's disallows
+    # everything, see cigarholic-core Seo\RobotsTxt; sitemaps from SEOPress, or core when SEOPress's
+    # are off), so they end in the PHP location below with its FastCGI cache rules and headers. A
+    # real file of the same name is still served as it is. They must stay ahead of the static-asset
+    # regex, which answers 404 for any .txt or .xml without a file (the first matching regex wins);
+    # the hard denies above still come first.
+    #   WordPress 7.1  /sitemap.xml  /wp-sitemap.xml  /wp-sitemap-<provider>[-<subtype>]-<n>.xml
+    #   SEOPress 10.4  /sitemaps.xml  /<type>-sitemap<n>.xml  /sitemap_index.xml (301 to sitemaps.xml)
+    # Their .xsl stylesheets (wp-sitemap*.xsl, sitemaps_xsl.xsl) are no static extension: location /.
+    # tests/infra/nginx-staging-auth.sh checks these paths against the shipped blocks.
+    location = /robots.txt {
+        try_files $uri /index.php$is_args$args;
+    }
+    location ~ ^/(?:sitemap|sitemap_index|sitemaps|wp-sitemap(?:-[a-z0-9_-]+)?|[a-z0-9_-]+-sitemap[0-9]*)\.xml$ {
+        try_files $uri /index.php$is_args$args;
+    }
+
     # --- static assets ---------------------------------------------------------------------------
     location ~* \.(?:css|js|mjs|jpe?g|png|gif|ico|svg|webp|avif|woff2?|ttf|otf|eot|mp4|webm|pdf|txt|xml|json|map)$ {
         expires 30d;

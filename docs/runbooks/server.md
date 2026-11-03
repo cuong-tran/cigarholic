@@ -55,6 +55,13 @@ closes root (it refuses while the deploy user cannot log in). Provisioning actio
   WP-CLI only (`deploy.md`, "First deploy of a site").
 - Both sites: `/wp-login.php` and `/wp-admin[/...]` 301 to the same path under `/wp/`, where WordPress
   lives (Bedrock), query string kept; `/wp-admin/install.php` stays denied.
+- Both sites: `/robots.txt` and the XML sitemaps are virtual files built by WordPress, so their
+  locations sit ahead of the static-asset regex (which answers 404 for any `.txt` or `.xml` without a
+  file) and end in the PHP location, FastCGI cache rules and headers included: `/sitemap.xml`,
+  `/wp-sitemap*.xml` (core), `/sitemaps.xml`, `/<type>-sitemap<n>.xml`, `/sitemap_index.xml`
+  (SEOPress). A real file of the same name wins. Staging keeps basic auth and `noindex` on them, and
+  its robots.txt disallows everything (`blog_public` 0; `cigarholic-core` `Seo\RobotsTxt`, because
+  WordPress no longer writes `Disallow: /` itself).
 - Cloudflare is additive (ADR 0008): when it arrives, `cloudflare.yml` adds the same rules at the edge.
 
 ## DNS records the owner creates at the registrar (while Cloudflare is deferred)
