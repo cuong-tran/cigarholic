@@ -25,7 +25,7 @@ patterns/                  hero, category-grid, best-sellers, craftsmanship-stor
 styles/sections/forest.json  the Forest section style (dark sections: header, hero, footer, coming soon)
 assets/fonts/              Young Serif and Hanken Grotesk woff2 (latin) with their OFL licences
 assets/brand/              logo (WebP), site icon (PNG, the C on Forest) and email logo (PNG); provisioning step 25
-                           imports the first two into the media library (masters in /brand)
+                           imports all three into the media library (masters in /brand)
 assets/images/             two SVG placeholders in the brand's photo sand, used until product photos exist
 ```
 

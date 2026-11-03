@@ -23,9 +23,9 @@ How the masters were made, so the result can be judged and redone from a better 
 |---|---|
 | `cigarholic-logo.webp` | Site logo (header, coming-soon page), imported into the media library as `site_logo`; 53 KB, WordPress makes the smaller sizes |
 | `cigarholic-icon.png` | Site icon (favicon, app icons): the C on Forest `#1F2B25`, 512 × 512 px, imported as `site_icon` |
-| `cigarholic-email-logo.png` | Email header logo, 400 px wide for 200 px display, 256-colour PNG (Outlook does not show WebP), served from the theme |
+| `cigarholic-email-logo.png` | Email header logo, 400 px wide for 200 px display, 256-colour PNG (Outlook shows neither WebP nor AVIF), imported into the media library so its URL survives a code rollback |
 
-To change the logo: replace the master here and the web copies in the theme, commit, deploy. Provisioning sees the new file (by SHA-256) and imports it as a new attachment; the old one stays in the media library.
+To change the logo: replace the master here and the web copies in the theme, commit, deploy. Provisioning sees the new file (by SHA-256) and imports it as a new attachment; the old one stays in the media library. An imported copy that is deleted, trashed or edited in the media library is imported again on the next run.
 
 ## Still wanted from the owner
 

@@ -176,7 +176,11 @@ final class ProvisionTest extends WP_UnitTestCase {
 		$this->assertSame( 512, $icon_meta['width'] );
 		$this->assertSame( 512, $icon_meta['height'] );
 		$this->assertStringEndsWith( '.png', (string) get_site_icon_url( 180 ), 'iOS needs a PNG apple-touch-icon' );
-		$this->assertStringEndsWith( '/themes/cigarholic/assets/brand/cigarholic-email-logo.png', (string) get_option( 'woocommerce_email_header_image' ) );
+		// The email logo is an upload (its URL survives a code rollback) and stays PNG for Outlook.
+		$email = attachment_url_to_postid( (string) get_option( 'woocommerce_email_header_image' ) );
+		$this->assertGreaterThan( 0, $email );
+		$this->assertSame( 'image/png', get_post_mime_type( $email ) );
+		$this->assertMatchesRegularExpression( '#/uploads/.+cigarholic-email-logo[^/]*\.png$#', (string) get_option( 'woocommerce_email_header_image' ) );
 		$this->assertSame( '200', get_option( 'woocommerce_email_header_image_width' ) );
 
 		// A second real run imports nothing and keeps the same attachments.
@@ -196,9 +200,39 @@ final class ProvisionTest extends WP_UnitTestCase {
 		);
 		$this->assertEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'import ' ) ) );
 
+		// A dry run with everything in place reports nothing for this step.
+		$this->runner()->run( true );
+		$this->assertEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'cigarholic-' ) && str_contains( $line, 'import' ) ) );
+
 		// The files are real uploads; remove them so the test leaves nothing on disk.
 		wp_delete_attachment( $logo, true );
 		wp_delete_attachment( $icon, true );
+		wp_delete_attachment( $email, true );
+	}
+
+	/**
+	 * Step 25: an imported copy whose file disappeared is imported again, and the alt text is put back;
+	 * a dry run reports the import and the option it would set.
+	 */
+	public function test_brand_assets_are_repaired(): void {
+		$this->runner()->run( false );
+		$logo = (int) get_option( 'site_logo' );
+		wp_delete_file( (string) get_attached_file( $logo ) );
+		update_post_meta( (int) get_option( 'site_icon' ), '_wp_attachment_context', 'edited' );
+
+		$this->runner()->run( true );
+		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'import cigarholic-logo.webp' ) ) );
+		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'option site_logo' ) ) );
+
+		$this->runner()->run( false );
+		$repaired = (int) get_option( 'site_logo' );
+		$this->assertNotSame( $logo, $repaired );
+		$this->assertFileExists( (string) get_attached_file( $repaired ) );
+		$this->assertSame( 'site-icon', get_post_meta( (int) get_option( 'site_icon' ), '_wp_attachment_context', true ) );
+
+		foreach ( array( $logo, $repaired, (int) get_option( 'site_icon' ), attachment_url_to_postid( (string) get_option( 'woocommerce_email_header_image' ) ) ) as $attachment ) {
+			wp_delete_attachment( $attachment, true );
+		}
 	}
 
 	/**

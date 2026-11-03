@@ -106,7 +106,7 @@ One PR per primary feature ID; where a change necessarily touches other IDs, the
 2. **`feat(NAV-01): Forest header and footer`**, also NAV-03.
 3. **`feat(NAV-04): homepage patterns in the brand layout`**.
 4. **`fix(CNT-01): WooCommerce surfaces in the brand style`** (product, archive, cart, checkout, mini cart, account, order received).
-5. **`feat(CNT-01): logo, site icon and email header from the brand files`** (done second, 2026-11-03, from the owner's raster artwork; provisioning step 25), as soon as the owner adds the files (can merge into 2 if they arrive first).
+5. **`feat(CNT-01): logo, site icon and email header from the brand files`**: done second (2026-11-03), from the owner's raster artwork; provisioning step 25 imports the logo, the site icon and the email logo.
 
 ## 5. Verification for every PR
 
@@ -119,7 +119,7 @@ One PR per primary feature ID; where a change necessarily touches other IDs, the
 
 ## 6. Owner inputs (to add to OWNER-ACTIONS B9)
 
-1. **Logo files:** the canvas holds the gold lockup and the monogram only as PNG uploads (282 KB and 85 KB), and this session could not download them. Please push the masters to `brand/` on any branch: the lockup and the monogram as SVG, plus the PNGs if SVG does not exist. Until then the header shows the site title as text in Young Serif.
+1. **Logo, vector master:** the raster artwork arrived on 2026-11-03 and is in use (`brand/`). Still wanted: the wordmark as a vector file (SVG, AI or PDF) for print, packaging and large banners.
 2. **Confirm the canvas is final** (colours, fonts, the Forest-heavy homepage), so CNT-01 can close B9 for everything except photos and catalog content.
 3. **Copy:** keep the current hero copy or switch to the canvas lines; either is a one-line change later.
 
