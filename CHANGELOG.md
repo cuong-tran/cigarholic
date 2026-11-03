@@ -6,7 +6,7 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ### Added
 
-- OPS-07: `/wp-login.php` and `/wp-admin[/...]` redirect (301) to the same path under `/wp/`, where WordPress lives, on both sites and in the Compose runtime; query strings kept, `/wp-admin/install.php` still denied. Covered by `tests/infra/nginx-staging-auth.sh` (41 cases) and `tests/e2e/admin-urls.spec.js`.
+- OPS-07 (#43): `/wp-login.php` and `/wp-admin[/...]` redirect (301) to the same path under `/wp/`, where WordPress lives, on both sites and in the Compose runtime; query strings kept, `/wp-admin/install.php` still denied. Covered by `tests/infra/nginx-staging-auth.sh` (41 cases) and `tests/e2e/admin-urls.spec.js`.
 
 ### Fixed
 

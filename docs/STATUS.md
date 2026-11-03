@@ -2,7 +2,7 @@
 
 Progress tracker for the Cigarholic build (`docs/KICKOFF-BRIEF.md` rule 6). Updated at the end of every session. A fresh agent, in a new cloud session or on a laptop, starts here after reading `CLAUDE.md` (which imports `AGENTS.md`).
 
-Last updated: 2026-11-02, Turn 3: **Phase 1 in progress.** M0 reached 2026-10-31. The VPS is provisioned and both sites have certificates. Staging is installed, provisioned and seeded for review. Release `v0.1.0` (the coming-soon site on `cigarholic.com`, M1) waits for the owner's tag and approvals (OWNER-ACTIONS A7).
+Last updated: 2026-11-03, end of Turn 3 (handoff to a new session): **Phase 1 in progress.** M0 reached 2026-10-31. The VPS is provisioned and both sites have certificates. Staging is installed, provisioned and seeded for review; `/wp-admin` and `/wp-login.php` redirect into `/wp/` on both sites. Release `v0.1.0` (the coming-soon site on `cigarholic.com`, M1) waits for the owner's tag and approvals (OWNER-ACTIONS A7). No PR is open.
 
 ## Where we are
 
@@ -46,7 +46,9 @@ Last updated: 2026-11-02, Turn 3: **Phase 1 in progress.** M0 reached 2026-10-31
 | #39 | FND-08 | Owner credentials and the Let's Encrypt contact from secrets only, never printed in the public logs |
 | #40 | FND-08 | The deploy activates the plugins (WooCommerce first, then every plugin of the `--no-dev` release) before `wp wc update` |
 | #41 | FND-03 | Search engine visibility follows `DISALLOW_INDEXING` (staging off, production on) |
-| #42 | docs | Release notes `v0.1.0`, this status |
+| #42 | docs | Release notes `v0.1.0`, staging installed and seeded |
+| #43 | OPS-07 | `/wp-login.php` and `/wp-admin[/...]` 301 into `/wp/` (both vhosts, Compose runtime with relative redirects); `tests/e2e/admin-urls.spec.js`; manager guide no longer claims two-factor is enforced |
+| #44 | docs | This handoff update |
 
 ## Server (Phase 1, 2026-11-02)
 
@@ -77,6 +79,7 @@ All runs of `infra-provision.yml` on the Hostinger VPS (`srv2109040`, Ubuntu 26.
 | 41492338926, 41492761834 | `wp-cli.yml` checks | Coming-soon on, store pages only off, HPOS on, USD, theme `cigarholic`, 11 active plugins, external object cache; provisioning dry run 0 changes |
 | 41493330262 | deploy staging (merge of #41) | Release 6: activation no-op, provisioning 1 change (`blog_public`), health HTTP 200 |
 | 41493526902 | `wp-cli.yml` `cigarholic seed` (staging) | 7 `SAMPLE-` products created (one variable with 2 variations); the command refuses production |
+| 41502548317, 41502652155 | `site-staging`, `site-production` | #43 vhosts applied. From outside on both hosts: `/wp-admin` → 301 `/wp/wp-admin/`, `/wp-login.php` → 301 `/wp/wp-login.php` (query kept), `/wp-admin/install.php` 403 |
 
 Verified from the sandbox afterwards: `https://staging.cigarholic.com/` 401 + HSTS + `noindex`; `https://cigarholic.com/` 404 (no release yet) with the Let's Encrypt chain; `www`, `max2lab.com`, `www.max2lab.com` and `http://` each 301 to `https://cigarholic.com/...` in one hop; `xmlrpc.php` 403. The server `.env` files hold random database credentials and salts; application keys arrive through `env-upsert.sh` on each deploy and are empty until the owner sets the secrets. `SSH_USER` stays `root` until the first deploys are verified, then `disable-root-login` (OWNER-ACTIONS A1).
 
@@ -178,6 +181,10 @@ make check && make test && make e2e
 ```bash
 make wp ARGS="cigarholic features" && make wp ARGS="cigarholic provision --dry-run"
 ```
+
+## Starting a new session
+
+Everything is merged and pushed; nothing lives only in a conversation. A new session reads `CLAUDE.md` (which imports `AGENTS.md`), this file and `docs/OWNER-ACTIONS.md`, then continues from "Next actions". Server work runs through the workflows (`infra-provision.yml`, `wp-cli.yml`, `deploy-*.yml`); `docs/runbooks/` has the commands. For the production release (next action 1) follow `docs/runbooks/deploy.md`, "First deploy of a site": deploy, `core install` with the owner secrets, deploy again; every production run waits for the owner's approval.
 
 ## If the session is reopened after the VM expired
 
