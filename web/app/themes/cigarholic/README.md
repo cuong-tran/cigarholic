@@ -17,8 +17,9 @@ functions.php              theme supports, pattern category "cigarholic", block 
 templates/                 index, front-page, page, single (journal post), archive, home (/journal/),
                            search, 404, single-product, archive-product, taxonomy-product_cat,
                            order-confirmation, coming-soon
-parts/                     header (announcement bar, logo/title, primary menu, search, account, mini cart)
-                           footer (shop/help/company menus, newsletter, company + warehouse, social,
+parts/                     header on Forest (announcement bar, logo, primary menu, search, account, mini cart;
+                           Forest phone menu)
+                           footer on Forest (logo, shop/help/company menus, newsletter, company + warehouse, social,
                            payment methods)
 patterns/                  hero, category-grid, best-sellers, craftsmanship-story, trust-bar,
                            product-content, gift-landing, newsletter, faq, coming-soon-content

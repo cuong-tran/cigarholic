@@ -224,6 +224,51 @@ test.describe( 'brand system', () => {
 		expect( await logo.evaluate( ( img ) => img.complete && img.naturalWidth > 0 ) ).toBe( true );
 	} );
 
+	test( 'header and footer are Forest sections (NAV-01, NAV-03)', async ( { page } ) => {
+		await login( page );
+		await page.goto( '/' );
+		const header = page.locator( '.site-header' );
+		const footer = page.locator( '.site-footer' );
+		await expect( header ).toHaveCSS( 'background-color', FOREST );
+		await expect( footer ).toHaveCSS( 'background-color', FOREST );
+		await expect( footer.locator( '.wp-block-site-logo img' ) ).toHaveAttribute( 'alt', 'Cigarholic' );
+		await expect( footer.getByRole( 'heading', { name: 'Shop' } ) ).toHaveCSS( 'color', GOLD );
+
+		// The search toggle is an icon like account and cart: no Gold fill, a 44 px target.
+		const search = header.locator( '.wp-block-search__button' );
+		await expect( search ).toHaveCSS( 'background-color', 'rgba(0, 0, 0, 0)' );
+		const box = await search.boundingBox();
+		expect( Math.min( box.width, box.height ) ).toBeGreaterThanOrEqual( 44 );
+
+		// Keyboard focus on a header link draws the Gold ring.
+		const firstLink = header.getByRole( 'navigation', { name: 'Primary' } ).getByRole( 'link' ).first();
+		for ( let i = 0; i < 30 && ! ( await firstLink.evaluate( ( el ) => el === document.activeElement ) ); i++ ) {
+			await page.keyboard.press( 'Tab' );
+		}
+		await expect( firstLink ).toBeFocused();
+		await expect( firstLink ).toHaveCSS( 'outline-color', GOLD );
+	} );
+
+	test( 'phone header: one row, menu button last, Forest menu', async ( { page } ) => {
+		await page.setViewportSize( { width: 390, height: 844 } );
+		await login( page );
+		await page.goto( '/' );
+		const header = page.locator( '.site-header' );
+		const open = header.getByRole( 'button', { name: /open menu/i } );
+		const logo = header.locator( '.wp-block-site-logo' );
+		const [ logoBox, openBox, searchBox ] = await Promise.all( [ logo.boundingBox(), open.boundingBox(), header.locator( '.wp-block-search__button' ).boundingBox() ] );
+		// Everything on the logo's row, the menu button to the right of the icons.
+		expect( Math.abs( ( openBox.y + openBox.height / 2 ) - ( logoBox.y + logoBox.height / 2 ) ) ).toBeLessThan( 12 );
+		expect( openBox.x ).toBeGreaterThan( searchBox.x );
+
+		await open.click();
+		const menu = page.locator( '.wp-block-navigation__responsive-container.is-menu-open' );
+		await expect( menu ).toBeVisible();
+		await expect( menu ).toHaveCSS( 'background-color', FOREST );
+		await expect( menu.getByRole( 'link', { name: 'Shop', exact: true } ) ).toHaveCSS( 'color', 'rgb(238, 233, 224)' );
+		expect( await contrastFailures( page ) ).toEqual( [] );
+	} );
+
 	test( 'store pages pass AA contrast for every visible text', async ( { page } ) => {
 		await login( page );
 		for ( const path of [ '/', '/shop/' ] ) {

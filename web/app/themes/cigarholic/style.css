@@ -70,6 +70,42 @@ Tags: e-commerce, block-patterns, block-styles, full-site-editing, accessibility
 	color: var(--wp--preset--color--contrast, #1a1815);
 }
 
+/*
+ * Header (NAV-01). The search toggle is an icon like the account and cart
+ * icons, not a Gold button: transparent, Ash icon, 44 px target, Gold on
+ * hover. On phones the menu button moves to the far right, after the icons.
+ */
+.site-header .wp-block-search__button {
+	min-inline-size: 44px;
+	min-block-size: 44px;
+	padding: 10px;
+	border-width: 0;
+	background-color: transparent;
+	color: inherit;
+}
+
+.site-header .wp-block-search__button-only .wp-block-search__inside-wrapper {
+	border-width: 0;
+}
+
+.site-header .wp-block-search__button:hover,
+.site-header .wp-block-search__button:focus {
+	background-color: transparent;
+	color: var(--wp--preset--color--gold, #c1904f);
+}
+
+@media (max-width: 599px) {
+
+	.site-header .wp-block-navigation {
+		order: 1;
+	}
+}
+
+/* Footer (NAV-03): the signup heading lines up with the footer columns. */
+.site-footer .cigarholic-signup .cigarholic-signup__heading {
+	text-align: start;
+}
+
 /* Young Serif has one weight and no italic: never let the browser fake either. */
 :where(h1, h2, h3, .wp-block-site-title, .wp-block-post-title, .wp-block-quote, .wp-block-pullquote, .has-young-serif-font-family) {
 	font-synthesis: none;
