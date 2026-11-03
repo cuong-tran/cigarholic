@@ -55,7 +55,8 @@ A branch name is refused in the workflow and again in the recipe (`cigarholic:gu
    core install --url=https://staging.cigarholic.com --title=Cigarholic --admin_user=owner --admin_email="$WP_OWNER_EMAIL" --admin_password="$WP_OWNER_INITIAL_PASSWORD" --skip-email
    ```
 
-   The owner changes the password at first login; 2FA is enforced by the Two Factor plugin.
+   The owner changes the password at first login and sets up two-factor (Users → Profile); the Two
+   Factor plugin is active, enrolment is not enforced yet (OPS-07, `docs/STATUS.md` next actions).
 4. Deploy again: `update-db`, plugin activation (WooCommerce first, then every plugin the release
    installed), `wc update`, `provision` and the object cache now run. `wp core install` activates
    no plugins; the deploy does, on every run, so a plugin added in a release becomes active with it.

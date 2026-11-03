@@ -31,11 +31,16 @@ final class Repository {
 
 	/**
 	 * Creates or updates the table when the schema version changed. Cheap option check otherwise.
+	 * Does nothing before WordPress is installed (`init` also runs during `wp core install`, when
+	 * `wp_options` does not exist yet): the first request after the install creates the table.
 	 *
 	 * @return void
 	 */
 	public static function install(): void {
 		if ( get_option( self::OPTION ) === self::SCHEMA_VERSION ) {
+			return;
+		}
+		if ( wp_installing() || ! is_blog_installed() ) {
 			return;
 		}
 		global $wpdb;

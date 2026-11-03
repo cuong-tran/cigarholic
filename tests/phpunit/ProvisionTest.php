@@ -141,4 +141,44 @@ final class ProvisionTest extends WP_UnitTestCase {
 		$this->assertNull( get_page_by_path( 'warranty', OBJECT, 'page' ) );
 		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'would change' ) ) );
 	}
+
+	/**
+	 * The installer's "Hello world!" post and its comment leave the public site; a post the manager
+	 * reused under that slug stays.
+	 */
+	public function test_sample_post_is_trashed_only_while_untouched(): void {
+		// Earlier tests leave $wp_rewrite at /%postname%/ in memory after the database rollback.
+		$this->set_permalink_structure( '' );
+		$existing = get_page_by_path( 'hello-world', OBJECT, 'post' );
+		if ( $existing instanceof \WP_Post ) {
+			wp_delete_post( $existing->ID, true );
+		}
+		$hello   = self::factory()->post->create(
+			array(
+				'post_name'   => 'hello-world',
+				'post_title'  => 'Hello world!',
+				'post_status' => 'publish',
+			)
+		);
+		$comment = self::factory()->comment->create( array( 'comment_post_ID' => $hello ) );
+
+		$this->runner()->run( true );
+		$this->assertSame( 'publish', get_post_status( $hello ), 'a dry run trashed the post' );
+
+		$this->runner()->run( false );
+		$this->assertSame( 'trash', get_post_status( $hello ) );
+		$this->assertSame( 'post-trashed', get_comment( $comment )->comment_approved ?? null );
+		$this->assertContains( '   changed: post hello-world trashed', $this->lines );
+		$this->assertSame( 0, $this->runner()->run( true ), "second run is not a no-op:\n" . implode( "\n", $this->lines ) );
+
+		$reused = self::factory()->post->create(
+			array(
+				'post_name'   => 'hello-world',
+				'post_title'  => 'Hello from the workshop',
+				'post_status' => 'publish',
+			)
+		);
+		$this->runner()->run( false );
+		$this->assertSame( 'publish', get_post_status( $reused ) );
+	}
 }
