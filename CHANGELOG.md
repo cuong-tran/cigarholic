@@ -4,6 +4,10 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+### Added
+
+- SEO-01: a site that discourages search engines (`blog_public` 0: staging and development, from `DISALLOW_INDEXING`) answers robots.txt with `User-agent: *` / `Disallow: /` (`Seo\RobotsTxt`, toggle `robots-txt`, on; last on the `robots_txt` filter). WordPress stopped writing that line itself in 5.3 and relies on the noindex meta tag alone, so staging's robots.txt would otherwise have listed only `/wp/wp-admin/`. Public sites (production) keep WordPress's rules plus what WooCommerce and SEOPress add. `RobotsTxtTest`.
+
 ### Fixed
 
 - SEO-01: `/robots.txt` and the XML sitemaps answered Nginx's own 404 on both VPS sites (found on production after `v0.1.1`): the vhost's static-asset regex caught every `.txt` and `.xml` and found no file, because WordPress builds them in `index.php`. `site.conf.tpl` now routes `/robots.txt` (exact match) and the core and SEOPress sitemap names (`/sitemap.xml`, `/wp-sitemap*.xml`, `/sitemaps.xml`, `/<type>-sitemap<n>.xml`, `/sitemap_index.xml`) to PHP ahead of that regex, through the same FastCGI cache rules and headers as other pages; real files of those names are still served directly, the hard denies still win, staging keeps basic auth and `noindex`. The Compose runtime never listed `txt` or `xml` as static and needed no change. `tests/infra/nginx-staging-auth.sh` now runs every hard deny and the new locations with the static regex in template order (69 cases, 40 before), and `tests/e2e/robots.spec.js` checks `/robots.txt` on the Compose stack. Reaches the servers through `infra-provision.yml` → `site-staging` and `site-production`.

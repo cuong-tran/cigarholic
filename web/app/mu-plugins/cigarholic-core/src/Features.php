@@ -36,6 +36,10 @@ final class Features {
 			'class'   => Security\TwoFactorRequired::class,
 			'default' => true,
 		),
+		'robots-txt'       => array(
+			'class'   => Seo\RobotsTxt::class,
+			'default' => true,
+		),
 		'signups'          => array(
 			'class'   => Signups\Signups::class,
 			'default' => true,

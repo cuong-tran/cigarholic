@@ -84,10 +84,11 @@ server {
 
     # --- virtual files WordPress answers: robots.txt and the XML sitemaps (SEO-01) ---------------
     # Not on disk: index.php builds them (robots.txt from blog_public, so staging's disallows
-    # everything; sitemaps from core or, once its sitemaps are on, SEOPress), so they end in the PHP
-    # location below with its FastCGI cache rules and headers. A real file of the same name is still
-    # served as it is. They must stay ahead of the static-asset regex, which answers 404 for any .txt
-    # or .xml without a file (the first matching regex wins); the hard denies above still come first.
+    # everything, see cigarholic-core Seo\RobotsTxt; sitemaps from SEOPress, or core when SEOPress's
+    # are off), so they end in the PHP location below with its FastCGI cache rules and headers. A
+    # real file of the same name is still served as it is. They must stay ahead of the static-asset
+    # regex, which answers 404 for any .txt or .xml without a file (the first matching regex wins);
+    # the hard denies above still come first.
     #   WordPress 7.1  /sitemap.xml  /wp-sitemap.xml  /wp-sitemap-<provider>[-<subtype>]-<n>.xml
     #   SEOPress 10.4  /sitemaps.xml  /<type>-sitemap<n>.xml  /sitemap_index.xml (301 to sitemaps.xml)
     # Their .xsl stylesheets (wp-sitemap*.xsl, sitemaps_xsl.xsl) are no static extension: location /.
