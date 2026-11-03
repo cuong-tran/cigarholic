@@ -137,6 +137,28 @@ final class ProvisionTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A coming-soon template saved in the Site Editor hides theme changes; the run warns and keeps it (CNT-01).
+	 */
+	public function test_saved_coming_soon_template_is_reported_not_deleted(): void {
+		$this->runner()->run( true );
+		$this->assertEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'warning: the coming-soon template' ) ) );
+
+		$saved = self::factory()->post->create(
+			array(
+				'post_type'    => 'wp_template',
+				'post_name'    => 'coming-soon',
+				'post_status'  => 'publish',
+				'post_content' => '<!-- wp:paragraph --><p>Saved in the Site Editor</p><!-- /wp:paragraph -->',
+			)
+		);
+		wp_set_post_terms( $saved, get_stylesheet(), 'wp_theme' );
+
+		$this->runner()->run( false );
+		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'warning: the coming-soon template was saved in the Site Editor (post ' . $saved . ')' ) ) );
+		$this->assertSame( 'publish', get_post_status( $saved ) );
+	}
+
+	/**
 	 * A dry run never writes.
 	 */
 	public function test_dry_run_changes_nothing(): void {

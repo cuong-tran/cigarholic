@@ -18,7 +18,8 @@ async function comingSoonIsOn( request ) {
 /**
  * Every visible text node whose colour fails AA against the background it is painted on
  * (4.5:1, or 3:1 for large text: 24 px, or 18.66 px bold). Opacity and translucent colours
- * are blended over the first opaque ancestor background.
+ * are blended over the first opaque ancestor background. Text over a background image, a
+ * gradient or a Cover block is reported too, because a colour comparison cannot judge it.
  */
 async function contrastFailures( page ) {
 	return page.evaluate( () => {
@@ -47,10 +48,16 @@ async function contrastFailures( page ) {
 			const [ hi, lo ] = [ luminance( x ), luminance( y ) ].sort( ( p, q ) => q - p );
 			return ( hi + 0.05 ) / ( lo + 0.05 );
 		};
+		// The colour behind an element; null when an image, gradient or Cover block paints it, which a
+		// colour comparison cannot judge.
 		const background = ( el ) => {
 			const layers = [];
 			for ( let node = el; node; node = node.parentElement ) {
-				const bg = parse( getComputedStyle( node ).backgroundColor );
+				const computed = getComputedStyle( node );
+				if ( computed.backgroundImage !== 'none' || node.classList.contains( 'wp-block-cover' ) ) {
+					return null;
+				}
+				const bg = parse( computed.backgroundColor );
 				if ( bg && bg.a > 0 ) {
 					layers.push( bg );
 					if ( bg.a === 1 ) {
@@ -88,6 +95,12 @@ async function contrastFailures( page ) {
 			}
 			const fg = parse( style.color );
 			const bg = background( el );
+			if ( ! bg ) {
+				// Fail loudly rather than pass unchecked: text over an image needs a manual check (or an
+				// overlay that gives it a solid colour) before it can be listed here as verified.
+				failures.push( `"${ text.textContent.trim().slice( 0, 40 ) }" is over an image or gradient: check its contrast by hand` );
+				continue;
+			}
 			const painted = blend( fg, bg, fg.a * opacity( el ) );
 			const size = parseFloat( style.fontSize );
 			const large = size >= 24 || ( size >= 18.66 && Number( style.fontWeight ) >= 700 );

@@ -39,6 +39,25 @@ Tags: e-commerce, block-patterns, block-styles, full-site-editing, accessibility
 	--cigarholic-eyebrow: var(--wp--preset--color--gold, #c1904f);
 }
 
+/*
+ * A Card is a light surface even inside Forest: Ink headings, Cedar links and
+ * the light focus, error and eyebrow colours (Ash text on Ash tint would be 1.05:1).
+ */
+.is-style-forest .is-style-card {
+	--cigarholic-focus: var(--wp--preset--color--contrast, #1a1815);
+	--cigarholic-error: #9b1c1c;
+	--cigarholic-eyebrow: var(--wp--preset--color--accent, #9c5034);
+	color: var(--wp--preset--color--contrast, #1a1815);
+}
+
+.is-style-forest .is-style-card :where(h1, h2, h3, h4, h5, h6) {
+	color: var(--wp--preset--color--contrast, #1a1815);
+}
+
+.is-style-forest .is-style-card a:where(:not(.wp-element-button)) {
+	color: var(--wp--preset--color--accent, #9c5034);
+}
+
 /* Outline buttons on Forest: Ash border and text, Ash fill with Ink text on hover. */
 .is-style-forest .wp-block-button.is-style-outline > .wp-block-button__link {
 	border-color: var(--wp--preset--color--base, #eee9e0);

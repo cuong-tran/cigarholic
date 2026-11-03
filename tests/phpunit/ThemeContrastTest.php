@@ -253,6 +253,41 @@ final class ThemeContrastTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Block styles registered in PHP (functions.php: Card, Eyebrow) pass AA where a manager can put them:
+	 * on the light page and inside a Forest section. The section-aware label colour resolves as style.css
+	 * sets it (Cedar on light, Gold on Forest).
+	 */
+	public function test_php_block_styles_pass_aa_on_light_and_forest(): void {
+		$contexts = array(
+			'light'  => array(
+				'text'       => 'contrast',
+				'background' => 'base',
+				'eyebrow'    => 'accent',
+			),
+			'forest' => array(
+				'text'       => 'base',
+				'background' => 'forest',
+				'eyebrow'    => 'gold',
+			),
+		);
+		$checked  = 0;
+		foreach ( \WP_Block_Styles_Registry::get_instance()->get_all_registered() as $block => $styles ) {
+			foreach ( $styles as $name => $style ) {
+				if ( empty( $style['style_data'] ) || ! is_array( $style['style_data'] ) ) {
+					continue;
+				}
+				foreach ( $contexts as $context => $colors ) {
+					$data = json_decode( str_replace( 'var(--cigarholic-eyebrow)', 'var:preset|color|' . $colors['eyebrow'], (string) wp_json_encode( $style['style_data'] ) ), true );
+					$this->walk( $block . '.is-style-' . $name . ' on ' . $context, $data, $this->palette[ $colors['text'] ], $this->palette[ $colors['background'] ] );
+					++$checked;
+				}
+			}
+		}
+		$this->assertGreaterThanOrEqual( 4, $checked, 'Card and Eyebrow were not found in the block style registry' );
+		$this->assertSame( array(), $this->failures, implode( "\n", $this->failures ) );
+	}
+
+	/**
 	 * The checker itself catches the pairing the brand rules forbid.
 	 */
 	public function test_cedar_on_forest_is_caught(): void {

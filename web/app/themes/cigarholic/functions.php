@@ -69,7 +69,9 @@ add_action( 'init', __NAMESPACE__ . '\\register_pattern_categories' );
  *
  * "Card" is an Ash tint panel with a 1 px Line border (no shadow, square
  * corners) for the category grid, the trust bar and the order-received next
- * steps; the border keeps it visible on Ash tint sections. "Eyebrow"
+ * steps; the border keeps it visible on Ash tint sections. It is a light
+ * surface wherever it sits: Ink text here, and inside Forest style.css puts
+ * its headings, links and focus ring back to the light rules. "Eyebrow"
  * is the small uppercase label above a heading; its colour follows the
  * section (Cedar on light, Gold on Forest) through --cigarholic-eyebrow in
  * style.css. Both are declared as theme.json-style data, so no extra
@@ -92,6 +94,7 @@ function register_block_styles(): void {
 				),
 				'color'   => array(
 					'background' => 'var:preset|color|neutral-1',
+					'text'       => 'var:preset|color|contrast',
 				),
 				'spacing' => array(
 					'padding' => array(
