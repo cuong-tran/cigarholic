@@ -6,7 +6,7 @@
  * Template Types: coming-soon
  * Inserter: false
  * Keywords: coming soon, launch, signup
- * Description: Brand name and label, one line about the launch and the signup form, on the Forest section style. Used by the coming-soon template; no navigation.
+ * Description: The logo, the H1 as a label under it, one line about the launch and the signup form, on the Forest section style. Used by the coming-soon template; no navigation.
  *
  * Feature IDs: CNT-04 (coming-soon page with email signup), CNT-01 (brand system), CMP-02 (origin wording).
  *
@@ -16,15 +16,13 @@
 ?>
 <!-- wp:group {"className":"coming-soon-content","style":{"spacing":{"blockGap":"var:preset|spacing|50"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 <div class="wp-block-group coming-soon-content">
-	<!-- wp:site-logo {"width":96,"shouldSyncIcon":true} /-->
-
-	<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|30"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
+	<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|40"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"center"}} -->
 	<div class="wp-block-group">
-		<!-- wp:site-title {"level":1,"textAlign":"center","fontSize":"xxx-large"} /-->
+		<!-- wp:site-logo {"width":360,"shouldSyncIcon":false,"align":"center"} /-->
 
-		<!-- wp:paragraph {"align":"center","className":"is-style-eyebrow"} -->
-		<p class="has-text-align-center is-style-eyebrow"><?php esc_html_e( 'Handcrafted humidors', 'cigarholic' ); ?></p>
-		<!-- /wp:paragraph -->
+		<!-- wp:heading {"textAlign":"center","level":1,"className":"is-style-eyebrow"} -->
+		<h1 class="wp-block-heading has-text-align-center is-style-eyebrow"><?php esc_html_e( 'Handcrafted humidors', 'cigarholic' ); ?></h1>
+		<!-- /wp:heading -->
 	</div>
 	<!-- /wp:group -->
 

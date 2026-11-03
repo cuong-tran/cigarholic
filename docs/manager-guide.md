@@ -40,6 +40,10 @@ Messages from the **Contact** page arrive by email in the support inbox, with th
 
 While **WooCommerce → Settings → Site visibility** is set to *Coming soon*, visitors see the launch page with the signup form and you (logged in as manager or admin) see the whole store. Only the owner decides when to switch it to *Live*.
 
+## Logo and site icon
+
+The logo in the header and on the coming-soon page, the browser-tab icon (the gold C on Forest) and the logo at the top of every email come from the brand files in the code, and every deploy puts them back. To change the logo, send the new artwork (ideally as a vector file: SVG, AI or PDF) and it is swapped in the code; a logo picked in the Site Editor would be replaced at the next deploy. The old versions stay in the media library.
+
 ## Brand colours and fonts
 
 The colours and fonts are part of the theme; you choose them by name in the editor and never type a hex value. Two rules keep text readable for everyone (WCAG 2.2 AA, CMP-04):

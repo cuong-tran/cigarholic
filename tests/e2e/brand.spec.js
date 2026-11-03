@@ -114,7 +114,7 @@ async function contrastFailures( page ) {
 }
 
 test.describe( 'brand system', () => {
-	test( 'fonts are self-hosted, loaded and actually render the H1', async ( { page, browserName } ) => {
+	test( 'fonts are self-hosted, loaded and actually paint the headings', async ( { page, browserName } ) => {
 		const external = [];
 		const served = new Set();
 		page.on( 'request', ( r ) => {
@@ -138,19 +138,33 @@ test.describe( 'brand system', () => {
 		expect( [ ...served ].sort() ).toEqual( [ 'hanken-grotesk-latin-wght-normal.woff2', 'young-serif-latin-400-normal.woff2' ] );
 		expect( external ).toEqual( [] );
 
-		const h1 = page.locator( 'h1' ).first();
-		await expect( h1 ).toHaveCSS( 'font-weight', '400' );
+		// The first heading set in Young Serif (the store's H1, the coming-soon signup heading), marked on the
+		// element that holds its text node, because Chromium reports fonts for direct text children only.
+		const marked = await page.evaluate( () => {
+			const heading = [ ...document.querySelectorAll( 'h1, h2' ) ].find( ( h ) => getComputedStyle( h ).fontFamily.startsWith( '"Young Serif"' ) );
+			if ( ! heading ) {
+				return null;
+			}
+			const walker = document.createTreeWalker( heading, NodeFilter.SHOW_TEXT );
+			let node = walker.nextNode();
+			while ( node && ! node.textContent.trim() ) {
+				node = walker.nextNode();
+			}
+			node.parentElement.setAttribute( 'data-brand-probe', '' );
+			return { text: heading.textContent.trim(), weight: getComputedStyle( heading ).fontWeight };
+		} );
+		expect( marked, 'a heading set in Young Serif' ).not.toBeNull();
+		expect( marked.weight ).toBe( '400' );
 
-		// The font that actually paints the H1's text, as Chromium reports it: a silent fallback to Georgia fails.
+		// The font that actually paints that text, as Chromium reports it: a silent fallback to Georgia fails.
 		test.skip( browserName !== 'chromium', 'platform font check needs the Chrome DevTools Protocol' );
 		const cdp = await page.context().newCDPSession( page );
 		await cdp.send( 'DOM.enable' );
 		await cdp.send( 'CSS.enable' );
 		const { root } = await cdp.send( 'DOM.getDocument', { depth: -1 } );
-		const textHolder = ( await cdp.send( 'DOM.querySelector', { nodeId: root.nodeId, selector: 'h1 a' } ) ).nodeId ||
-			( await cdp.send( 'DOM.querySelector', { nodeId: root.nodeId, selector: 'h1' } ) ).nodeId;
-		const { fonts } = await cdp.send( 'CSS.getPlatformFontsForNode', { nodeId: textHolder } );
-		expect( fonts.filter( ( f ) => f.isCustomFont ).map( ( f ) => f.familyName ) ).toContain( 'Young Serif' );
+		const { nodeId } = await cdp.send( 'DOM.querySelector', { nodeId: root.nodeId, selector: '[data-brand-probe]' } );
+		const { fonts } = await cdp.send( 'CSS.getPlatformFontsForNode', { nodeId } );
+		expect( fonts.filter( ( f ) => f.isCustomFont ).map( ( f ) => f.familyName ), marked.text ).toContain( 'Young Serif' );
 	} );
 
 	test( 'coming-soon page: Forest ground, Gold focus ring, Forest error colour, AA contrast', async ( { page, request } ) => {
@@ -161,6 +175,15 @@ test.describe( 'brand system', () => {
 		await expect( forest ).toHaveCSS( 'background-color', FOREST );
 		const height = await forest.evaluate( ( el ) => el.getBoundingClientRect().height );
 		expect( height ).toBeGreaterThanOrEqual( page.viewportSize().height );
+
+		// The logo from the media library (provisioning step 25), loaded, named for screen readers; the H1 under it.
+		const logo = page.locator( '.wp-block-site-logo img' );
+		await expect( logo ).toHaveAttribute( 'alt', 'Cigarholic' );
+		// Modern Image Formats (OPS-09) may serve the upload as AVIF or WebP.
+		await expect( logo ).toHaveAttribute( 'src', /\/uploads\/.+cigarholic-logo.*\.(webp|avif)$/ );
+		expect( await logo.evaluate( ( img ) => img.complete && img.naturalWidth > 0 ) ).toBe( true );
+		await expect( page.getByRole( 'heading', { level: 1 } ) ).toHaveText( /handcrafted humidors/i );
+		await expect( page.getByRole( 'heading', { level: 1 } ) ).toHaveCSS( 'color', GOLD );
 
 		// Keyboard focus on a link inside Forest draws the Gold ring (Ink would be 1.21:1 there).
 		const phone = page.locator( 'a[href^="tel:"]' );
@@ -181,6 +204,24 @@ test.describe( 'brand system', () => {
 		await expect( status ).toHaveAttribute( 'data-state', 'error', { timeout: 15_000 } );
 		await expect( status ).toHaveCSS( 'color', ERROR_ON_FOREST );
 		expect( await contrastFailures( page ) ).toEqual( [] );
+	} );
+
+	test( 'site icon comes from the brand files and stays PNG', async ( { page, request } ) => {
+		await page.goto( '/' );
+		for ( const rel of [ 'icon', 'apple-touch-icon' ] ) {
+			const href = await page.locator( `link[rel="${ rel }"]` ).first().getAttribute( 'href' );
+			expect( href, rel ).toMatch( /\/uploads\/.+cigarholic-icon.*\.png$/ );
+			expect( ( await request.get( href ) ).status(), rel ).toBe( 200 );
+		}
+	} );
+
+	test( 'header shows the logo', async ( { page } ) => {
+		await login( page );
+		await page.goto( '/' );
+		const logo = page.locator( 'header .wp-block-site-logo img' );
+		await expect( logo ).toBeVisible();
+		await expect( logo ).toHaveAttribute( 'alt', 'Cigarholic' );
+		expect( await logo.evaluate( ( img ) => img.complete && img.naturalWidth > 0 ) ).toBe( true );
 	} );
 
 	test( 'store pages pass AA contrast for every visible text', async ( { page } ) => {
