@@ -12,3 +12,4 @@ One file per decision, numbered, never rewritten: a superseded decision gets a n
 | [0006](0006-secrets-channel.md) | One secrets channel: GitHub secrets → provisioning and deploy workflows → server `.env` | accepted |
 | [0007](0007-dev-tools-as-phars.md) | PHPStan, PHPUnit and Deployer as pinned phars, not Composer packages | accepted |
 | [0008](0008-edge-optional.md) | Cloudflare is additive: the origin alone must serve TLS, redirects and rate limits | accepted |
+| [0009](0009-brand-system.md) | Brand system as semantic theme tokens with contrast rules, a Forest section style, self-hosted Young Serif and Hanken Grotesk | accepted |

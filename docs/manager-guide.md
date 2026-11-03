@@ -40,6 +40,16 @@ Messages from the **Contact** page arrive by email in the support inbox, with th
 
 While **WooCommerce → Settings → Site visibility** is set to *Coming soon*, visitors see the launch page with the signup form and you (logged in as manager or admin) see the whole store. Only the owner decides when to switch it to *Live*.
 
+## Brand colours and fonts
+
+The colours and fonts are part of the theme; you choose them by name in the editor and never type a hex value. Two rules keep text readable for everyone (WCAG 2.2 AA, CMP-04):
+
+- **On light backgrounds** (*Ash*, *Ash tint*) text is *Ink*, *Stone* (quieter text) or *Cedar* (links, buttons).
+- **On dark backgrounds** (*Forest*, *Forest raised*) text is *Ash*, *Mist* (quieter text) or *Gold* (labels, buttons).
+- Never put *Gold* text on a light background or *Cedar* text on Forest: both are too faint to read. *Line* is for dividers only.
+
+To make a section dark, select the group and pick **Forest** under *Styles*: the background, text, links, buttons and focus outline all switch together. The small uppercase label above a heading is the paragraph style **Eyebrow**; boxed panels are the group style **Card**. Headings use Young Serif and body text Hanken Grotesk; both are served from our own site, so there is nothing to install or license.
+
 ## Coming next in this guide
 
 Add or edit a product, change a price, run a sale, process an order, refund, add tracking, edit pages.

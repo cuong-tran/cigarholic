@@ -24,7 +24,7 @@
 .cigarholic-spec-table th,
 .cigarholic-spec-table td {
 	padding: var( --wp--preset--spacing--30, 0.75rem ) var( --wp--preset--spacing--20, 0.5rem );
-	border-bottom: 1px solid var( --wp--preset--color--neutral-1, #ddd );
+	border-bottom: 1px solid var( --wp--preset--color--line, #d6cec1 );
 	text-align: left;
 	vertical-align: top;
 }

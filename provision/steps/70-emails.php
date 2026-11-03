@@ -8,7 +8,7 @@
  * email enabled. The logo (header image) is added when the brand assets arrive (B9). The low-stock
  * recipient is set with the inventory options in 10-woocommerce-general.
  *
- * Feature IDs: FND-03, ORD-02, ORD-03, CMP-07.
+ * Feature IDs: FND-03, ORD-02, ORD-03, CMP-07, CNT-01 (colours).
  *
  * @package Cigarholic
  */
@@ -30,13 +30,14 @@ return static function ( Context $ctx ): void {
 		. 'Handcrafted in Vietnam, shipped from Texas. Questions: support@cigarholic.com'
 	);
 
-	// Colours from the theme palette, with the theme.json values as fallback when the theme is not active.
+	// Colours from the theme palette (CNT-01 brand system), with the theme.json values as fallback when the
+	// theme is not active: Forest header, Ash outer background, Ash tint body, Ink text, Stone footer text.
 	$palette = array(
-		'accent'    => '#6b4a2e',
-		'neutral-1' => '#f4f1ec',
-		'base'      => '#ffffff',
-		'contrast'  => '#1c1917',
-		'neutral-2' => '#5b564f',
+		'forest'    => '#1f2b25',
+		'base'      => '#eee9e0',
+		'neutral-1' => '#f7f4ef',
+		'contrast'  => '#1a1815',
+		'neutral-2' => '#5e574e',
 	);
 	if ( function_exists( 'wp_get_global_settings' ) ) {
 		$theme_palette = wp_get_global_settings( array( 'color', 'palette', 'theme' ) );
@@ -48,9 +49,9 @@ return static function ( Context $ctx ): void {
 			}
 		}
 	}
-	$ctx->option( 'woocommerce_email_base_color', $palette['accent'] );
-	$ctx->option( 'woocommerce_email_background_color', $palette['neutral-1'] );
-	$ctx->option( 'woocommerce_email_body_background_color', $palette['base'] );
+	$ctx->option( 'woocommerce_email_base_color', $palette['forest'] );
+	$ctx->option( 'woocommerce_email_background_color', $palette['base'] );
+	$ctx->option( 'woocommerce_email_body_background_color', $palette['neutral-1'] );
 	$ctx->option( 'woocommerce_email_text_color', $palette['contrast'] );
 	$ctx->option( 'woocommerce_email_footer_text_color', $palette['neutral-2'] );
 	$ctx->option( 'woocommerce_email_auto_sync_with_theme', 'no' );

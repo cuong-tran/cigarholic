@@ -1,0 +1,194 @@
+// CNT-01 brand system: the self-hosted fonts load and really render, the Forest section style, the
+// section-aware focus ring and error colour, and WCAG 2.2 AA contrast for every visible text (CMP-04).
+// Functions passed to page.evaluate() run in the browser, hence these globals.
+/* global document, getComputedStyle, NodeFilter */
+import { test, expect } from '@playwright/test';
+import { login, waitForTurnstile } from './helpers.js';
+
+const FOREST = 'rgb(31, 43, 37)';
+const GOLD = 'rgb(193, 144, 79)';
+const ERROR_ON_FOREST = 'rgb(242, 160, 138)';
+
+/** Whether anonymous visitors get the coming-soon page here (provisioning step 80). */
+async function comingSoonIsOn( request ) {
+	const html = await ( await request.get( '/' ) ).text();
+	return html.includes( 'cigarholic-signup__form' ) && ! html.includes( 'aria-label="Primary"' );
+}
+
+/**
+ * Every visible text node whose colour fails AA against the background it is painted on
+ * (4.5:1, or 3:1 for large text: 24 px, or 18.66 px bold). Opacity and translucent colours
+ * are blended over the first opaque ancestor background. Text over a background image, a
+ * gradient or a Cover block is reported too, because a colour comparison cannot judge it.
+ */
+async function contrastFailures( page ) {
+	return page.evaluate( () => {
+		const parse = ( value ) => {
+			const m = value.match( /rgba?\(([^)]+)\)/ );
+			if ( ! m ) {
+				return null;
+			}
+			const [ r, g, b, a = 1 ] = m[ 1 ].split( /[ ,/]+/ ).filter( Boolean ).map( Number );
+			return { r, g, b, a };
+		};
+		const blend = ( top, bottom, alpha ) => ( {
+			r: top.r * alpha + bottom.r * ( 1 - alpha ),
+			g: top.g * alpha + bottom.g * ( 1 - alpha ),
+			b: top.b * alpha + bottom.b * ( 1 - alpha ),
+			a: 1,
+		} );
+		const luminance = ( c ) => {
+			const f = ( v ) => {
+				const s = v / 255;
+				return s <= 0.04045 ? s / 12.92 : ( ( s + 0.055 ) / 1.055 ) ** 2.4;
+			};
+			return 0.2126 * f( c.r ) + 0.7152 * f( c.g ) + 0.0722 * f( c.b );
+		};
+		const ratio = ( x, y ) => {
+			const [ hi, lo ] = [ luminance( x ), luminance( y ) ].sort( ( p, q ) => q - p );
+			return ( hi + 0.05 ) / ( lo + 0.05 );
+		};
+		// The colour behind an element; null when an image, gradient or Cover block paints it, which a
+		// colour comparison cannot judge.
+		const background = ( el ) => {
+			const layers = [];
+			for ( let node = el; node; node = node.parentElement ) {
+				const computed = getComputedStyle( node );
+				if ( computed.backgroundImage !== 'none' || node.classList.contains( 'wp-block-cover' ) ) {
+					return null;
+				}
+				const bg = parse( computed.backgroundColor );
+				if ( bg && bg.a > 0 ) {
+					layers.push( bg );
+					if ( bg.a === 1 ) {
+						break;
+					}
+				}
+			}
+			let result = { r: 255, g: 255, b: 255, a: 1 };
+			for ( const layer of layers.reverse() ) {
+				result = blend( layer, result, layer.a );
+			}
+			return result;
+		};
+		const opacity = ( el ) => {
+			let value = 1;
+			for ( let node = el; node; node = node.parentElement ) {
+				value *= Number( getComputedStyle( node ).opacity );
+			}
+			return value;
+		};
+
+		const failures = [];
+		const walker = document.createTreeWalker( document.body, NodeFilter.SHOW_TEXT );
+		for ( let text = walker.nextNode(); text; text = walker.nextNode() ) {
+			const el = text.parentElement;
+			if ( ! el || ! text.textContent.trim() || el.closest( 'script, style, noscript, [aria-hidden="true"]' ) ) {
+				continue;
+			}
+			const range = document.createRange();
+			range.selectNodeContents( text );
+			const rect = range.getBoundingClientRect();
+			const style = getComputedStyle( el );
+			if ( rect.width < 2 || rect.height < 2 || style.visibility === 'hidden' ) {
+				continue; // Screen-reader-only text and the honeypot are clipped to 1 px.
+			}
+			const fg = parse( style.color );
+			const bg = background( el );
+			if ( ! bg ) {
+				// Fail loudly rather than pass unchecked: text over an image needs a manual check (or an
+				// overlay that gives it a solid colour) before it can be listed here as verified.
+				failures.push( `"${ text.textContent.trim().slice( 0, 40 ) }" is over an image or gradient: check its contrast by hand` );
+				continue;
+			}
+			const painted = blend( fg, bg, fg.a * opacity( el ) );
+			const size = parseFloat( style.fontSize );
+			const large = size >= 24 || ( size >= 18.66 && Number( style.fontWeight ) >= 700 );
+			const value = ratio( painted, bg );
+			if ( value < ( large ? 3 : 4.5 ) ) {
+				failures.push( `"${ text.textContent.trim().slice( 0, 40 ) }" ${ style.color } on rgb(${ bg.r }, ${ bg.g }, ${ bg.b }): ${ value.toFixed( 2 ) }:1` );
+			}
+		}
+		return failures;
+	} );
+}
+
+test.describe( 'brand system', () => {
+	test( 'fonts are self-hosted, loaded and actually render the H1', async ( { page, browserName } ) => {
+		const external = [];
+		const served = new Set();
+		page.on( 'request', ( r ) => {
+			if ( /fonts\.(googleapis|gstatic)\.com/.test( r.url() ) ) {
+				external.push( r.url() );
+			}
+		} );
+		page.on( 'response', ( r ) => {
+			if ( /\/themes\/cigarholic\/assets\/fonts\/[a-z0-9-]+\.woff2$/.test( r.url() ) && r.status() === 200 ) {
+				served.add( r.url().replace( /^.*\//, '' ) );
+			}
+		} );
+
+		await page.goto( '/' );
+		await page.evaluate( () => document.fonts.ready );
+
+		// document.fonts.check() is true even when no face matches, so look at the faces themselves.
+		const faces = await page.evaluate( () => [ ...document.fonts ].map( ( f ) => ( { family: f.family.replace( /["']/g, '' ), status: f.status } ) ) );
+		expect( faces ).toContainEqual( { family: 'Young Serif', status: 'loaded' } );
+		expect( faces ).toContainEqual( { family: 'Hanken Grotesk', status: 'loaded' } );
+		expect( [ ...served ].sort() ).toEqual( [ 'hanken-grotesk-latin-wght-normal.woff2', 'young-serif-latin-400-normal.woff2' ] );
+		expect( external ).toEqual( [] );
+
+		const h1 = page.locator( 'h1' ).first();
+		await expect( h1 ).toHaveCSS( 'font-weight', '400' );
+
+		// The font that actually paints the H1's text, as Chromium reports it: a silent fallback to Georgia fails.
+		test.skip( browserName !== 'chromium', 'platform font check needs the Chrome DevTools Protocol' );
+		const cdp = await page.context().newCDPSession( page );
+		await cdp.send( 'DOM.enable' );
+		await cdp.send( 'CSS.enable' );
+		const { root } = await cdp.send( 'DOM.getDocument', { depth: -1 } );
+		const textHolder = ( await cdp.send( 'DOM.querySelector', { nodeId: root.nodeId, selector: 'h1 a' } ) ).nodeId ||
+			( await cdp.send( 'DOM.querySelector', { nodeId: root.nodeId, selector: 'h1' } ) ).nodeId;
+		const { fonts } = await cdp.send( 'CSS.getPlatformFontsForNode', { nodeId: textHolder } );
+		expect( fonts.filter( ( f ) => f.isCustomFont ).map( ( f ) => f.familyName ) ).toContain( 'Young Serif' );
+	} );
+
+	test( 'coming-soon page: Forest ground, Gold focus ring, Forest error colour, AA contrast', async ( { page, request } ) => {
+		test.skip( ! ( await comingSoonIsOn( request ) ), 'coming-soon mode is off on this environment' );
+		await page.goto( '/' );
+
+		const forest = page.locator( '.is-style-forest' ).first();
+		await expect( forest ).toHaveCSS( 'background-color', FOREST );
+		const height = await forest.evaluate( ( el ) => el.getBoundingClientRect().height );
+		expect( height ).toBeGreaterThanOrEqual( page.viewportSize().height );
+
+		// Keyboard focus on a link inside Forest draws the Gold ring (Ink would be 1.21:1 there).
+		const phone = page.locator( 'a[href^="tel:"]' );
+		for ( let i = 0; i < 30 && ! ( await phone.evaluate( ( el ) => el === document.activeElement ) ); i++ ) {
+			await page.keyboard.press( 'Tab' );
+		}
+		await expect( phone ).toBeFocused();
+		await expect( phone ).toHaveCSS( 'outline-color', GOLD );
+
+		expect( await contrastFailures( page ) ).toEqual( [] );
+
+		// A refused address shows the error in the Forest error colour.
+		const form = page.locator( '.cigarholic-signup__form' );
+		await waitForTurnstile( form );
+		await form.getByLabel( 'Email address' ).fill( 'not-an-email' );
+		await form.getByRole( 'button' ).click();
+		const status = form.locator( '.cigarholic-signup__status' );
+		await expect( status ).toHaveAttribute( 'data-state', 'error', { timeout: 15_000 } );
+		await expect( status ).toHaveCSS( 'color', ERROR_ON_FOREST );
+		expect( await contrastFailures( page ) ).toEqual( [] );
+	} );
+
+	test( 'store pages pass AA contrast for every visible text', async ( { page } ) => {
+		await login( page );
+		for ( const path of [ '/', '/shop/' ] ) {
+			await page.goto( path );
+			await page.evaluate( () => document.fonts.ready );
+			expect( await contrastFailures( page ), path ).toEqual( [] );
+		}
+	} );
+} );

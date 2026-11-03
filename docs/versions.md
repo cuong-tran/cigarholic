@@ -20,6 +20,8 @@ What runs where, and when it was last tested together. Same PHP minor on CI, sta
 | PHPUnit | 9.6.38 | `scripts/tools.sh` | 2026-10-30 (6 tests green in the container) | phar; the WordPress test suite (`wp-phpunit/wp-phpunit` 7.1.3) still uses PHPUnit 9 APIs; `yoast/phpunit-polyfills` 4.0 |
 | Deployer | 8.0.5 | `scripts/tools.sh` | 2026-10-30 | phar |
 | PHP_CodeSniffer + WPCS | 3.x + 3.4.1 | `composer.lock` | 2026-10-30 | PHPCompatibilityWP 2.1.x |
+| Young Serif (font) | Fontsource `@fontsource/young-serif` 5.3.0, latin 400 | `web/app/themes/cigarholic/assets/fonts/` (vendored woff2, OFL) | 2026-11-03 (rendered in Chromium) | ADR 0009; sha256 `6ba68b99…`, 26 992 bytes |
+| Hanken Grotesk (font) | Fontsource `@fontsource-variable/hanken-grotesk` 5.3.0, latin, wght 100–900 | `web/app/themes/cigarholic/assets/fonts/` (vendored woff2, OFL) | 2026-11-03 (rendered in Chromium) | ADR 0009; sha256 `e9201edd…`, 34 704 bytes |
 
 Plugin versions: see `docs/plugins.md` (all pinned exactly in `composer.lock`).
 

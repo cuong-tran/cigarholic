@@ -33,8 +33,9 @@
 	font-weight: 600;
 }
 
+/* --cigarholic-error comes from the theme: #9b1c1c on light, #f2a08a on Forest (CNT-01). */
 .cigarholic-contact__status[data-state="error"] {
-	color: #9b1c1c;
+	color: var(--cigarholic-error, #9b1c1c);
 }
 
 .cigarholic-contact__button {

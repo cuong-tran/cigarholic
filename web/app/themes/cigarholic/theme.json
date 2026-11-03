@@ -20,28 +20,53 @@
       "palette": [
         {
           "slug": "base",
-          "color": "#ffffff",
-          "name": "Base"
-        },
-        {
-          "slug": "contrast",
-          "color": "#1c1917",
-          "name": "Contrast"
-        },
-        {
-          "slug": "accent",
-          "color": "#6b4a2e",
-          "name": "Accent"
+          "color": "#eee9e0",
+          "name": "Ash (page ground)"
         },
         {
           "slug": "neutral-1",
-          "color": "#f4f1ec",
-          "name": "Neutral 1 (surface)"
+          "color": "#f7f4ef",
+          "name": "Ash tint (cards, inputs, quiet sections)"
+        },
+        {
+          "slug": "line",
+          "color": "#d6cec1",
+          "name": "Line (dividers only)"
         },
         {
           "slug": "neutral-2",
-          "color": "#5b564f",
-          "name": "Neutral 2 (muted text)"
+          "color": "#5e574e",
+          "name": "Stone (muted text on light)"
+        },
+        {
+          "slug": "contrast",
+          "color": "#1a1815",
+          "name": "Ink (text)"
+        },
+        {
+          "slug": "accent",
+          "color": "#9c5034",
+          "name": "Cedar (links and buttons on light)"
+        },
+        {
+          "slug": "forest",
+          "color": "#1f2b25",
+          "name": "Forest (dark sections)"
+        },
+        {
+          "slug": "forest-2",
+          "color": "#26342d",
+          "name": "Forest raised (panels on Forest)"
+        },
+        {
+          "slug": "mist",
+          "color": "#cfc9be",
+          "name": "Mist (muted text on Forest)"
+        },
+        {
+          "slug": "gold",
+          "color": "#c1904f",
+          "name": "Gold (accent on Forest only)"
         }
       ]
     },
@@ -52,17 +77,45 @@
       "fluid": true,
       "fontFamilies": [
         {
-          "slug": "system-sans",
-          "name": "System sans-serif",
-          "fontFamily": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif"
+          "slug": "hanken-grotesk",
+          "name": "Hanken Grotesk",
+          "fontFamily": "\"Hanken Grotesk\", \"Helvetica Neue\", Arial, sans-serif",
+          "fontFace": [
+            {
+              "fontFamily": "Hanken Grotesk",
+              "fontStyle": "normal",
+              "fontWeight": "100 900",
+              "fontDisplay": "swap",
+              "src": [
+                "file:./assets/fonts/hanken-grotesk-latin-wght-normal.woff2"
+              ]
+            }
+          ]
         },
         {
-          "slug": "system-serif",
-          "name": "System serif",
-          "fontFamily": "Georgia, \"Times New Roman\", Times, serif"
+          "slug": "young-serif",
+          "name": "Young Serif",
+          "fontFamily": "\"Young Serif\", Georgia, serif",
+          "fontFace": [
+            {
+              "fontFamily": "Young Serif",
+              "fontStyle": "normal",
+              "fontWeight": "400",
+              "fontDisplay": "swap",
+              "src": [
+                "file:./assets/fonts/young-serif-latin-400-normal.woff2"
+              ]
+            }
+          ]
         }
       ],
       "fontSizes": [
+        {
+          "slug": "x-small",
+          "size": "0.75rem",
+          "fluid": false,
+          "name": "Label"
+        },
         {
           "slug": "small",
           "size": "0.875rem",
@@ -71,39 +124,48 @@
         },
         {
           "slug": "medium",
-          "size": "1rem",
+          "size": "1.0625rem",
           "fluid": {
             "min": "1rem",
-            "max": "1.125rem"
+            "max": "1.0625rem"
           },
-          "name": "Medium"
+          "name": "Body"
         },
         {
           "slug": "large",
-          "size": "1.25rem",
+          "size": "1.125rem",
           "fluid": {
-            "min": "1.125rem",
-            "max": "1.5rem"
+            "min": "1.0625rem",
+            "max": "1.25rem"
           },
-          "name": "Large"
+          "name": "Lead"
         },
         {
           "slug": "x-large",
-          "size": "1.75rem",
+          "size": "1.5rem",
           "fluid": {
-            "min": "1.5rem",
-            "max": "2.25rem"
+            "min": "1.375rem",
+            "max": "1.625rem"
           },
-          "name": "Extra large"
+          "name": "Heading 3"
         },
         {
           "slug": "xx-large",
-          "size": "2.5rem",
+          "size": "2.25rem",
           "fluid": {
             "min": "2rem",
-            "max": "3.25rem"
+            "max": "2.5rem"
           },
-          "name": "Huge"
+          "name": "Heading 2"
+        },
+        {
+          "slug": "xxx-large",
+          "size": "3.25rem",
+          "fluid": {
+            "min": "2.5rem",
+            "max": "4rem"
+          },
+          "name": "Heading 1"
         }
       ],
       "textColumns": false,
@@ -157,7 +219,14 @@
           "name": "8"
         }
       ],
-      "units": [ "px", "rem", "em", "%", "vh", "vw" ]
+      "units": [
+        "px",
+        "rem",
+        "em",
+        "%",
+        "vh",
+        "vw"
+      ]
     },
     "border": {
       "color": true,
@@ -171,13 +240,7 @@
     },
     "shadow": {
       "defaultPresets": false,
-      "presets": [
-        {
-          "slug": "soft",
-          "name": "Soft",
-          "shadow": "0 2px 12px rgba(28, 25, 23, 0.08)"
-        }
-      ]
+      "presets": []
     },
     "blocks": {
       "core/button": {
@@ -198,17 +261,17 @@
       "text": "var:preset|color|contrast"
     },
     "typography": {
-      "fontFamily": "var:preset|font-family|system-sans",
+      "fontFamily": "var:preset|font-family|hanken-grotesk",
       "fontSize": "var:preset|font-size|medium",
-      "lineHeight": "1.6"
+      "lineHeight": "1.65"
     },
     "spacing": {
       "blockGap": "var:preset|spacing|50",
       "padding": {
         "top": "0",
-        "right": "var:preset|spacing|40",
+        "right": "clamp(1rem, 4vw, 2rem)",
         "bottom": "0",
-        "left": "var:preset|spacing|40"
+        "left": "clamp(1rem, 4vw, 2rem)"
       }
     },
     "elements": {
@@ -221,54 +284,48 @@
         },
         ":hover": {
           "color": {
-            "text": "var:preset|color|contrast"
+            "text": "var:preset|color|forest"
           }
         },
         ":focus": {
           "color": {
-            "text": "var:preset|color|contrast"
+            "text": "var:preset|color|forest"
           }
         }
       },
       "button": {
         "border": {
-          "radius": "2px",
+          "radius": "3px",
           "width": "0"
         },
         "color": {
-          "background": "var:preset|color|contrast",
-          "text": "var:preset|color|base"
+          "background": "var:preset|color|accent",
+          "text": "#ffffff"
         },
         "spacing": {
           "padding": {
-            "top": "0.75rem",
-            "right": "1.5rem",
-            "bottom": "0.75rem",
-            "left": "1.5rem"
+            "top": "0.875rem",
+            "right": "1.625rem",
+            "bottom": "0.875rem",
+            "left": "1.625rem"
           }
         },
         "typography": {
-          "fontFamily": "var:preset|font-family|system-sans",
-          "fontSize": "var:preset|font-size|medium",
+          "fontFamily": "var:preset|font-family|hanken-grotesk",
+          "fontSize": "1rem",
           "fontWeight": "600",
           "lineHeight": "1.2",
           "textDecoration": "none"
         },
         ":hover": {
           "color": {
-            "background": "var:preset|color|accent",
-            "text": "var:preset|color|base"
-          }
-        },
-        ":focus": {
-          "color": {
-            "background": "var:preset|color|accent",
+            "background": "var:preset|color|forest",
             "text": "var:preset|color|base"
           }
         },
         ":active": {
           "color": {
-            "background": "var:preset|color|accent",
+            "background": "var:preset|color|forest",
             "text": "var:preset|color|base"
           }
         }
@@ -278,46 +335,53 @@
           "text": "var:preset|color|contrast"
         },
         "typography": {
-          "fontFamily": "var:preset|font-family|system-serif",
-          "fontWeight": "600",
-          "lineHeight": "1.2"
+          "fontFamily": "var:preset|font-family|young-serif",
+          "fontWeight": "400",
+          "lineHeight": "1.15"
         }
       },
       "h1": {
         "typography": {
-          "fontSize": "var:preset|font-size|xx-large"
+          "fontSize": "var:preset|font-size|xxx-large",
+          "lineHeight": "1.05",
+          "letterSpacing": "-0.01em"
         }
       },
       "h2": {
         "typography": {
-          "fontSize": "var:preset|font-size|x-large"
+          "fontSize": "var:preset|font-size|xx-large",
+          "lineHeight": "1.15"
         }
       },
       "h3": {
         "typography": {
-          "fontSize": "var:preset|font-size|large"
+          "fontSize": "var:preset|font-size|x-large",
+          "lineHeight": "1.2"
         }
       },
       "h4": {
         "typography": {
-          "fontFamily": "var:preset|font-family|system-sans",
+          "fontFamily": "var:preset|font-family|hanken-grotesk",
           "fontSize": "var:preset|font-size|medium",
-          "fontWeight": "700"
+          "fontWeight": "600",
+          "lineHeight": "1.4"
         }
       },
       "h5": {
         "typography": {
-          "fontFamily": "var:preset|font-family|system-sans",
+          "fontFamily": "var:preset|font-family|hanken-grotesk",
           "fontSize": "var:preset|font-size|medium",
-          "fontWeight": "600"
+          "fontWeight": "600",
+          "lineHeight": "1.4"
         }
       },
       "h6": {
         "typography": {
-          "fontFamily": "var:preset|font-family|system-sans",
-          "fontSize": "var:preset|font-size|small",
+          "fontFamily": "var:preset|font-family|hanken-grotesk",
+          "fontSize": "var:preset|font-size|x-small",
           "fontWeight": "600",
-          "letterSpacing": "0.04em",
+          "letterSpacing": "0.24em",
+          "lineHeight": "1.4",
           "textTransform": "uppercase"
         }
       },
@@ -336,9 +400,9 @@
           "outline": {
             "border": {
               "color": "var:preset|color|contrast",
-              "radius": "2px",
+              "radius": "3px",
               "style": "solid",
-              "width": "2px"
+              "width": "1.5px"
             },
             "color": {
               "background": "transparent",
@@ -346,18 +410,18 @@
             },
             "spacing": {
               "padding": {
-                "top": "calc(0.75rem - 2px)",
-                "right": "calc(1.5rem - 2px)",
-                "bottom": "calc(0.75rem - 2px)",
-                "left": "calc(1.5rem - 2px)"
+                "top": "calc(0.875rem - 1.5px)",
+                "right": "calc(1.625rem - 1.5px)",
+                "bottom": "calc(0.875rem - 1.5px)",
+                "left": "calc(1.625rem - 1.5px)"
               }
             },
             ":hover": {
               "border": {
-                "color": "var:preset|color|accent"
+                "color": "var:preset|color|contrast"
               },
               "color": {
-                "background": "var:preset|color|accent",
+                "background": "var:preset|color|contrast",
                 "text": "var:preset|color|base"
               }
             }
@@ -366,7 +430,7 @@
       },
       "core/navigation": {
         "typography": {
-          "fontSize": "var:preset|font-size|medium",
+          "fontSize": "0.9375rem",
           "fontWeight": "500"
         },
         "elements": {
@@ -387,10 +451,10 @@
       },
       "core/site-title": {
         "typography": {
-          "fontFamily": "var:preset|font-family|system-serif",
-          "fontSize": "var:preset|font-size|large",
-          "fontWeight": "700",
-          "letterSpacing": "0.02em",
+          "fontFamily": "var:preset|font-family|young-serif",
+          "fontSize": "var:preset|font-size|x-large",
+          "fontWeight": "400",
+          "letterSpacing": "-0.01em",
           "lineHeight": "1"
         },
         "elements": {
@@ -419,9 +483,9 @@
       },
       "core/post-title": {
         "typography": {
-          "fontFamily": "var:preset|font-family|system-serif",
-          "fontWeight": "600",
-          "lineHeight": "1.2"
+          "fontFamily": "var:preset|font-family|young-serif",
+          "fontWeight": "400",
+          "lineHeight": "1.15"
         },
         "elements": {
           "link": {
@@ -461,7 +525,7 @@
       "core/search": {
         "border": {
           "color": "var:preset|color|neutral-2",
-          "radius": "2px",
+          "radius": "3px",
           "style": "solid",
           "width": "1px"
         },
@@ -471,13 +535,13 @@
       },
       "core/separator": {
         "color": {
-          "text": "var:preset|color|neutral-1"
+          "text": "var:preset|color|line"
         }
       },
       "core/details": {
         "border": {
           "bottom": {
-            "color": "var:preset|color|neutral-1",
+            "color": "var:preset|color|line",
             "style": "solid",
             "width": "1px"
           }
@@ -491,9 +555,9 @@
       },
       "core/quote": {
         "typography": {
-          "fontFamily": "var:preset|font-family|system-serif",
+          "fontFamily": "var:preset|font-family|young-serif",
           "fontSize": "var:preset|font-size|large",
-          "fontStyle": "italic"
+          "fontStyle": "normal"
         },
         "border": {
           "left": {
@@ -505,8 +569,9 @@
       },
       "core/pullquote": {
         "typography": {
-          "fontFamily": "var:preset|font-family|system-serif",
+          "fontFamily": "var:preset|font-family|young-serif",
           "fontSize": "var:preset|font-size|x-large",
+          "fontWeight": "400",
           "lineHeight": "1.3"
         }
       },
@@ -524,11 +589,11 @@
       },
       "woocommerce/product-button": {
         "border": {
-          "radius": "2px"
+          "radius": "3px"
         },
         "color": {
-          "background": "var:preset|color|contrast",
-          "text": "var:preset|color|base"
+          "background": "var:preset|color|accent",
+          "text": "#ffffff"
         },
         "typography": {
           "fontSize": "var:preset|font-size|small",
@@ -542,11 +607,11 @@
       },
       "woocommerce/product-sale-badge": {
         "border": {
-          "radius": "2px"
+          "radius": "3px"
         },
         "color": {
           "background": "var:preset|color|accent",
-          "text": "var:preset|color|base"
+          "text": "#ffffff"
         },
         "typography": {
           "fontSize": "var:preset|font-size|small",
