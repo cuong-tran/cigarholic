@@ -5,7 +5,7 @@
  * Categories: cigarholic, featured
  * Template Types: front-page
  * Keywords: hero, banner, intro
- * Description: Full-width introduction with the brand promise, two calls to action and a product photo placeholder. Carries the page's only H1.
+ * Description: Full-width Forest introduction with a Gold label, the brand promise, two calls to action and a photo panel. Carries the page's only H1.
  *
  * Feature IDs: NAV-04 (homepage), CNT-01 (brand system), CMP-02 (origin wording).
  *
@@ -13,26 +13,26 @@
  */
 
 ?>
-<!-- wp:group {"align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"backgroundColor":"neutral-1","layout":{"type":"constrained"}} -->
-<div class="wp-block-group alignfull has-neutral-1-background-color has-background" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">
-	<!-- wp:columns {"verticalAlignment":"center","align":"wide"} -->
+<!-- wp:group {"align":"full","className":"is-style-forest","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull is-style-forest" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">
+	<!-- wp:columns {"verticalAlignment":"center","align":"wide","style":{"spacing":{"blockGap":{"left":"var:preset|spacing|70"}}}} -->
 	<div class="wp-block-columns alignwide are-vertically-aligned-center">
-		<!-- wp:column {"verticalAlignment":"center","width":"55%"} -->
-		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:55%">
-			<!-- wp:paragraph {"style":{"typography":{"letterSpacing":"0.08em","textTransform":"uppercase"}},"textColor":"neutral-2","fontSize":"small"} -->
-			<p class="has-neutral-2-color has-text-color has-small-font-size" style="letter-spacing:0.08em;text-transform:uppercase"><?php esc_html_e( 'Handcrafted in Vietnam, shipped from Texas', 'cigarholic' ); ?></p>
+		<!-- wp:column {"verticalAlignment":"center","width":"52%","style":{"spacing":{"blockGap":"var:preset|spacing|50"}}} -->
+		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:52%">
+			<!-- wp:paragraph {"className":"is-style-eyebrow"} -->
+			<p class="is-style-eyebrow"><?php esc_html_e( 'Handcrafted in Vietnam, shipped from Texas', 'cigarholic' ); ?></p>
 			<!-- /wp:paragraph -->
 
 			<!-- wp:heading {"level":1} -->
 			<h1 class="wp-block-heading"><?php esc_html_e( 'Humidors made by hand, built to protect your collection', 'cigarholic' ); ?></h1>
 			<!-- /wp:heading -->
 
-			<!-- wp:paragraph {"fontSize":"large"} -->
-			<p class="has-large-font-size"><?php esc_html_e( 'Solid hardwood humidors, cigar boxes and accessories, each one cut, joined and finished by hand in our Vietnam workshop and delivered from our warehouse in Texas.', 'cigarholic' ); ?></p>
+			<!-- wp:paragraph {"textColor":"mist","fontSize":"large"} -->
+			<p class="has-mist-color has-text-color has-large-font-size"><?php esc_html_e( 'Solid hardwood humidors, cigar boxes and accessories, each one cut, joined and finished by hand in our Vietnam workshop and delivered from our warehouse in Texas.', 'cigarholic' ); ?></p>
 			<!-- /wp:paragraph -->
 
-			<!-- wp:buttons -->
-			<div class="wp-block-buttons">
+			<!-- wp:buttons {"style":{"spacing":{"margin":{"top":"var:preset|spacing|30"}}}} -->
+			<div class="wp-block-buttons" style="margin-top:var(--wp--preset--spacing--30)">
 				<!-- wp:button -->
 				<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( home_url( '/shop/' ) ); ?>"><?php esc_html_e( 'Shop humidors', 'cigarholic' ); ?></a></div>
 				<!-- /wp:button -->
@@ -45,10 +45,10 @@
 		</div>
 		<!-- /wp:column -->
 
-		<!-- wp:column {"verticalAlignment":"center","width":"45%"} -->
-		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:45%">
+		<!-- wp:column {"verticalAlignment":"center","width":"48%"} -->
+		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:48%">
 			<!-- wp:image {"aspectRatio":"4/3","scale":"cover","sizeSlug":"large"} -->
-			<figure class="wp-block-image size-large"><img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/placeholder-product.svg' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder for a photo of a handcrafted desktop humidor with its lid open', 'cigarholic' ); ?>" style="aspect-ratio:4/3;object-fit:cover"/></figure>
+			<figure class="wp-block-image size-large"><img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/placeholder-hero.svg' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder for a photo of a handcrafted desktop humidor with its lid open', 'cigarholic' ); ?>" style="aspect-ratio:4/3;object-fit:cover"/></figure>
 			<!-- /wp:image -->
 		</div>
 		<!-- /wp:column -->

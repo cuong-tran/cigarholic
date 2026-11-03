@@ -21,8 +21,8 @@
 		<h2 class="wp-block-heading"><?php esc_html_e( 'Best sellers', 'cigarholic' ); ?></h2>
 		<!-- /wp:heading -->
 
-		<!-- wp:paragraph -->
-		<p><a href="<?php echo esc_url( home_url( '/shop/' ) ); ?>"><?php esc_html_e( 'Shop all humidors', 'cigarholic' ); ?></a></p>
+		<!-- wp:paragraph {"style":{"typography":{"fontWeight":"600"}}} -->
+		<p style="font-weight:600"><a href="<?php echo esc_url( home_url( '/shop/?orderby=popularity' ) ); ?>"><?php esc_html_e( 'All best sellers', 'cigarholic' ); ?> &rarr;</a></p>
 		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:group -->
@@ -34,11 +34,11 @@
 				<!-- wp:woocommerce/product-sale-badge {"isDescendentOfQueryLoop":true,"align":"right"} /-->
 			<!-- /wp:woocommerce/product-image -->
 
-			<!-- wp:post-title {"textAlign":"center","level":3,"isLink":true,"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title","style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}}} /-->
+			<!-- wp:post-title {"level":3,"isLink":true,"fontSize":"large","__woocommerceNamespace":"woocommerce/product-collection/product-title","style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}}}} /-->
 
-			<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"textAlign":"center","fontSize":"small"} /-->
+			<!-- wp:woocommerce/product-price {"isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
 
-			<!-- wp:woocommerce/product-button {"textAlign":"center","isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
+			<!-- wp:woocommerce/product-button {"textAlign":"left","isDescendentOfQueryLoop":true,"fontSize":"small"} /-->
 		<!-- /wp:woocommerce/product-template -->
 	</div>
 	<!-- /wp:woocommerce/product-collection -->

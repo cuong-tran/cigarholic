@@ -3,11 +3,11 @@
  * Provisioning step: report theme files hidden by copies saved in the Site Editor (CNT-01).
  *
  * A template or template part saved in the Site Editor (for example the coming-soon page through
- * WooCommerce's "Customize" link, or the header after a menu tweak) replaces the theme file, so theme
- * changes to it would not show. Saved work is never deleted here; the run names it, and the owner
+ * WooCommerce's "Customize" link, the homepage after a text edit, or the header after a menu tweak)
+ * replaces the theme file, so theme changes to it would not show. Saved work is never deleted here; the run names it, and the owner
  * resets it under Appearance > Editor (Templates or Patterns > Template parts > the item > Reset).
  *
- * Feature IDs: FND-03, CNT-01, CNT-04, NAV-01, NAV-03.
+ * Feature IDs: FND-03, CNT-01, CNT-04, NAV-01, NAV-03, NAV-04.
  *
  * @package Cigarholic
  */
@@ -21,6 +21,7 @@ return static function ( Context $ctx ): void {
 	}
 	$watched = array(
 		'coming-soon' => 'wp_template',
+		'front-page'  => 'wp_template',
 		'header'      => 'wp_template_part',
 		'footer'      => 'wp_template_part',
 	);
