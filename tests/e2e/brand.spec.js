@@ -286,6 +286,20 @@ test.describe( 'brand system', () => {
 		expect( await contrastFailures( page ) ).toEqual( [] );
 	} );
 
+	test( 'header row stays inside the viewport from 320 px up', async ( { page } ) => {
+		await login( page );
+		for ( const width of [ 320, 360, 599, 600, 782, 1024 ] ) {
+			await page.setViewportSize( { width, height: 800 } );
+			await page.goto( '/' );
+			// Each control of the header row ends inside the viewport (the menu wraps inside its own box).
+			const overflow = await page.evaluate( () => {
+				const row = document.querySelector( '.site-header .alignwide' );
+				return Math.max( ...[ ...row.children ].map( ( c ) => c.getBoundingClientRect().right ) ) - document.documentElement.clientWidth;
+			} );
+			expect( overflow, `${ width } px` ).toBeLessThanOrEqual( 0 );
+		}
+	} );
+
 	test( 'store pages pass AA contrast for every visible text', async ( { page } ) => {
 		await login( page );
 		for ( const path of [ '/', '/shop/' ] ) {
