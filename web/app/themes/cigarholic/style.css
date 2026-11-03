@@ -31,6 +31,9 @@ Tags: e-commerce, block-patterns, block-styles, full-site-editing, accessibility
 	--cigarholic-focus: var(--wp--preset--color--contrast, #1a1815);
 	--cigarholic-error: #9b1c1c;
 	--cigarholic-eyebrow: var(--wp--preset--color--accent, #9c5034);
+
+	/* Hairlines on Forest (header, footer, coming soon): Gold at 35 %, following the gold token. */
+	--cigarholic-hairline: color-mix(in srgb, var(--wp--preset--color--gold, #c1904f) 35%, transparent);
 }
 
 .is-style-forest {
@@ -68,6 +71,36 @@ Tags: e-commerce, block-patterns, block-styles, full-site-editing, accessibility
 .is-style-forest .wp-block-button.is-style-outline > .wp-block-button__link:focus {
 	background-color: var(--wp--preset--color--base, #eee9e0);
 	color: var(--wp--preset--color--contrast, #1a1815);
+}
+
+/*
+ * Header (NAV-01). The search toggle is an icon like the account and cart
+ * icons, not a Gold button: transparent, Ash icon, 44 px target, Gold on
+ * hover. On phones the menu button stays where the markup puts it (after the
+ * logo), so the visual order and the keyboard order match (WCAG 2.4.3).
+ */
+.site-header .wp-block-search__button {
+	min-inline-size: 44px;
+	min-block-size: 44px;
+	padding: 10px;
+	border-width: 0;
+	background-color: transparent;
+	color: inherit;
+}
+
+.site-header .wp-block-search__button-only .wp-block-search__inside-wrapper {
+	border-width: 0;
+}
+
+.site-header .wp-block-search__button:hover,
+.site-header .wp-block-search__button:focus {
+	background-color: transparent;
+	color: var(--wp--preset--color--gold, #c1904f);
+}
+
+/* Footer (NAV-03): the signup heading lines up with the footer columns. */
+.site-footer .cigarholic-signup .cigarholic-signup__heading {
+	text-align: start;
 }
 
 /* Young Serif has one weight and no italic: never let the browser fake either. */

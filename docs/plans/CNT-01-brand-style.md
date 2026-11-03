@@ -1,6 +1,6 @@
 # Plan: apply the Cigarholic brand style to the theme (CNT-01)
 
-Status: **PR 1 implemented** (2026-11-03: tokens, fonts, Forest section style, coming-soon page, email colours) and **PR 5** (logo, site icon, email logo, from the owner's raster artwork); PRs 2 to 4 open. Source: the owner's design canvas "Cigarholic Brand" (claude.ai artifact `QssWn4fkbnqPAQcDJ66oLh`, version of 2026-10-30), boards *Logo suite*, *Color & type*, *Applications* and *Homepage hero*. The three earlier boards (A · The Band, B · Growth Rings, C · Dovetail) are explorations the canvas itself labels "earlier"; nothing is taken from them, including B's Cedar Light `#D9946E` and C's Archivo.
+Status: **PR 1 implemented** (2026-11-03: tokens, fonts, Forest section style, coming-soon page, email colours) **PR 2** (Forest header and footer) and **PR 5** (logo, site icon, email logo, from the owner's raster artwork); PRs 3 and 4 open. Source: the owner's design canvas "Cigarholic Brand" (claude.ai artifact `QssWn4fkbnqPAQcDJ66oLh`, version of 2026-10-30), boards *Logo suite*, *Color & type*, *Applications* and *Homepage hero*. The three earlier boards (A · The Band, B · Growth Rings, C · Dovetail) are explorations the canvas itself labels "earlier"; nothing is taken from them, including B's Cedar Light `#D9946E` and C's Archivo.
 
 Feature IDs: CNT-01 (brand system), with NAV-01 (header), NAV-03 (footer), NAV-04 (homepage), CNT-04 (coming soon), CMP-04 (accessibility), ORD-03 (branded transactional emails). Satisfies most of OWNER-ACTIONS B9 (colours and fonts); the logo **files** are still missing (see "Owner inputs").
 
@@ -103,7 +103,7 @@ Young Serif has **one weight and no italic**. Headings therefore go from weight 
 One PR per primary feature ID; where a change necessarily touches other IDs, the PR is named by the primary one and lists the rest (AGENTS.md, "How work flows" 1). Each is squash-merged after green CI and deploys staging; production only from the owner's tag.
 
 1. **`feat(CNT-01): brand tokens, self-hosted fonts and the Forest section style`**, also CNT-04, CMP-04, ORD-03: theme.json, fonts + OFL, `styles/sections/forest.json`, `style.css`, block styles, placeholders, coming-soon restyle, email colours + test, ADR 0009 (brand system and self-hosted fonts), theme README token table, `docs/versions.md`, `docs/manager-guide.md` (which colours go where: Gold only on Forest, Cedar only on light), `CHANGELOG.md`, `docs/STATUS.md`. Worth a `v0.2.0` tag because it changes the live coming-soon page.
-2. **`feat(NAV-01): Forest header and footer`**, also NAV-03.
+2. **`feat(NAV-01): Forest header and footer`**, also NAV-03: done (2026-11-03). The search toggle is a plain 44 px icon like account and cart; on phones the header is one row in markup order (logo, menu, search, account, cart), so focus order matches. Step 85 reports header, footer or coming-soon copies saved in the Site Editor.
 3. **`feat(NAV-04): homepage patterns in the brand layout`**.
 4. **`fix(CNT-01): WooCommerce surfaces in the brand style`** (product, archive, cart, checkout, mini cart, account, order received).
 5. **`feat(CNT-01): logo, site icon and email header from the brand files`**: done second (2026-11-03), from the owner's raster artwork; provisioning step 25 imports the logo, the site icon and the email logo.

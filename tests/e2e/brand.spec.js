@@ -18,10 +18,17 @@ async function comingSoonIsOn( request ) {
 /**
  * Every visible text node whose colour fails AA against the background it is painted on
  * (4.5:1, or 3:1 for large text: 24 px, or 18.66 px bold). Opacity and translucent colours
- * are blended over the first opaque ancestor background. Text over a background image, a
+ * are blended over the first opaque ancestor background, after finite animations finish. Text over a background image, a
  * gradient or a Cover block is reported too, because a colour comparison cannot judge it.
  */
 async function contrastFailures( page ) {
+	// Measure the settled page: a fade-in (the phone menu opens from opacity 0 over 100 ms) would
+	// otherwise be judged mid-animation. Infinite animations (spinners) never finish, so skip them.
+	await page.evaluate( () => Promise.all(
+		document.getAnimations()
+			.filter( ( a ) => a.effect?.getTiming().iterations !== Infinity )
+			.map( ( a ) => a.finished.catch( () => {} ) )
+	) );
 	return page.evaluate( () => {
 		const parse = ( value ) => {
 			const m = value.match( /rgba?\(([^)]+)\)/ );
@@ -222,6 +229,82 @@ test.describe( 'brand system', () => {
 		await expect( logo ).toBeVisible();
 		await expect( logo ).toHaveAttribute( 'alt', 'Cigarholic' );
 		expect( await logo.evaluate( ( img ) => img.complete && img.naturalWidth > 0 ) ).toBe( true );
+	} );
+
+	test( 'header and footer are Forest sections (NAV-01, NAV-03)', async ( { page } ) => {
+		await login( page );
+		await page.goto( '/' );
+		const header = page.locator( '.site-header' );
+		const footer = page.locator( '.site-footer' );
+		await expect( header ).toHaveCSS( 'background-color', FOREST );
+		await expect( footer ).toHaveCSS( 'background-color', FOREST );
+		await expect( footer.locator( '.wp-block-site-logo img' ) ).toHaveAttribute( 'alt', 'Cigarholic' );
+		await expect( footer.getByRole( 'heading', { name: 'Shop' } ) ).toHaveCSS( 'color', GOLD );
+
+		// The search toggle is an icon like account and cart: no Gold fill, a 44 px target.
+		const search = header.locator( '.wp-block-search__button' );
+		await expect( search ).toHaveCSS( 'background-color', 'rgba(0, 0, 0, 0)' );
+		const box = await search.boundingBox();
+		expect( Math.min( box.width, box.height ) ).toBeGreaterThanOrEqual( 44 );
+
+		// Keyboard focus on a header link draws the Gold ring.
+		const firstLink = header.getByRole( 'navigation', { name: 'Primary' } ).getByRole( 'link' ).first();
+		for ( let i = 0; i < 30 && ! ( await firstLink.evaluate( ( el ) => el === document.activeElement ) ); i++ ) {
+			await page.keyboard.press( 'Tab' );
+		}
+		await expect( firstLink ).toBeFocused();
+		await expect( firstLink ).toHaveCSS( 'outline-color', GOLD );
+	} );
+
+	test( 'phone header: one row, focus order matches what you see, Forest menu', async ( { page } ) => {
+		await page.setViewportSize( { width: 390, height: 844 } );
+		await login( page );
+		await page.goto( '/' );
+		const header = page.locator( '.site-header' );
+		const open = header.getByRole( 'button', { name: /open menu/i } );
+		const logo = header.locator( '.wp-block-site-logo' );
+		const [ logoBox, openBox ] = await Promise.all( [ logo.boundingBox(), open.boundingBox() ] );
+		// Everything on the logo's row.
+		expect( Math.abs( ( openBox.y + openBox.height / 2 ) - ( logoBox.y + logoBox.height / 2 ) ) ).toBeLessThan( 12 );
+		// The gold hairline follows the gold token at 35 %.
+		expect( await header.evaluate( ( el ) => getComputedStyle( el ).borderBottomColor ) ).toMatch( /0\.35\)$/ );
+
+		// Keyboard focus visits the header controls left to right (WCAG 2.4.3): no CSS reordering.
+		const xs = [];
+		await page.locator( 'body' ).focus();
+		for ( let i = 0; i < 12 && xs.length < 5; i++ ) {
+			await page.keyboard.press( 'Tab' );
+			const x = await page.evaluate( () => {
+				const el = document.activeElement;
+				return el && el.closest( '.site-header' ) && ! el.closest( '.cigarholic-announcement-bar' ) ? el.getBoundingClientRect().x : null;
+			} );
+			if ( null !== x ) {
+				xs.push( x );
+			}
+		}
+		expect( xs.length ).toBe( 5 ); // Logo, menu, search, account, cart.
+		expect( xs ).toEqual( [ ...xs ].sort( ( a, b ) => a - b ) );
+
+		await open.click();
+		const menu = page.locator( '.wp-block-navigation__responsive-container.is-menu-open' );
+		await expect( menu ).toBeVisible();
+		await expect( menu ).toHaveCSS( 'background-color', FOREST );
+		await expect( menu.getByRole( 'link', { name: 'Shop', exact: true } ) ).toHaveCSS( 'color', 'rgb(238, 233, 224)' );
+		expect( await contrastFailures( page ) ).toEqual( [] );
+	} );
+
+	test( 'header row stays inside the viewport from 320 px up', async ( { page } ) => {
+		await login( page );
+		for ( const width of [ 320, 360, 599, 600, 782, 1024 ] ) {
+			await page.setViewportSize( { width, height: 800 } );
+			await page.goto( '/' );
+			// Each control of the header row ends inside the viewport (the menu wraps inside its own box).
+			const overflow = await page.evaluate( () => {
+				const row = document.querySelector( '.site-header .alignwide' );
+				return Math.max( ...[ ...row.children ].map( ( c ) => c.getBoundingClientRect().right ) ) - document.documentElement.clientWidth;
+			} );
+			expect( overflow, `${ width } px` ).toBeLessThanOrEqual( 0 );
+		}
 	} );
 
 	test( 'store pages pass AA contrast for every visible text', async ( { page } ) => {
