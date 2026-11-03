@@ -243,4 +243,17 @@ return static function ( Context $ctx ): void {
 	} else {
 		$ctx->log( 'ok: no sample page' );
 	}
+
+	// The installer's "Hello world!" post is public in the feed, the REST API and oEmbed even while
+	// the site is in coming-soon mode, with its sample comment. Trashed only while it is untouched
+	// (same slug and title); trashing a post also hides its comments.
+	$hello = get_page_by_path( 'hello-world', OBJECT, 'post' );
+	if ( $hello instanceof WP_Post && 'Hello world!' === $hello->post_title && 'trash' !== $hello->post_status ) {
+		if ( ! $ctx->is_dry_run() ) {
+			wp_trash_post( $hello->ID );
+		}
+		$ctx->changed( 'post hello-world trashed' );
+	} else {
+		$ctx->log( 'ok: no sample post' );
+	}
 };

@@ -147,4 +147,19 @@ final class SignupsTest extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'cigarholic/v1/signups', $html );
 		$this->assertStringContainsString( 'cf-turnstile', $html, 'Turnstile test keys are configured in wp-tests-config.php' );
 	}
+
+	/**
+	 * While WordPress is being installed the table is not touched (`init` runs during
+	 * `wp core install`, before `wp_options` exists); the next request creates it.
+	 */
+	public function test_install_waits_for_wordpress(): void {
+		delete_option( Repository::OPTION );
+		wp_installing( true );
+		Repository::install();
+		wp_installing( false );
+		$this->assertFalse( get_option( Repository::OPTION ) );
+
+		Repository::install();
+		$this->assertSame( Repository::SCHEMA_VERSION, get_option( Repository::OPTION ) );
+	}
 }

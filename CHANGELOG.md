@@ -4,20 +4,19 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+### Fixed
+
+- OPS-07: no login name reaches a visitor after a fresh install. `?author=N` no longer redirects to `/author/<login>/`, author archives answer 404, author links on the front end point at the home page, the core users sitemap is gone, and feeds (`dc:creator`) and oEmbed cards show the site name while a user's display name is still the login. Found on production right after the `v0.1.0` install: `/?author=1`, `/feed/` and `/wp-json/oembed/1.0/embed` named the administrator.
+- FND-03: provisioning (`20-pages`) trashes the installer's untouched "Hello world!" post, which was public in the feed, the REST API and oEmbed during coming-soon, together with its sample comment.
+- CNT-04: `cigarholic-core` no longer touches the signups table while WordPress is being installed (`init` runs during `wp core install`, before `wp_options` exists; seen as a database error in the production install log and in the 2026-11-02 staging review).
+
+## [0.1.0] - 2026-11-03
+
+First release, for the coming-soon site on `cigarholic.com` (milestone M1): the WooCommerce store built and provisioned as code, running whole-site coming-soon with email capture; the store itself stays hidden from visitors until the owner switches it to Live. Verified on staging first: WordPress installed with WP-CLI, 11 launch plugins active, provisioning applied and idempotent, seven `SAMPLE-` products for review (never on production). Tagged by the owner on 2026-11-03 at `854a25a` (#43) and deployed to production the same day: release 1, `wp core install`, release 2 (11 plugins active, 77 provisioning changes, health HTTP 200).
+
 ### Added
 
 - OPS-07 (#43): `/wp-login.php` and `/wp-admin[/...]` redirect (301) to the same path under `/wp/`, where WordPress lives, on both sites and in the Compose runtime; query strings kept, `/wp-admin/install.php` still denied. Covered by `tests/infra/nginx-staging-auth.sh` (41 cases) and `tests/e2e/admin-urls.spec.js`.
-
-### Fixed
-
-- Docs: the manager guide said two-factor is required; the Two Factor plugin is active but enrolment is not enforced yet (OPS-07, next actions).
-
-## [0.1.0] - 2026-11-02
-
-First release, for the coming-soon site on `cigarholic.com` (milestone M1): the WooCommerce store built and provisioned as code, running whole-site coming-soon with email capture; the store itself stays hidden from visitors until the owner switches it to Live. Verified on staging first: WordPress installed with WP-CLI, 11 launch plugins active, provisioning applied and idempotent, seven `SAMPLE-` products for review (never on production).
-
-### Added
-
 - OPS-01 (#37): `infra-provision.yml` → `status` lists the tables of each site database and counts web-installer requests by method and status from the access logs (counts only, no client addresses); `tests/infra/status-installer-log.sh`.
 - OPS-06 (#33): monitoring runbook `docs/runbooks/monitoring.md` (what is monitored and why, the keyword that survives the coming-soon phase, alert routing to the owner, what to do per alert, the server-side signals, UI steps for the owner), `infra/monitoring/uptimerobot.sh` (idempotent UptimeRobot v2 script with `--dry-run` and `--list`, secrets never on a command line or in the log) and the `monitoring.yml` workflow (`environment`, `dry_run`, `list`); optional `UPTIMEROBOT_ALERT_CONTACTS` variable. The API calls wait for the owner's key (OWNER-ACTIONS B3).
 - OPS-04 (#32): staging deploys switched on with the marker file `infra/deploy/STAGING_ENABLED`; every push to `main` that touches the application deploys `staging.cigarholic.com`.
@@ -36,6 +35,7 @@ First release, for the coming-soon site on `cigarholic.com` (milestone M1): the 
 
 ### Fixed
 
+- Docs (#43): the manager guide said two-factor is required; the Two Factor plugin is active but enrolment is not enforced yet (OPS-07, next actions).
 - FND-08 / OPS-01 (#31), from the first real runs on the VPS: `infra-provision.yml` reads `LETSENCRYPT_EMAIL` from the repository secret or the variable; the deploy sudoers file no longer sets `requiretty` (sudo on Ubuntu 26.04 rejects it, which stopped `provision.sh` at the visudo check); `status.sh` prints `-` for tools that are not installed yet.
 - FND-08 (#34): the first staging deploy failed its health check with HTTP 500 because MariaDB rejected the password in `shared/.env`: `random_secret` in `site.sh` had a `}` inside its `${2:-...}` default, so `:,.<>?-}` was appended to every charset and the `?-}` range added the backslash, which MariaDB reads as an escape and PHP literally. Secrets are now alphanumeric; `site.sh` rotates a non-alphanumeric `DB_PASSWORD` and re-asserts the database user (both sites were affected and rotated). `wp` on the server is a wrapper that silences WP-CLI 2.12's PHP 8.5 deprecations for the CLI only.
 - FND-03 (#41): staging reported `blog_public = 1`: `DISALLOW_INDEXING` was defined for staging and development but nothing read it (the Bedrock plugin that does is not installed). Provisioning now sets Settings > Reading > search engine visibility from the constant; production stays visible. Staging was never indexable in practice (basic auth and `X-Robots-Tag: noindex`).
