@@ -108,25 +108,29 @@ function register_block_styles(): void {
 		)
 	);
 
-	register_block_style(
-		'core/paragraph',
-		array(
-			'name'       => 'eyebrow',
-			'label'      => __( 'Eyebrow', 'cigarholic' ),
-			'style_data' => array(
-				'color'      => array(
-					'text' => 'var(--cigarholic-eyebrow)',
+	// Paragraph labels above a heading, and a heading that reads as a label (the coming-soon H1 under the logo).
+	foreach ( array( 'core/paragraph', 'core/heading' ) as $block ) {
+		register_block_style(
+			$block,
+			array(
+				'name'       => 'eyebrow',
+				'label'      => __( 'Eyebrow', 'cigarholic' ),
+				'style_data' => array(
+					'color'      => array(
+						'text' => 'var(--cigarholic-eyebrow)',
+					),
+					'typography' => array(
+						'fontFamily'    => 'var:preset|font-family|hanken-grotesk',
+						'fontSize'      => 'var:preset|font-size|x-small',
+						'fontWeight'    => '600',
+						'letterSpacing' => '0.24em',
+						'lineHeight'    => '1.4',
+						'textTransform' => 'uppercase',
+					),
 				),
-				'typography' => array(
-					'fontSize'      => 'var:preset|font-size|x-small',
-					'fontWeight'    => '600',
-					'letterSpacing' => '0.24em',
-					'lineHeight'    => '1.4',
-					'textTransform' => 'uppercase',
-				),
-			),
-		)
-	);
+			)
+		);
+	}
 }
 add_action( 'init', __NAMESPACE__ . '\\register_block_styles' );
 

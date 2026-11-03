@@ -24,6 +24,8 @@ patterns/                  hero, category-grid, best-sellers, craftsmanship-stor
                            product-content, gift-landing, newsletter, faq, coming-soon-content
 styles/sections/forest.json  the Forest section style (dark sections: header, hero, footer, coming soon)
 assets/fonts/              Young Serif and Hanken Grotesk woff2 (latin) with their OFL licences
+assets/brand/              logo (WebP), site icon (PNG, the C on Forest) and email logo (PNG); provisioning step 25
+                           imports the first two into the media library (masters in /brand)
 assets/images/             two SVG placeholders in the brand's photo sand, used until product photos exist
 ```
 
@@ -40,7 +42,7 @@ WooCommerce supplies cart, checkout, my-account, product search results and the 
 | Shadow | none | The canvas's shadows belong to product mock-ups; web surfaces are flat |
 | Layout | content 1200 px, wide 1400 px, root padding `clamp(1rem, 4vw, 2rem)` on both sides | `useRootPaddingAwareAlignments` is on, so full-width blocks bleed and constrained content keeps a 16 px gutter on phones, 32 px on desktop |
 
-Block styles (registered in `functions.php` with `style_data`, so there is no extra stylesheet): `core/group` → **Card** (`is-style-card`): Ash tint fill, 1 px `line` border, square corners, `spacing.50` padding, no shadow. `core/paragraph` → **Eyebrow** (`is-style-eyebrow`): 12 px, 600, uppercase, +0.24 em; Cedar on light, Gold on Forest.
+Block styles (registered in `functions.php` with `style_data`, so there is no extra stylesheet): `core/group` → **Card** (`is-style-card`): Ash tint fill, 1 px `line` border, square corners, `spacing.50` padding, no shadow. `core/paragraph` and `core/heading` → **Eyebrow** (`is-style-eyebrow`): Hanken Grotesk 12 px, 600, uppercase, +0.24 em; Cedar on light, Gold on Forest.
 
 Button variations: default (Cedar with white text, Forest on hover; Gold with Ink text inside Forest) and core's `outline` (Ink border and text; Ash inside Forest). Radius 3 px.
 
@@ -62,7 +64,7 @@ Two more plugin-side expectations: the primary menu is a `wp_navigation` post th
 
 Page slugs created by provisioning and linked from the footer, 404 page and patterns: `/shop/`, `/journal/`, `/about/`, `/contact/`, `/faq/`, `/shipping-policy/`, `/returns-refunds/`, `/warranty/`, `/privacy-policy/`, `/terms-of-service/`, `/accessibility-statement/`, `/my-account/`. Category links use `/collections/<slug>/` with the slugs `desktop-humidors`, `cabinet-humidors`, `travel-humidors`, `cigar-boxes`, `humidor-accessories`, `gift-sets` (ADR 0002 and 0003). Social links in the footer point at the platforms' home pages until the real profile URLs exist; the manager changes them in the Site Editor (footer part → "Social media" navigation).
 
-Heading order: the hero and the product title carry the only H1 of their pages; `site-title` is a `<p>` in the header (`level: 0`) and an H1 only on the coming-soon page. Patterns meant for use inside a page (`gift-landing`, `faq`, `craftsmanship-story`, `trust-bar`, `newsletter`) start at H2 because `page.html` renders the page title as H1.
+Heading order: the hero and the product title carry the only H1 of their pages; the header shows the Site logo block (the wordmark, alt "Cigarholic", set by provisioning step 25) instead of the site title; on the coming-soon page the logo is followed by the H1 "Handcrafted humidors" in the Eyebrow style. Patterns meant for use inside a page (`gift-landing`, `faq`, `craftsmanship-story`, `trust-bar`, `newsletter`) start at H2 because `page.html` renders the page title as H1.
 
 Landmarks: `header` and `footer` come from the template part areas, `main` from the `core/group` with `tagName: main` in every template, and every navigation block has an `ariaLabel` ("Primary", "Shop", "Help", "Company", "Social media"). The skip link is printed by core for block themes.
 

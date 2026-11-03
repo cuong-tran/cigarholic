@@ -1,6 +1,6 @@
 # Plan: apply the Cigarholic brand style to the theme (CNT-01)
 
-Status: **PR 1 implemented** (2026-11-03: tokens, fonts, Forest section style, coming-soon page, email colours); PRs 2 to 5 open. Source: the owner's design canvas "Cigarholic Brand" (claude.ai artifact `QssWn4fkbnqPAQcDJ66oLh`, version of 2026-10-30), boards *Logo suite*, *Color & type*, *Applications* and *Homepage hero*. The three earlier boards (A · The Band, B · Growth Rings, C · Dovetail) are explorations the canvas itself labels "earlier"; nothing is taken from them, including B's Cedar Light `#D9946E` and C's Archivo.
+Status: **PR 1 implemented** (2026-11-03: tokens, fonts, Forest section style, coming-soon page, email colours) and **PR 5** (logo, site icon, email logo, from the owner's raster artwork); PRs 2 to 4 open. Source: the owner's design canvas "Cigarholic Brand" (claude.ai artifact `QssWn4fkbnqPAQcDJ66oLh`, version of 2026-10-30), boards *Logo suite*, *Color & type*, *Applications* and *Homepage hero*. The three earlier boards (A · The Band, B · Growth Rings, C · Dovetail) are explorations the canvas itself labels "earlier"; nothing is taken from them, including B's Cedar Light `#D9946E` and C's Archivo.
 
 Feature IDs: CNT-01 (brand system), with NAV-01 (header), NAV-03 (footer), NAV-04 (homepage), CNT-04 (coming soon), CMP-04 (accessibility), ORD-03 (branded transactional emails). Satisfies most of OWNER-ACTIONS B9 (colours and fonts); the logo **files** are still missing (see "Owner inputs").
 
@@ -106,7 +106,7 @@ One PR per primary feature ID; where a change necessarily touches other IDs, the
 2. **`feat(NAV-01): Forest header and footer`**, also NAV-03.
 3. **`feat(NAV-04): homepage patterns in the brand layout`**.
 4. **`fix(CNT-01): WooCommerce surfaces in the brand style`** (product, archive, cart, checkout, mini cart, account, order received).
-5. **`feat(CNT-01): logo, site icon and email header from the brand files`**, as soon as the owner adds the files (can merge into 2 if they arrive first).
+5. **`feat(CNT-01): logo, site icon and email header from the brand files`** (done second, 2026-11-03, from the owner's raster artwork; provisioning step 25), as soon as the owner adds the files (can merge into 2 if they arrive first).
 
 ## 5. Verification for every PR
 
