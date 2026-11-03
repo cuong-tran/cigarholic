@@ -7,7 +7,7 @@ Description: Block theme for the Cigarholic store: handcrafted wooden humidors, 
 Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
-Version: 0.1.0
+Version: 0.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: cigarholic
@@ -15,23 +15,59 @@ Tags: e-commerce, block-patterns, block-styles, full-site-editing, accessibility
 */
 
 /*
- * Everything visual is a token in theme.json. This file only holds what
- * theme.json cannot express: focus indicators, the skip link, minimum target
- * sizes, reduced motion and print. Feature IDs: FND-05, CNT-01, CMP-04.
+ * Everything visual is a token in theme.json (and styles/sections/forest.json).
+ * This file only holds what theme.json cannot express: colours that follow the
+ * section they sit in (focus ring, form errors, eyebrow labels, outline buttons
+ * on Forest), the skip link, minimum target sizes, font synthesis, reduced
+ * motion and print. Feature IDs: FND-05, CNT-01, CMP-04.
  */
+
+/*
+ * Section-aware colours (CNT-01, CMP-04). Light grounds: Ink focus ring
+ * (14.65:1 on Ash), #9b1c1c errors (6.74:1), Cedar labels (4.81:1).
+ * Forest: Gold focus ring and labels (5.15:1), #f2a08a errors (7.11:1).
+ */
+:root {
+	--cigarholic-focus: var(--wp--preset--color--contrast, #1a1815);
+	--cigarholic-error: #9b1c1c;
+	--cigarholic-eyebrow: var(--wp--preset--color--accent, #9c5034);
+}
+
+.is-style-forest {
+	--cigarholic-focus: var(--wp--preset--color--gold, #c1904f);
+	--cigarholic-error: #f2a08a;
+	--cigarholic-eyebrow: var(--wp--preset--color--gold, #c1904f);
+}
+
+/* Outline buttons on Forest: Ash border and text, Ash fill with Ink text on hover. */
+.is-style-forest .wp-block-button.is-style-outline > .wp-block-button__link {
+	border-color: var(--wp--preset--color--base, #eee9e0);
+	color: var(--wp--preset--color--base, #eee9e0);
+}
+
+.is-style-forest .wp-block-button.is-style-outline > .wp-block-button__link:hover,
+.is-style-forest .wp-block-button.is-style-outline > .wp-block-button__link:focus {
+	background-color: var(--wp--preset--color--base, #eee9e0);
+	color: var(--wp--preset--color--contrast, #1a1815);
+}
+
+/* Young Serif has one weight and no italic: never let the browser fake either. */
+:where(h1, h2, h3, .wp-block-site-title, .wp-block-post-title, .wp-block-quote, .wp-block-pullquote, .has-young-serif-font-family) {
+	font-synthesis: none;
+}
 
 /* Visible focus for keyboard users (WCAG 2.2 AA, 2.4.7 Focus Visible, 2.4.11 Focus Not Obscured). */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-	outline: 3px solid var(--wp--preset--color--contrast, #1c1917);
+	outline: 3px solid var(--cigarholic-focus, #1a1815);
 	outline-offset: 2px;
 	border-radius: 2px;
 }
 
 /* Skip link: core prints it for block themes; only its colours are themed here. */
 .skip-link.screen-reader-text:focus {
-	background-color: var(--wp--preset--color--base, #fff);
-	color: var(--wp--preset--color--contrast, #1c1917);
-	outline: 3px solid var(--wp--preset--color--contrast, #1c1917);
+	background-color: var(--wp--preset--color--base, #eee9e0);
+	color: var(--wp--preset--color--contrast, #1a1815);
+	outline: 3px solid var(--wp--preset--color--contrast, #1a1815);
 }
 
 /* Minimum 24 x 24 px pointer targets for controls (WCAG 2.2 AA, 2.5.8 Target Size). */

@@ -1,6 +1,6 @@
 # Plan: apply the Cigarholic brand style to the theme (CNT-01)
 
-Status: **plan, nothing implemented yet** (2026-11-03). Source: the owner's design canvas "Cigarholic Brand" (claude.ai artifact `QssWn4fkbnqPAQcDJ66oLh`, version of 2026-10-30), boards *Logo suite*, *Color & type*, *Applications* and *Homepage hero*. The three earlier boards (A · The Band, B · Growth Rings, C · Dovetail) are explorations the canvas itself labels "earlier"; nothing is taken from them, including B's Cedar Light `#D9946E` and C's Archivo.
+Status: **PR 1 implemented** (2026-11-03: tokens, fonts, Forest section style, coming-soon page, email colours); PRs 2 to 5 open. Source: the owner's design canvas "Cigarholic Brand" (claude.ai artifact `QssWn4fkbnqPAQcDJ66oLh`, version of 2026-10-30), boards *Logo suite*, *Color & type*, *Applications* and *Homepage hero*. The three earlier boards (A · The Band, B · Growth Rings, C · Dovetail) are explorations the canvas itself labels "earlier"; nothing is taken from them, including B's Cedar Light `#D9946E` and C's Archivo.
 
 Feature IDs: CNT-01 (brand system), with NAV-01 (header), NAV-03 (footer), NAV-04 (homepage), CNT-04 (coming soon), CMP-04 (accessibility), ORD-03 (branded transactional emails). Satisfies most of OWNER-ACTIONS B9 (colours and fonts); the logo **files** are still missing (see "Owner inputs").
 
@@ -11,8 +11,7 @@ Feature IDs: CNT-01 (brand system), with NAV-01 (header), NAV-03 (footer), NAV-0
 | Brand name | Hex | Role in the canvas | theme.json slug (proposed) |
 |---|---|---|---|
 | Ash | `#EEE9E0` | Page ground | `base` (was `#ffffff`) |
-| Ash tint | `#F7F4EF` | Cards, inputs, email body | `surface` (new) |
-| Sand | `#E3DCD0` | Quiet panels | `neutral-1` (was `#f4f1ec`) |
+| Ash tint | `#F7F4EF` | Cards, inputs, quiet sections, email body | `neutral-1` (was `#f4f1ec`) |
 | Photo sand | `#DCD3C4` | Image placeholders | used only in the placeholder SVGs |
 | Line | `#D6CEC1` | Hairlines, dividers | `line` (new) |
 | Stone | `#5E574E` | Muted text, captions | `neutral-2` (was `#5b564f`) |
@@ -30,7 +29,8 @@ Contrast, measured with the WCAG formula (AA needs 4.5:1 for text, 3:1 for UI an
 | Pair | Ratio | Rule that follows |
 |---|---|---|
 | Ink on Ash / on Ash tint | 14.65 / 16.15 | |
-| Stone on Ash / tint / Sand `#DCD3C4` | 5.89 / 6.49 / 4.80 | Stone is the lightest muted text allowed on any light ground |
+| Stone on Ash / tint / Photo sand `#DCD3C4` | 5.89 / 6.49 / 4.80 | Stone is the lightest muted text allowed on any light ground |
+| **Cedar on Sand `#E3DCD0`** | **4.27** | Fails: Sand (a panel colour on the canvas boards, not in its Color & type palette) is not a web token; quiet sections use Ash tint (found by the page contrast check in PR 1) |
 | Cedar on Ash / tint | 4.81 / 5.30 | Cedar links pass on light |
 | White on Cedar, Ash on Cedar | 5.82 / 4.81 | Primary button on light: white text |
 | Ash on Forest, Mist on Forest | 12.14 / 8.91 | |
@@ -74,7 +74,7 @@ Young Serif has **one weight and no italic**. Headings therefore go from weight 
 2. **Fonts, self-hosted** (rule: no external requests; ADR to record it): Young Serif 400 latin and Hanken Grotesk variable (wght 400 to 600 used) latin from `@fontsource/young-serif` 5.3.0 and `@fontsource-variable/hanken-grotesk` 5.3.0 (both OFL-1.1, checked on npm 2026-11-03). Vendor the woff2 files once into `assets/fonts/` with `OFL.txt`; no npm runtime dependency. Record versions in `docs/versions.md`. File sizes are measured in PR 1 (latin subsets are typically a few tens of KB each). `functions.php` prints one `<link rel="preload">` for Young Serif (the H1 is the LCP element on the home and coming-soon pages).
 3. **Section style "Forest"** (`styles/sections/forest.json` with `"slug": "forest"`, a block style variation with `blockTypes` `core/group`, `core/columns`, `core/cover`; core finds it because `WP_Theme_JSON_Resolver::get_style_variations()` walks `styles/` with a `RecursiveDirectoryIterator`, and `wp_register_block_style_variations_from_theme_json_partials()` registers it as `is-style-forest`, both checked in WordPress 7.1.4): Forest background, Ash text, Ash headings, Gold-on-hover links, Gold button with Ink text, Ash outline button, Ash navigation links, Mist captions. Header part, hero, footer, coming-soon template and the gift-card style panels use it, so the dark treatment is one class (`is-style-forest`) the manager can also pick in the editor.
 4. **`style.css`** (only what theme.json cannot express): focus ring colour as a custom property, Ink by default and Gold inside `.is-style-forest` (5.15:1); the same switch for the form error colour (`--cigarholic-error`: `#9b1c1c` on light, `#F2A08A` inside `.is-style-forest`, used by the signup and contact block CSS) and the eyebrow colour; `font-synthesis: none` on the serif.
-5. **Block styles in `functions.php`**: `core/paragraph` → **Eyebrow** (label style); `core/group` → **Card** restyled (Ash tint fill, no border, no shadow, square corners) for the trust bar and order-received next steps. The category and gift grids drop the card frame and follow the canvas: image, serif title, Stone text, Cedar "Shop the collection →" link.
+5. **Block styles in `functions.php`**: `core/paragraph` → **Eyebrow** (label style); `core/group` → **Card** restyled (Ash tint fill, 1 px Line border so it stays visible on Ash tint sections, no shadow, square corners) for the trust bar and order-received next steps. The category and gift grids drop the card frame and follow the canvas: image, serif title, Stone text, Cedar "Shop the collection →" link.
 6. **Image placeholders**: recolour `placeholder-product.svg` and `placeholder-workshop.svg` to Photo sand with a Stone caption, so pages read as the canvas does until photos arrive (B9).
 7. **Logo and icon** (when the files arrive): a new idempotent provisioning step (`25-brand.php`) imports the gold lockup (WebP/PNG at 2× of 56 px, a few KB, not the 282 KB canvas PNG) as `site_logo`, the monogram (512 × 512 on Forest) as `site_icon`, and sets `woocommerce_email_header_image`; it compares a file hash so re-runs change nothing. `core/site-logo` stays in the header so the manager can swap it. SVG masters live in `brand/`; SVG is not uploaded to the media library (it would need an upload allowance or a plugin).
 
@@ -88,7 +88,7 @@ Young Serif has **one weight and no italic**. Headings therefore go from weight 
 | 4 | Homepage (`patterns/hero.php` and the others, NAV-04) | Hero on Forest in the canvas layout (eyebrow, H1, lead, Gold primary + Ash outline buttons, 420 px photo panel on Forest raised); category grid in the canvas card layout with a right-aligned "All collections →" link; best sellers, craftsmanship, trust bar, newsletter on Ash with Card fills |
 | 5 | WooCommerce surfaces | Product page, archive, category, cart, checkout, mini-cart drawer, my account, order confirmation: buttons, inputs (Ash tint fill, Stone border), price, badges, notices. WooCommerce block CSS hard-codes some whites; fix what the screenshots show, through theme.json first and `style.css` only when needed |
 | 6 | cigarholic-core block CSS | Signup and contact error colour through the custom property; announcement bar and spec table already read the presets; the Prop 65 notice keeps its warning yellow |
-| 7 | Emails (`provision/steps/70-emails.php`, ORD-03) | Header colour Forest, background Ash, body Ash tint, text Ink, footer Stone; header image once the logo exists. The step's slug mapping changes, because re-pointing the slugs alone would give Cedar, Sand and Ash through today's `accent`, `neutral-1` and `base`: `woocommerce_email_base_color` ← `forest`, `_background_color` ← `base`, `_body_background_color` ← `surface`, `_text_color` ← `contrast`, `_footer_text_color` ← `neutral-2`, with the hard-coded fallback array updated to the new hex values. `ProvisionTest` asserts all five options |
+| 7 | Emails (`provision/steps/70-emails.php`, ORD-03) | Header colour Forest, background Ash, body Ash tint, text Ink, footer Stone; header image once the logo exists. The step's slug mapping changes, because re-pointing the slugs alone would give Cedar, Sand and Ash through today's `accent`, `neutral-1` and `base`: `woocommerce_email_base_color` ← `forest`, `_background_color` ← `base`, `_body_background_color` ← `neutral-1`, `_text_color` ← `contrast`, `_footer_text_color` ← `neutral-2`, with the hard-coded fallback array updated to the new hex values. `ProvisionTest` asserts all five options |
 
 ### Deliberately not taken from the canvas
 

@@ -123,7 +123,12 @@ final class ProvisionTest extends WP_UnitTestCase {
 		// 60, 70, 80.
 		$this->assertSame( 'yes', get_option( 'woocommerce_calc_taxes' ) );
 		$this->assertSame( 'support@cigarholic.com', get_option( 'woocommerce_email_from_address' ) );
-		$this->assertSame( '#6b4a2e', get_option( 'woocommerce_email_base_color' ) );
+		// Brand colours from the theme palette (CNT-01): Forest header, Ash outer, Ash tint body, Ink text, Stone footer.
+		$this->assertSame( '#1f2b25', get_option( 'woocommerce_email_base_color' ) );
+		$this->assertSame( '#eee9e0', get_option( 'woocommerce_email_background_color' ) );
+		$this->assertSame( '#f7f4ef', get_option( 'woocommerce_email_body_background_color' ) );
+		$this->assertSame( '#1a1815', get_option( 'woocommerce_email_text_color' ) );
+		$this->assertSame( '#5e574e', get_option( 'woocommerce_email_footer_text_color' ) );
 		$new_order = get_option( 'woocommerce_new_order_settings' );
 		$this->assertSame( get_option( 'admin_email' ), $new_order['recipient'] );
 		$this->assertSame( 'yes', get_option( 'woocommerce_coming_soon' ) );

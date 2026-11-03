@@ -1,0 +1,90 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 3,
+  "title": "Forest",
+  "slug": "forest",
+  "blockTypes": [
+    "core/group",
+    "core/columns"
+  ],
+  "styles": {
+    "color": {
+      "background": "var:preset|color|forest",
+      "text": "var:preset|color|base"
+    },
+    "elements": {
+      "link": {
+        "color": {
+          "text": "var:preset|color|base"
+        },
+        ":hover": {
+          "color": {
+            "text": "var:preset|color|gold"
+          }
+        },
+        ":focus": {
+          "color": {
+            "text": "var:preset|color|gold"
+          }
+        }
+      },
+      "heading": {
+        "color": {
+          "text": "var:preset|color|base"
+        }
+      },
+      "button": {
+        "color": {
+          "background": "var:preset|color|gold",
+          "text": "var:preset|color|contrast"
+        },
+        ":hover": {
+          "color": {
+            "background": "var:preset|color|base",
+            "text": "var:preset|color|contrast"
+          }
+        },
+        ":active": {
+          "color": {
+            "background": "var:preset|color|base",
+            "text": "var:preset|color|contrast"
+          }
+        }
+      },
+      "caption": {
+        "color": {
+          "text": "var:preset|color|mist"
+        }
+      }
+    },
+    "blocks": {
+      "core/site-title": {
+        "elements": {
+          "link": {
+            "color": {
+              "text": "var:preset|color|base"
+            }
+          }
+        }
+      },
+      "core/navigation": {
+        "elements": {
+          "link": {
+            "color": {
+              "text": "var:preset|color|base"
+            }
+          }
+        }
+      },
+      "core/post-title": {
+        "elements": {
+          "link": {
+            "color": {
+              "text": "var:preset|color|base"
+            }
+          }
+        }
+      }
+    }
+  }
+}

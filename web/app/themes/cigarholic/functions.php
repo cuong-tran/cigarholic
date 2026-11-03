@@ -67,9 +67,13 @@ add_action( 'init', __NAMESPACE__ . '\\register_pattern_categories' );
 /**
  * Block styles used by the patterns (CNT-01).
  *
- * "Card" is a bordered surface for the category grid, the trust bar and the
- * order-received next steps. It is declared as theme.json-style data so no
- * extra stylesheet is needed.
+ * "Card" is an Ash tint panel with a 1 px Line border (no shadow, square
+ * corners) for the category grid, the trust bar and the order-received next
+ * steps; the border keeps it visible on Ash tint sections. "Eyebrow"
+ * is the small uppercase label above a heading; its colour follows the
+ * section (Cedar on light, Gold on Forest) through --cigarholic-eyebrow in
+ * style.css. Both are declared as theme.json-style data, so no extra
+ * stylesheet is needed.
  *
  * @return void
  */
@@ -81,13 +85,13 @@ function register_block_styles(): void {
 			'label'      => __( 'Card', 'cigarholic' ),
 			'style_data' => array(
 				'border'  => array(
-					'color'  => 'var:preset|color|neutral-1',
+					'color'  => 'var:preset|color|line',
 					'style'  => 'solid',
 					'width'  => '1px',
-					'radius' => '4px',
+					'radius' => '0',
 				),
 				'color'   => array(
-					'background' => 'var:preset|color|base',
+					'background' => 'var:preset|color|neutral-1',
 				),
 				'spacing' => array(
 					'padding' => array(
@@ -97,12 +101,52 @@ function register_block_styles(): void {
 						'left'   => 'var:preset|spacing|50',
 					),
 				),
-				'shadow'  => 'var:preset|shadow|soft',
+			),
+		)
+	);
+
+	register_block_style(
+		'core/paragraph',
+		array(
+			'name'       => 'eyebrow',
+			'label'      => __( 'Eyebrow', 'cigarholic' ),
+			'style_data' => array(
+				'color'      => array(
+					'text' => 'var(--cigarholic-eyebrow)',
+				),
+				'typography' => array(
+					'fontSize'      => 'var:preset|font-size|x-small',
+					'fontWeight'    => '600',
+					'letterSpacing' => '0.24em',
+					'lineHeight'    => '1.4',
+					'textTransform' => 'uppercase',
+				),
 			),
 		)
 	);
 }
 add_action( 'init', __NAMESPACE__ . '\\register_block_styles' );
+
+/**
+ * Preloads the two self-hosted brand fonts (CNT-01, Core Web Vitals budget).
+ *
+ * The @font-face rules come from theme.json; the URLs here are the same
+ * get_theme_file_uri() values WordPress resolves for them, so the browser
+ * reuses the preloaded files. Young Serif sets the H1 (the LCP element on the
+ * home and coming-soon pages), Hanken Grotesk everything else.
+ *
+ * @return void
+ */
+function preload_fonts(): void {
+	$files = array( 'young-serif-latin-400-normal.woff2', 'hanken-grotesk-latin-wght-normal.woff2' );
+	foreach ( $files as $file ) {
+		printf(
+			'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n",
+			esc_url( get_theme_file_uri( 'assets/fonts/' . $file ) )
+		);
+	}
+}
+add_action( 'wp_head', __NAMESPACE__ . '\\preload_fonts', 1 );
 
 /**
  * Front-end stylesheet (focus, target sizes, reduced motion, print).

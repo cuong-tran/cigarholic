@@ -2,16 +2,18 @@
 
 Presentation layer of the Cigarholic store (feature IDs FND-05, CNT-01, NAV-01 to NAV-04, CNT-04, CAT-06, CHK-06, CMP-04). Everything visual is a token in `theme.json`; markup is block templates, parts and patterns; `functions.php` only declares theme supports, a pattern category and one block style. All logic, including the dynamic blocks the templates reference, lives in the `cigarholic-core` mu-plugin.
 
-Design rules that this theme carries: no page builder, WCAG 2.2 AA from the first template, no external requests and no web fonts (fonts will be self-hosted when the brand assets arrive, decision D-01), "Handcrafted in Vietnam" and never anything that implies tobacco is sold or that a product is made in the USA.
+Design rules that this theme carries: no page builder, WCAG 2.2 AA from the first template, no external requests (the brand fonts are self-hosted, ADR 0009), "Handcrafted in Vietnam" and never anything that implies tobacco is sold or that a product is made in the USA. The brand system (colours, type, contrast rules) comes from the owner's design canvas; the plan is `docs/plans/CNT-01-brand-style.md`.
 
 ## What is in it
 
 ```text
-style.css                  theme header + the few rules theme.json cannot express (focus ring, skip link
+style.css                  theme header + the few rules theme.json cannot express (section-aware focus ring,
+                           error and eyebrow colours, outline buttons on Forest, font synthesis, skip link
                            colours, 24 px targets, reduced motion, print)
-theme.json                 version 3: palette, system font stacks, fluid sizes, spacing scale, layout,
+theme.json                 version 3: brand palette, self-hosted font faces, fluid type scale, spacing scale, layout,
                            element and block styles, template part areas
-functions.php              theme supports, pattern category "cigarholic", block style "card", stylesheet
+functions.php              theme supports, pattern category "cigarholic", block styles "card" and "eyebrow",
+                           font preloads, stylesheet
 templates/                 index, front-page, page, single (journal post), archive, home (/journal/),
                            search, 404, single-product, archive-product, taxonomy-product_cat,
                            order-confirmation, coming-soon
@@ -20,7 +22,9 @@ parts/                     header (announcement bar, logo/title, primary menu, s
                            payment methods)
 patterns/                  hero, category-grid, best-sellers, craftsmanship-story, trust-bar,
                            product-content, gift-landing, newsletter, faq, coming-soon-content
-assets/images/             two neutral SVG placeholders used until product photos exist
+styles/sections/forest.json  the Forest section style (dark sections: header, hero, footer, coming soon)
+assets/fonts/              Young Serif and Hanken Grotesk woff2 (latin) with their OFL licences
+assets/images/             two SVG placeholders in the brand's photo sand, used until product photos exist
 ```
 
 WooCommerce supplies cart, checkout, my-account, product search results and the mini-cart drawer from its own block templates; the theme does not override them.
@@ -29,16 +33,18 @@ WooCommerce supplies cart, checkout, my-account, product search results and the 
 
 | Kind | Slugs | Notes |
 |---|---|---|
-| Colours | `base` #ffffff, `contrast` #1c1917, `accent` #6b4a2e, `neutral-1` #f4f1ec (surface), `neutral-2` #5b564f (muted text) | Every text/background pair among these passes WCAG AA 4.5:1 (lowest: neutral-2 on neutral-1, 6.45:1). Placeholders until brand colours arrive |
-| Font families | `system-sans` (body, buttons, h4 to h6), `system-serif` (h1 to h3, site title) | System stacks only; no `@font-face` |
-| Font sizes | `small`, `medium`, `large`, `x-large`, `xx-large` | Fluid except `small` |
+| Colours | `base` Ash #eee9e0 (page), `neutral-1` Ash tint #f7f4ef (cards, inputs, quiet sections), `line` #d6cec1 (dividers only), `neutral-2` Stone #5e574e (muted text), `contrast` Ink #1a1815 (text), `accent` Cedar #9c5034 (links and buttons on light), `forest` #1f2b25 (dark sections), `forest-2` #26342d (panels on Forest), `mist` #cfc9be (muted text on Forest), `gold` #c1904f (accent on Forest only) | Rules, all checked by `ThemeContrastTest`: on Ash and Ash tint use Ink, Stone, Cedar; on Forest use Ash, Mist, Gold. Gold on light is 2.36:1 and Cedar on Forest 2.52:1, so never. Lowest allowed pair: Cedar on Ash, 4.81:1 |
+| Font families | `hanken-grotesk` (body, buttons, navigation, h4 to h6), `young-serif` (h1 to h3, site title, post titles, quotes) | Self-hosted woff2 in `assets/fonts/` (latin; Young Serif 400 only, Hanken Grotesk variable 100 to 900), OFL licences beside them, both preloaded by `functions.php`. Young Serif has no bold or italic: serif text stays at 400 and upright (`font-synthesis: none`) |
+| Font sizes | `x-small` (labels), `small`, `medium` (body, 17 px), `large` (lead), `x-large` (H3), `xx-large` (H2), `xxx-large` (H1, 40 to 64 px) | Fluid except `x-small` and `small` |
 | Spacing | `10` to `80` (0.25 rem up to a clamp of 3.5 to 7 rem) | Use `var:preset\|spacing\|50` in block attributes, `var(--wp--preset--spacing--50)` in CSS |
-| Shadow | `soft` | Used by the `card` block style |
-| Layout | content 1200 px, wide 1400 px, root padding `spacing.40` on both sides | `useRootPaddingAwareAlignments` is on, so full-width blocks bleed and constrained content keeps a 16 px gutter on phones |
+| Shadow | none | The canvas's shadows belong to product mock-ups; web surfaces are flat |
+| Layout | content 1200 px, wide 1400 px, root padding `clamp(1rem, 4vw, 2rem)` on both sides | `useRootPaddingAwareAlignments` is on, so full-width blocks bleed and constrained content keeps a 16 px gutter on phones, 32 px on desktop |
 
-Block style: `core/group` → **Card** (`is-style-card`): 1 px `neutral-1` border, 4 px radius, `spacing.50` padding, `soft` shadow. Registered in `functions.php` with `style_data`, so there is no CSS file to maintain.
+Block styles (registered in `functions.php` with `style_data`, so there is no extra stylesheet): `core/group` → **Card** (`is-style-card`): Ash tint fill, 1 px `line` border, square corners, `spacing.50` padding, no shadow. `core/paragraph` → **Eyebrow** (`is-style-eyebrow`): 12 px, 600, uppercase, +0.24 em; Cedar on light, Gold on Forest.
 
-Button variations: default (contrast on base, accent on hover) and core's `outline` (styled in `theme.json`).
+Button variations: default (Cedar with white text, Forest on hover; Gold with Ink text inside Forest) and core's `outline` (Ink border and text; Ash inside Forest). Radius 3 px.
+
+Section style **Forest** (`styles/sections/forest.json`, slug `forest`, for `core/group` and `core/columns`): Forest background, Ash text and headings, Ash links with Gold hover, Gold buttons, Mist captions. Add `is-style-forest` (or pick "Forest" in the block's Styles panel) to make a section dark. `style.css` follows it with the focus ring (Ink on light, Gold on Forest), the form error colour (`#9b1c1c` on light, `#f2a08a` on Forest) and the eyebrow colour, through `--cigarholic-focus`, `--cigarholic-error` and `--cigarholic-eyebrow`. Text set with `textColor` presets inside Forest must come from the Forest rules (`mist`, not `neutral-2`).
 
 ## Blocks expected from cigarholic-core
 
