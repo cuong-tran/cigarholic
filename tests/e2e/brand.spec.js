@@ -324,11 +324,29 @@ test.describe( 'brand system', () => {
 		await expect( primary ).toHaveCSS( 'color', 'rgb(26, 24, 21)' );
 		await expect( hero.getByRole( 'link', { name: 'See how they are made' } ) ).toHaveCSS( 'border-top-color', 'rgb(238, 233, 224)' );
 
-		// One descriptive link per category card, each to its collection.
+		// One descriptive link per category card, each to its own collection.
 		const cards = page.locator( 'main a[href*="/collections/"]' ).filter( { hasText: /^Shop .+ →$/ } );
 		await expect( cards ).toHaveCount( 6 );
-		const names = await cards.allTextContents();
-		expect( new Set( names ).size ).toBe( 6 );
+		const links = await cards.evaluateAll( ( as ) => Object.fromEntries( as.map( ( a ) => [ a.textContent.trim(), new URL( a.href ).pathname ] ) ) );
+		expect( links ).toEqual( {
+			'Shop desktop humidors →': '/collections/desktop-humidors/',
+			'Shop cabinet humidors →': '/collections/cabinet-humidors/',
+			'Shop travel humidors →': '/collections/travel-humidors/',
+			'Shop cigar boxes →': '/collections/cigar-boxes/',
+			'Shop accessories →': '/collections/humidor-accessories/',
+			'Shop gift sets →': '/collections/gift-sets/',
+		} );
+
+		// The hero columns stay inside their row, and the cards reflow: one per row on phones, three on desktop.
+		const grid = cards.first().locator( 'xpath=ancestor::*[contains(@class, "is-layout-grid")][1]' );
+		for ( const [ width, perRow ] of [ [ 360, 1 ], [ 1280, 3 ] ] ) {
+			await page.setViewportSize( { width, height: 900 } );
+			const row = await hero.locator( '.wp-block-columns' ).boundingBox();
+			const last = await hero.locator( '.wp-block-column' ).last().boundingBox();
+			expect( last.x + last.width, `hero at ${ width }px` ).toBeLessThanOrEqual( row.x + row.width + 1 );
+			const tops = await grid.evaluate( ( g ) => new Set( [ ...g.children ].map( ( c ) => Math.round( c.getBoundingClientRect().top ) ) ).size );
+			expect( 6 / tops, `cards per row at ${ width }px` ).toBe( perRow );
+		}
 	} );
 
 	test( 'store pages pass AA contrast for every visible text', async ( { page } ) => {

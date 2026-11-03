@@ -147,6 +147,7 @@ final class ProvisionTest extends WP_UnitTestCase {
 		$saved = array();
 		foreach ( array(
 			'coming-soon' => 'wp_template',
+			'front-page'  => 'wp_template',
 			'header'      => 'wp_template_part',
 		) as $slug => $type ) {
 			$saved[ $slug ] = self::factory()->post->create(
@@ -163,6 +164,7 @@ final class ProvisionTest extends WP_UnitTestCase {
 
 		$this->runner()->run( false );
 		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'warning: the coming-soon template was saved in the Site Editor (post ' . $saved['coming-soon'] . ')' ) ) );
+		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'warning: the front-page template was saved in the Site Editor (post ' . $saved['front-page'] . ')' ) ) );
 		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'warning: the header template part was saved in the Site Editor (post ' . $saved['header'] . ')' ) ) );
 		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'ok: footer comes from the theme' ) ) );
 		foreach ( $saved as $post ) {
