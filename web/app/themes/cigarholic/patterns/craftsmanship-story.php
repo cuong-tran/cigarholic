@@ -17,6 +17,10 @@
 <section class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">
 	<!-- wp:media-text {"align":"wide","mediaType":"image"} -->
 	<div class="wp-block-media-text alignwide is-stacked-on-mobile"><figure class="wp-block-media-text__media"><img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/placeholder-workshop.svg' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder for a photo of a craftsman fitting a humidor lid in the Vietnam workshop', 'cigarholic' ); ?>"/></figure><div class="wp-block-media-text__content">
+		<!-- wp:paragraph {"className":"is-style-eyebrow"} -->
+		<p class="is-style-eyebrow"><?php esc_html_e( 'Our workshop', 'cigarholic' ); ?></p>
+		<!-- /wp:paragraph -->
+
 		<!-- wp:heading -->
 		<h2 class="wp-block-heading"><?php esc_html_e( 'Made by hand in Vietnam', 'cigarholic' ); ?></h2>
 		<!-- /wp:heading -->

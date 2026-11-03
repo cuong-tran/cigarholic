@@ -27,7 +27,8 @@ styles/sections/forest.json  the Forest section style (dark sections: header, he
 assets/fonts/              Young Serif and Hanken Grotesk woff2 (latin) with their OFL licences
 assets/brand/              logo (WebP), site icon (PNG, the C on Forest) and email logo (PNG); provisioning step 25
                            imports all three into the media library (masters in /brand)
-assets/images/             two SVG placeholders in the brand's photo sand, used until product photos exist
+assets/images/             SVG placeholders used until photos exist: product and workshop in the brand's photo
+                           sand, hero in Forest raised
 ```
 
 WooCommerce supplies cart, checkout, my-account, product search results and the mini-cart drawer from its own block templates; the theme does not override them.

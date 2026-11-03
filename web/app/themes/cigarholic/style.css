@@ -103,6 +103,11 @@ Tags: e-commerce, block-patterns, block-styles, full-site-editing, accessibility
 	text-align: start;
 }
 
+/* Headings break into even lines, as on the canvas (theme.json has no text-wrap setting). */
+:where(h1, h2, h3) {
+	text-wrap: balance;
+}
+
 /* Young Serif has one weight and no italic: never let the browser fake either. */
 :where(h1, h2, h3, .wp-block-site-title, .wp-block-post-title, .wp-block-quote, .wp-block-pullquote, .has-young-serif-font-family) {
 	font-synthesis: none;

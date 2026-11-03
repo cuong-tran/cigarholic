@@ -307,6 +307,30 @@ test.describe( 'brand system', () => {
 		}
 	} );
 
+	test( 'homepage sections follow the canvas (NAV-04)', async ( { page } ) => {
+		await login( page );
+		await page.goto( '/' );
+
+		// The hero is a Forest section that starts where the header ends (no Ash band between them).
+		const hero = page.locator( 'main .is-style-forest' ).filter( { has: page.getByRole( 'heading', { level: 1 } ) } );
+		await expect( hero ).toHaveCSS( 'background-color', FOREST );
+		const [ headerBox, heroBox ] = await Promise.all( [ page.locator( '.site-header' ).boundingBox(), hero.boundingBox() ] );
+		expect( Math.abs( heroBox.y - ( headerBox.y + headerBox.height ) ) ).toBeLessThanOrEqual( 1 );
+		await expect( hero.locator( '.is-style-eyebrow' ) ).toHaveCSS( 'color', GOLD );
+
+		// Gold primary with Ink text, Ash outline on Forest.
+		const primary = hero.getByRole( 'link', { name: 'Shop humidors' } );
+		await expect( primary ).toHaveCSS( 'background-color', GOLD );
+		await expect( primary ).toHaveCSS( 'color', 'rgb(26, 24, 21)' );
+		await expect( hero.getByRole( 'link', { name: 'See how they are made' } ) ).toHaveCSS( 'border-top-color', 'rgb(238, 233, 224)' );
+
+		// One descriptive link per category card, each to its collection.
+		const cards = page.locator( 'main a[href*="/collections/"]' ).filter( { hasText: /^Shop .+ →$/ } );
+		await expect( cards ).toHaveCount( 6 );
+		const names = await cards.allTextContents();
+		expect( new Set( names ).size ).toBe( 6 );
+	} );
+
 	test( 'store pages pass AA contrast for every visible text', async ( { page } ) => {
 		await login( page );
 		for ( const path of [ '/', '/shop/' ] ) {

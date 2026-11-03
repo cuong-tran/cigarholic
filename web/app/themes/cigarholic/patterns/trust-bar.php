@@ -47,8 +47,8 @@ $cigarholic_trust_items = array(
 ?>
 <!-- wp:group {"tagName":"section","align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"},"blockGap":"var:preset|spacing|60"}},"backgroundColor":"neutral-1","layout":{"type":"constrained"}} -->
 <section class="wp-block-group alignfull has-neutral-1-background-color has-background" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">
-	<!-- wp:heading {"textAlign":"center"} -->
-	<h2 class="wp-block-heading has-text-align-center"><?php esc_html_e( 'Why buy from Cigarholic', 'cigarholic' ); ?></h2>
+	<!-- wp:heading {"align":"wide"} -->
+	<h2 class="wp-block-heading alignwide"><?php esc_html_e( 'Why buy from Cigarholic', 'cigarholic' ); ?></h2>
 	<!-- /wp:heading -->
 
 	<!-- wp:group {"align":"wide","style":{"spacing":{"blockGap":"var:preset|spacing|40"}},"layout":{"type":"grid","minimumColumnWidth":"14rem"}} -->

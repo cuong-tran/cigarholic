@@ -13,8 +13,8 @@
  */
 
 ?>
-<!-- wp:group {"tagName":"section","align":"full","className":"newsletter","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"},"blockGap":"var:preset|spacing|40"}},"backgroundColor":"neutral-1","layout":{"type":"constrained","contentSize":"640px"}} -->
-<section class="wp-block-group alignfull newsletter has-neutral-1-background-color has-background" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">
+<!-- wp:group {"tagName":"section","align":"full","className":"newsletter","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"},"blockGap":"var:preset|spacing|40"}},"layout":{"type":"constrained","contentSize":"640px"}} -->
+<section class="wp-block-group alignfull newsletter" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">
 	<!-- wp:cigarholic/signup-form {"heading":"<?php echo esc_attr__( 'Join the Cigarholic list', 'cigarholic' ); ?>","buttonLabel":"<?php echo esc_attr__( 'Subscribe', 'cigarholic' ); ?>"} /-->
 
 	<!-- wp:paragraph {"align":"center","fontSize":"small","textColor":"neutral-2"} -->
