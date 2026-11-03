@@ -18,10 +18,17 @@ async function comingSoonIsOn( request ) {
 /**
  * Every visible text node whose colour fails AA against the background it is painted on
  * (4.5:1, or 3:1 for large text: 24 px, or 18.66 px bold). Opacity and translucent colours
- * are blended over the first opaque ancestor background. Text over a background image, a
+ * are blended over the first opaque ancestor background, after finite animations finish. Text over a background image, a
  * gradient or a Cover block is reported too, because a colour comparison cannot judge it.
  */
 async function contrastFailures( page ) {
+	// Measure the settled page: a fade-in (the phone menu opens from opacity 0 over 100 ms) would
+	// otherwise be judged mid-animation. Infinite animations (spinners) never finish, so skip them.
+	await page.evaluate( () => Promise.all(
+		document.getAnimations()
+			.filter( ( a ) => a.effect?.getTiming().iterations !== Infinity )
+			.map( ( a ) => a.finished.catch( () => {} ) )
+	) );
 	return page.evaluate( () => {
 		const parse = ( value ) => {
 			const m = value.match( /rgba?\(([^)]+)\)/ );
