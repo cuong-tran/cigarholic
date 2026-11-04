@@ -4,6 +4,14 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+### Fixed
+
+- FND-03: WooCommerce applies its new-store defaults on the first admin page view after install (`WC_Install::newly_installed` on `admin_init`). One of them turns email theme sync back on, which recoloured the emails (header Cedar `#9c5034` instead of Forest, body Ash instead of Ash tint) until the next deploy's provisioning restored them. This happened on staging and production after their first admin login. Provisioning step `10-woocommerce-general` now runs those defaults itself, once, before its settings, so the first admin visit changes nothing provisioning set (a dry run only reports it). `ProvisionTest::test_first_admin_visit_after_provisioning_changes_nothing`. Both servers already had their first admin visit, so this only affects new installs (the Compose stack, CI, a rebuilt site).
+
+## [0.2.0] - 2026-11-04
+
+The brand style (CNT-01, plan `docs/plans/CNT-01-brand-style.md`): tokens and self-hosted fonts, the Forest header and footer, the homepage, the WooCommerce pages, the logo, site icon and email logo, and robots.txt and the sitemaps on the VPS. Tagged by the owner at `167fd98` and deployed to production on 2026-11-04 (release 4, run 41760596394, approved on the `production` Environment).
+
 ### Added
 
 - SEO-01: a site that discourages search engines (`blog_public` 0: staging and development, from `DISALLOW_INDEXING`) answers robots.txt with `User-agent: *` / `Disallow: /` (`Seo\RobotsTxt`, toggle `robots-txt`, on; last on the `robots_txt` filter). WordPress stopped writing that line itself in 5.3 and relies on the noindex meta tag alone, so staging's robots.txt would otherwise have listed only `/wp/wp-admin/`. Public sites (production) keep WordPress's rules plus what WooCommerce and SEOPress add. `RobotsTxtTest`.
