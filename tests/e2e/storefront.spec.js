@@ -1,5 +1,7 @@
 // Browse → product → cart → checkout (Cash on delivery, development only) → order received → email in Mailpit.
 // FND-12 smoke subset; skipped while the catalog has no products (seed data arrives with CAT-03).
+// Functions passed to page.evaluate() run in the browser, hence this global.
+/* global getComputedStyle */
 import { test, expect } from '@playwright/test';
 import { login, mailpitMessages, uniqueEmail } from './helpers.js';
 
@@ -84,6 +86,17 @@ test.describe( 'storefront', () => {
 		await expect( page.getByText( /thank you/i ).first() ).toBeVisible();
 		const orderNumber = ( await page.locator( '.wc-block-order-confirmation-summary-list-item__value' ).first().textContent() )?.trim();
 		expect( orderNumber ).toMatch( /^\d+$/ );
+
+		// CHK-06: the next-steps card follows the order (Cash on delivery leaves it processing) and keeps the Card style.
+		const nextSteps = page.locator( '.order-next-steps' );
+		await expect( nextSteps.getByRole( 'heading', { level: 2, name: 'What happens next' } ) ).toBeVisible();
+		await expect( nextSteps.getByRole( 'listitem' ).first() ).toContainText( /^Packing and shipping\. We pack your order and hand it to the carrier within \d+(–\d+)? business days? from our US warehouse in Houston, Texas\.$/ );
+		await expect( nextSteps ).toContainText( `Please quote order number ${ orderNumber }.` );
+		const card = await nextSteps.evaluate( ( el ) => {
+			const s = getComputedStyle( el );
+			return { background: s.backgroundColor, border: s.borderTopWidth + ' ' + s.borderTopStyle };
+		} );
+		expect( card ).toEqual( { background: 'rgb(247, 244, 239)', border: '1px solid' } );
 
 		// WooCommerce sends "[Cigarholic]: New order #N" to the shop and "Your Cigarholic order has been received!" to the buyer.
 		await expect.poll( async () => ( await mailpitMessages( request, `#${ orderNumber }` ) ).length, { timeout: 30_000 } ).toBeGreaterThan( 0 );

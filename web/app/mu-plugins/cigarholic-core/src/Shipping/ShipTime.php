@@ -14,8 +14,9 @@ use WC_Product;
 /**
  * One ship-time promise for the whole store: the business days from order to hand-off to the carrier
  * for in-stock items, set by the manager under WooCommerce > Settings > Shipping > Shipping settings
- * (default 1 to 2). Shown by the `cigarholic/ship-time` block on the product page and as a line under
- * every in-stock cart item (cart, checkout summary, mini cart). Nothing is promised for an item on
+ * (default 1 to 2). Shown by the `cigarholic/ship-time` block on the product page, as a line under
+ * every in-stock cart item (cart, checkout summary, mini cart) and in the order-received next steps
+ * (CHK-06). Nothing is promised for an item on
  * backorder or out of stock, or for a quantity above the stock, so the promise stays true (CMP-05, FTC
  * Mail Order Rule): when orders will leave later, the manager changes the days here and every
  * message follows.
@@ -199,7 +200,7 @@ final class ShipTime implements Feature {
 		$settings[] = array(
 			'title' => __( 'Ship time', 'cigarholic' ),
 			'type'  => 'title',
-			'desc'  => __( 'Business days from the order to the hand-off to the carrier, for items in stock. Shown on product pages and under each item in the cart, the checkout and the mini cart. Keep it true: before orders will leave later (holidays, stock, a delay), change it here first, and tell customers whose orders are already late (Mail Order Rule; see the manager guide).', 'cigarholic' ),
+			'desc'  => __( 'Business days from the order to the hand-off to the carrier, for items in stock. Shown on product pages, under each item in the cart, the checkout and the mini cart, and on the order-received page. Keep it true: before orders will leave later (holidays, stock, a delay), change it here first, and tell customers whose orders are already late (Mail Order Rule; see the manager guide).', 'cigarholic' ),
 			'id'    => 'cigarholic_ship_time',
 		);
 		$settings[] = array(

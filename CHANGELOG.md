@@ -6,6 +6,18 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ### Added
 
+- CHK-06 / SHP-03 / CMP-05: the order-received "What happens next" card is written from the order (`Checkout\OrderNextSteps`, block `cigarholic/order-next-steps`, toggle `order-next-steps`, on) instead of fixed template text. It covers:
+  - Packing with the manager's ship time.
+  - Backordered lines (marked by WooCommerce, or a product's stock below zero): they ship when back in stock, the buyer gets the expected date by email and can cancel for a full refund. The ship time is not promised for them.
+  - The tracking email, with an Orders link for customers with an account.
+  - Support by reply, by email, by the contact page (only once it is published) or by phone, quoting the actual order number.
+  - For orders with a humidor, the seasoning instructions (with the FAQ link once that page is published).
+  - "Payment check" first for on-hold orders. Pending, failed, cancelled and refunded orders get no card, because WooCommerce's status block already tells the buyer what to do.
+  - The order is read only with its valid order key in the URL, as WooCommerce's confirmation blocks require; without it the card shows the general steps.
+  - The card is a real `core/group` with the Card style (rendered through `do_blocks`, so WordPress applies the style variation's generated class).
+
+  Tests: `OrderNextStepsTest` (statuses, backorders both ways, account link, humidor tip, page links, order key, block markup with the Card class), and the checkout smoke test now checks the card on a real Cash-on-delivery order (text, order number, Ash tint background and border).
+
 - SHP-03 / CMP-05: one ship-time promise for the whole store, set under **WooCommerce → Settings → Shipping → Shipping settings → Ship time** (business days to the carrier for in-stock items, default 1–2, clamped to 1–60; `Shipping\ShipTime`, toggle `ship-time`, on). The new `cigarholic/ship-time` block shows it on the product page ("Ships in 1–2 business days from our US warehouse in Houston, Texas.") and in the product's shipping section. Each in-stock cart item gets "Ships in 1–2 business days" (Store API `item_data`, no label) in the cart, the checkout summary and the mini cart. The homepage trust bar and the FAQ answer read the same setting. No promise is shown for a product or variation on backorder or out of stock, or for a cart quantity above the stock; a variable product with some options on backorder says "In-stock options ship in …". The hard-coded "1 to 2 business days" is gone from the product template and patterns (the order-received page follows with CHK-06). Manager guide section "Ship time" with the delay procedure (FTC Mail Order Rule). `ShipTimeTest` (range text and clamping, stock states, variations, quantity above stock, the Store API cart line, settings fields, block output), `tests/e2e/ship-time.spec.js` (product page, cart, checkout summary, mini cart).
 
 ### Fixed
