@@ -12,6 +12,8 @@
  * @package Cigarholic
  */
 
+$cigarholic_ship_days = class_exists( \Cigarholic\Core\Shipping\ShipTime::class ) ? \Cigarholic\Core\Shipping\ShipTime::range_text() : __( '1–2 business days', 'cigarholic' ); // SHP-03: the manager's ship-time setting.
+
 $cigarholic_trust_items = array(
 	array(
 		'title' => __( 'Handcrafted in Vietnam', 'cigarholic' ),
@@ -21,7 +23,7 @@ $cigarholic_trust_items = array(
 	),
 	array(
 		'title' => __( 'Ships from Texas', 'cigarholic' ),
-		'text'  => __( 'Orders leave our warehouse in Houston, Texas within 1 to 2 business days, with tracking by email.', 'cigarholic' ),
+		'text'  => sprintf( /* translators: %s: business days, for example "1–2 business days" */ __( 'In-stock orders leave our warehouse in Houston, Texas within %s, with tracking by email.', 'cigarholic' ), $cigarholic_ship_days ),
 		'url'   => '/shipping-policy/',
 		'link'  => __( 'Shipping policy', 'cigarholic' ),
 	),

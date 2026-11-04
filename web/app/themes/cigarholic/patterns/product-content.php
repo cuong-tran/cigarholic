@@ -94,8 +94,10 @@
 		<h2 class="wp-block-heading"><?php esc_html_e( 'Shipping and returns', 'cigarholic' ); ?></h2>
 		<!-- /wp:heading -->
 
+		<!-- wp:cigarholic/ship-time /-->
+
 		<!-- wp:paragraph -->
-		<p><?php esc_html_e( 'Orders ship within 1 to 2 business days from our warehouse in Houston, Texas, and you receive the tracking number by email. Shipping options and costs are shown at checkout.', 'cigarholic' ); ?> <a href="<?php echo esc_url( home_url( '/shipping-policy/' ) ); ?>"><?php esc_html_e( 'Shipping policy', 'cigarholic' ); ?></a></p>
+		<p><?php esc_html_e( 'You receive the tracking number by email as soon as the carrier has the package. Shipping options and costs are shown at checkout.', 'cigarholic' ); ?> <a href="<?php echo esc_url( home_url( '/shipping-policy/' ) ); ?>"><?php esc_html_e( 'Shipping policy', 'cigarholic' ); ?></a></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:paragraph -->

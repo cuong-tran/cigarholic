@@ -28,6 +28,20 @@ A single line at the top of every page, for a promotion, a shipping message or a
 3. Optionally set a **Start** and **End** in the store's timezone (Eastern Time, shown next to the field). Leave them empty to show the bar until you untick Enabled.
 4. **Save announcement bar**. The change is live immediately.
 
+## Ship time
+
+The store promises one ship time: how many business days pass between an order and its hand-off to the carrier, for items in stock. It shows on every product page ("Ships in 1–2 business days from our US warehouse in Houston, Texas."), under each item in the cart, the checkout and the mini cart ("Ships in 1–2 business days"), in the trust bar on the homepage and in the FAQ answer about shipping. Products on backorder or out of stock get no promise; a variable product with some options on backorder says "In-stock options ship in …".
+
+1. Open **WooCommerce → Settings → Shipping → Shipping settings** and scroll to **Ship time**.
+2. Set **Ships in at least** and **Ships in at most** (business days, 1 to 60). The same number in both shows a single count ("Ships in 3 business days").
+3. **Save changes**. Every message changes at once.
+
+US law (the FTC Mail Order Rule) requires a reasonable basis for this promise. When orders will leave later than it says (a holiday, a stock delay, a warehouse problem):
+
+1. Change the ship time here **before** taking more orders, and add an announcement bar if the delay is temporary ("Orders placed this week ship from December 2").
+2. For orders already placed that will miss the promise, email each customer before the promised date: the new ship date, and that they may cancel for a full refund. If a second delay follows, the customer must agree to it or the order is cancelled and refunded.
+3. Keep a note on each such order (**Add note** on the order page) of what you told the customer and when.
+
 ## Contact form
 
 Messages from the **Contact** page arrive by email in the support inbox, with the visitor's address as Reply-To, so you answer by replying. Nothing is stored on the website.

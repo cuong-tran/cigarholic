@@ -76,6 +76,10 @@ final class Features {
 			'class'   => Catalog\Seed::class,
 			'default' => true,
 		),
+		'ship-time'        => array(
+			'class'   => Shipping\ShipTime::class,
+			'default' => true,
+		),
 	);
 
 	/**

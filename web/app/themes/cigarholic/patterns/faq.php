@@ -12,6 +12,8 @@
  * @package Cigarholic
  */
 
+$cigarholic_ship_days = class_exists( \Cigarholic\Core\Shipping\ShipTime::class ) ? \Cigarholic\Core\Shipping\ShipTime::range_text() : __( '1–2 business days', 'cigarholic' ); // SHP-03: the manager's ship-time setting.
+
 $cigarholic_faq = array(
 	array(
 		'q' => __( 'Do you sell cigars?', 'cigarholic' ),
@@ -27,7 +29,7 @@ $cigarholic_faq = array(
 	),
 	array(
 		'q' => __( 'How long does shipping take?', 'cigarholic' ),
-		'a' => __( 'We hand orders to the carrier within 1 to 2 business days from Houston, Texas. Transit time depends on the carrier service you choose at checkout and your address; the tracking email shows the estimate.', 'cigarholic' ),
+		'a' => sprintf( /* translators: %s: business days, for example "1–2 business days" */ __( 'We hand orders for in-stock items to the carrier within %s from Houston, Texas. Transit time depends on the carrier service you choose at checkout and your address; the tracking email shows the estimate.', 'cigarholic' ), $cigarholic_ship_days ),
 	),
 	array(
 		'q' => __( 'Do you ship outside the United States?', 'cigarholic' ),

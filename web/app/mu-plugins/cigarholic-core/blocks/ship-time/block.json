@@ -1,0 +1,22 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "cigarholic/ship-time",
+	"version": "0.1.0",
+	"title": "Ship time",
+	"category": "woocommerce",
+	"icon": "clock",
+	"description": "The store's ship-time promise from WooCommerce > Settings > Shipping. On a product: \"Ships in 1–2 business days from our US warehouse in Houston, Texas.\", nothing while the product is on backorder or out of stock. Elsewhere: the same promise for in-stock items.",
+	"keywords": [ "shipping", "ship time", "delivery", "dispatch" ],
+	"textdomain": "cigarholic",
+	"usesContext": [ "postId", "postType" ],
+	"attributes": {},
+	"supports": {
+		"html": false,
+		"color": { "text": true, "background": false, "link": false },
+		"spacing": { "margin": true },
+		"typography": { "fontSize": true }
+	},
+	"editorScript": "file:./editor.js",
+	"render": "file:./render.php"
+}
