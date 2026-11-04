@@ -137,6 +137,44 @@ final class ProvisionTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Step 10 runs WooCommerce's new-store defaults before the settings, so the first admin page view
+	 * after install (WC_Install::newly_installed on admin_init) no longer turns email theme sync on and
+	 * recolours the emails, and provisioning stays a no-op afterwards (FND-03).
+	 */
+	public function test_first_admin_visit_after_provisioning_changes_nothing(): void {
+		// Earlier tests leave $wp_rewrite at /%postname%/ in memory after the database rollback.
+		$this->set_permalink_structure( '' );
+		update_option( 'woocommerce_newly_installed', 'yes' );
+
+		$this->runner()->run( true );
+		$this->assertSame( 'yes', get_option( 'woocommerce_newly_installed' ), 'a dry run must not run the defaults' );
+		$this->assertNotEmpty( array_filter( $this->lines, static fn( string $line ): bool => str_contains( $line, 'would change: WooCommerce new-store defaults' ) ) );
+
+		$this->runner()->run( false );
+		$this->assertSame( 'no', get_option( 'woocommerce_newly_installed' ) );
+
+		$watched = array(
+			'woocommerce_email_auto_sync_with_theme',
+			'woocommerce_email_base_color',
+			'woocommerce_email_background_color',
+			'woocommerce_email_body_background_color',
+			'woocommerce_email_text_color',
+			'woocommerce_email_footer_text_color',
+			'woocommerce_coming_soon',
+			'woocommerce_store_pages_only',
+			'woocommerce_custom_orders_table_enabled',
+		);
+		$before  = array_combine( $watched, array_map( 'get_option', $watched ) );
+
+		// What admin_init does on the first admin page view.
+		\WC_Install::newly_installed();
+
+		$this->assertSame( $before, array_combine( $watched, array_map( 'get_option', $watched ) ) );
+		$this->assertSame( 'no', $before['woocommerce_email_auto_sync_with_theme'] );
+		$this->assertSame( 0, $this->runner()->run( true ), "provisioning is not a no-op after the first admin visit:\n" . implode( "\n", $this->lines ) );
+	}
+
+	/**
 	 * Step 85: a coming-soon template or a header/footer part saved in the Site Editor hides theme
 	 * changes; the run names each one and keeps it (CNT-01, NAV-01, NAV-03).
 	 */

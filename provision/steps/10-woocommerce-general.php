@@ -21,6 +21,17 @@ return static function ( Context $ctx ): void {
 		return;
 	}
 
+	// WooCommerce applies its new-store defaults on the first admin page view after install
+	// (WC_Install::newly_installed on admin_init): among them email theme sync on, which recolours
+	// the emails, and store-pages-only coming soon. Run them now, once, so this step and the later
+	// ones are applied after them and a first admin visit changes nothing they set.
+	if ( 'yes' === get_option( 'woocommerce_newly_installed' ) && is_callable( array( 'WC_Install', 'newly_installed' ) ) ) {
+		if ( ! $ctx->is_dry_run() ) {
+			WC_Install::newly_installed();
+		}
+		$ctx->changed( 'WooCommerce new-store defaults (woocommerce_newly_installed)' );
+	}
+
 	// Store address: HuyLinh LLC headquarters (brief section 1). The company name itself is not a
 	// WooCommerce setting; it goes into the email footer (70-emails) and the theme footer.
 	$ctx->option( 'woocommerce_store_address', '7901 4th St N STE 300' );
