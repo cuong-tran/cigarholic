@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "cigarholic/order-next-steps",
+	"version": "0.1.0",
+	"title": "Order next steps",
+	"category": "woocommerce",
+	"icon": "list-view",
+	"description": "The \"What happens next\" card for the order-received page, written from the order: ship time, backorders, tracking email, account link, support contact with the order number, and the seasoning tip for humidors. Renders nothing for an unpaid order.",
+	"keywords": [ "order", "confirmation", "thank you", "next steps", "shipping" ],
+	"textdomain": "cigarholic",
+	"attributes": {},
+	"supports": {
+		"html": false,
+		"multiple": false,
+		"align": [ "wide" ],
+		"spacing": { "margin": true }
+	},
+	"editorScript": "file:./editor.js",
+	"render": "file:./render.php"
+}

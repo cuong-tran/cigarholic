@@ -80,6 +80,10 @@ final class Features {
 			'class'   => Shipping\ShipTime::class,
 			'default' => true,
 		),
+		'order-next-steps' => array(
+			'class'   => Checkout\OrderNextSteps::class,
+			'default' => true,
+		),
 	);
 
 	/**
