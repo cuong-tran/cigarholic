@@ -306,6 +306,13 @@ for u in / /shop/ '/?author=1' /feed/ /robots.txt /sitemaps.xml /wp-admin /wp/wp
 
 Everything is merged and pushed; nothing lives only in a conversation. A new session reads `CLAUDE.md` (which imports `AGENTS.md`), this file and `docs/OWNER-ACTIONS.md`, then continues from "Next actions". Server work runs through the workflows (`infra-provision.yml`, `wp-cli.yml`, `deploy-*.yml`); `docs/runbooks/` has the commands. A production release is the owner's tag on `main`; after its deploy, check the live site from outside with the commands below and record the run IDs in "Server".
 
+Start-up, in this order (about 6 minutes, most of it the PHP image build):
+
+1. `git status`, then `git fetch origin main && git checkout -B <session branch> origin/main`. The harness names the session branch; it is the only one you may push. The previous session's branch is already deleted after its merge.
+2. `nohup dockerd >/tmp/dockerd.log 2>&1 &`, then `scripts/tools.sh && COMPOSER_ALLOW_SUPERUSER=1 composer install && npm ci`, then `make up` (in the background; it ends with the URLs and `Sample catalog: 7 products`).
+3. Check the deploys since the last entry in "Server": `gh api 'repos/cuong-tran/cigarholic/actions/runs?per_page=10' --jq '.workflow_runs[] | [.id, .name, .head_branch, .conclusion] | @tsv'`. Read a deploy's provisioning output from its job log (`changed:` and `warning:` lines; step 85 warns about theme files saved in the Site Editor).
+4. Work one PR at a time on the session branch (`docs/runbooks/sandbox.md`, "GitHub from the sandbox"). Merge your own PR once CI is green; the merge deploys staging. End with a handoff PR for this file.
+
 ## If the session is reopened after the VM expired
 
 `git status`, read this file, `scripts/tools.sh && composer install`, `make up`, then continue from "Next actions". If the Docker daemon is down after a restart, `make up` starts it and recreates the containers with the gateway CA (do not use a bare `docker compose up` in the sandbox).
