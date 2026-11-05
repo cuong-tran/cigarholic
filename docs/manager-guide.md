@@ -76,6 +76,25 @@ The shop pages follow the same rules: form fields have a light fill and a dark g
 
 To make a section dark, select the group and pick **Forest** under *Styles*: the background, text, links, buttons and focus outline all switch together. The small uppercase label above a heading is the paragraph style **Eyebrow**; boxed panels are the group style **Card**. Headings use Young Serif and body text Hanken Grotesk; both are served from our own site, so there is nothing to install or license.
 
+## Search results and social previews (SEOPress)
+
+Google shows a page's **SEO title** and **meta description**; Facebook, Pinterest and messaging apps show the same title with the page's image. SEOPress writes them from templates, so a new product or collection gets them without any work:
+
+| Page | Title | Description |
+|---|---|---|
+| Home | Cigarholic \| Handcrafted Wooden Humidors and Cigar Boxes | Wooden humidors, cigar boxes and humidor accessories, handcrafted in Vietnam and shipped from our Texas warehouse to the contiguous US. |
+| Product | *Product name* \| Cigarholic | The product's **short description** |
+| Collection (category) | *Category name* \| Cigarholic | The category's description |
+| Shop | Shop Humidors and Cigar Boxes \| Cigarholic | Desktop, cabinet and travel humidors, cigar boxes and humidor accessories, handcrafted in Vietnam. |
+
+So the most useful thing to do for search is to write a good **short description** for every product (about 150 characters, what it is, the wood, the capacity) and a description for every category (**Products → Categories → Edit**).
+
+To word one page differently, open it and use the **SEO** box under the editor (tab **Titles settings**): a title or description typed there replaces the template for that page only. Leave the **Advanced** tab's "Do not display this page in search engine results / XML - HTML sitemaps (noindex)" unticked, except to hide a page from Google on purpose. Cart, checkout and My account are always hidden, and the next deploy puts that back if it is changed.
+
+Site-wide SEOPress settings (**SEO → Titles & Metas**, **XML - HTML Sitemap** and the company details under **Social Networks**) are set by the code and come back with every deploy; ask for a change instead of editing them. The sitemap Google reads is `https://cigarholic.com/sitemaps.xml`: it lists published pages, products and collections, never drafts, the cart, checkout or account pages.
+
+While the store is in coming soon, visitors and search engines see only the launch page, so none of this shows in Google before launch.
+
 ## Coming next in this guide
 
 Add or edit a product, change a price, run a sale, process an order, refund, add tracking, edit pages.

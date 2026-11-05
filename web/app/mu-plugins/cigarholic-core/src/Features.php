@@ -40,6 +40,10 @@ final class Features {
 			'class'   => Seo\RobotsTxt::class,
 			'default' => true,
 		),
+		'website-schema'   => array(
+			'class'   => Seo\WebsiteSchema::class,
+			'default' => true,
+		),
 		'signups'          => array(
 			'class'   => Signups\Signups::class,
 			'default' => true,

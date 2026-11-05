@@ -162,6 +162,94 @@ final class ProvisionTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Step 75 (SEO-01): sets its keys inside SEOPress's option arrays and keeps every other key, top-level
+	 * or nested, so a setting changed elsewhere in SEOPress survives a deploy.
+	 */
+	public function test_seo_step_sets_its_keys_and_keeps_the_rest(): void {
+		$this->set_permalink_structure( '' );
+		update_option(
+			'seopress_titles_option_name',
+			array(
+				'seopress_titles_home_site_title' => 'Typed in SEOPress',
+				'seopress_titles_404_desc'        => 'kept',
+				'seopress_titles_tax_titles'      => array(
+					'product_cat' => array(
+						'title'    => 'old',
+						'nofollow' => '1',
+					),
+				),
+			)
+		);
+		update_option( 'seopress_xml_sitemap_option_name', array( 'seopress_xml_sitemap_author_enable' => '1' ) );
+
+		$this->runner()->run( false );
+
+		$titles = get_option( 'seopress_titles_option_name' );
+		$this->assertSame( 'Cigarholic | Handcrafted Wooden Humidors and Cigar Boxes', $titles['seopress_titles_home_site_title'] );
+		$this->assertSame( '|', $titles['seopress_titles_sep'] );
+		$this->assertSame( 'kept', $titles['seopress_titles_404_desc'] );
+		$this->assertSame( '%%term_title%% %%current_pagination%% %%sep%% %%sitetitle%%', $titles['seopress_titles_tax_titles']['product_cat']['title'] );
+		$this->assertSame( '1', $titles['seopress_titles_tax_titles']['product_cat']['nofollow'], 'a nested key the step does not own is kept' );
+		$this->assertStringContainsString( '%%sitetitle%%', $titles['seopress_titles_archive_titles']['product']['title'] );
+		$this->assertSame( '1', $titles['seopress_titles_tax_titles']['occasion']['noindex'] );
+
+		$sitemap = get_option( 'seopress_xml_sitemap_option_name' );
+		$this->assertSame( '1', $sitemap['seopress_xml_sitemap_taxonomies_list']['product_cat']['include'] );
+		$this->assertSame( '0', $sitemap['seopress_xml_sitemap_taxonomies_list']['category']['include'] );
+		$this->assertSame( '1', $sitemap['seopress_xml_sitemap_post_types_list']['product']['include'] );
+		$this->assertArrayNotHasKey( 'seopress_xml_sitemap_author_enable', $sitemap, 'author archives answer 404, so no author sitemap' );
+
+		$social = get_option( 'seopress_social_option_name' );
+		$this->assertSame( 'OnlineStore', $social['seopress_social_knowledge_type'] );
+		$this->assertSame( 'large', $social['seopress_social_twitter_card_img_size'] );
+		$this->assertNotSame( '', $social['seopress_social_knowledge_img'] );
+		$this->assertSame( wp_get_attachment_image_url( (int) get_option( 'site_logo' ), 'full' ), $social['seopress_social_knowledge_img'], 'the logo imported by step 25' );
+		$this->assertArrayNotHasKey( 'seopress_social_accounts_facebook', $social, 'no social profile until the owner gives one' );
+
+		$this->assertSame( '0', get_option( 'seopress_toggle' )['toggle-google-analytics'] );
+		$this->assertSame( '1', get_option( 'seopress_toggle' )['toggle-titles'], 'other module switches are kept' );
+		foreach ( array( 'cart', 'checkout', 'myaccount' ) as $wc_page ) {
+			$this->assertSame( 'yes', get_post_meta( wc_get_page_id( $wc_page ), '_seopress_robots_index', true ), $wc_page );
+		}
+
+		$this->assertSame( 0, $this->runner()->run( true ), "second run is not a no-op:\n" . implode( "\n", $this->lines ) );
+	}
+
+	/**
+	 * Step 75 (SEO-01): on a public site (production) SEOPress drops WooCommerce's noindex from the cart,
+	 * checkout and account pages and prints "index, follow"; the per-page noindex the step sets brings
+	 * noindex back. Rendered through SEOPress's own robots tag, as wp_head prints it.
+	 */
+	public function test_woocommerce_pages_are_noindex_on_a_public_site(): void {
+		$this->set_permalink_structure( '' );
+		$this->runner()->run( false );
+		update_option( 'blog_public', '1' );
+		// As on the servers: SEOPress only touches WooCommerce's robots when it sees WooCommerce as active
+		// (the bootstrap loads it without listing it).
+		update_option( 'active_plugins', array( 'woocommerce/woocommerce.php', 'wp-seopress/seopress.php' ) );
+		$this->assertTrue( function_exists( 'seopress_load_titles_options' ), 'SEOPress titles module is not loaded' );
+
+		$robots = function ( int $page_id ): string {
+			$this->go_to( (string) get_permalink( $page_id ) );
+			seopress_load_titles_options();
+			ob_start();
+			seopress_titles_advanced_robots_hook();
+			return (string) ob_get_clean();
+		};
+
+		foreach ( array( 'cart', 'checkout', 'myaccount' ) as $wc_page ) {
+			$tag = $robots( wc_get_page_id( $wc_page ) );
+			$this->assertMatchesRegularExpression( '/<meta name="robots" content="[^"]*\bnoindex\b/', $tag, $wc_page );
+			$this->assertSame( array(), apply_filters( 'wp_robots', array() ), "SEOPress empties WooCommerce's own noindex on the $wc_page page" );
+		}
+
+		// Without the step's meta, SEOPress would invite indexing: the reason the step sets it.
+		$cart = wc_get_page_id( 'cart' );
+		delete_post_meta( $cart, '_seopress_robots_index' );
+		$this->assertStringContainsString( 'content="index, follow', $robots( $cart ) );
+	}
+
+	/**
 	 * Step 10 runs WooCommerce's new-store defaults before the settings, so the first admin page view
 	 * after install (WC_Install::newly_installed on admin_init) no longer turns email theme sync on and
 	 * recolours the emails, and provisioning stays a no-op afterwards (FND-03).

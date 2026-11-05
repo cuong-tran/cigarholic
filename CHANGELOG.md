@@ -4,6 +4,24 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+### Added
+
+- SEO-01 / SEO-02: SEOPress is configured as code (provisioning step `75-seo`) instead of running on its activation defaults. It sets only its own keys inside SEOPress's option arrays and keeps every other key.
+  - **Titles and descriptions:** separator `|`. The home page is "Cigarholic | Handcrafted Wooden Humidors and Cigar Boxes" with a description. The shop is "Shop Humidors and Cigar Boxes | Cigarholic": SEOPress's default archive template had dropped the site name ("Shop -"). Products, pages and collections use "*name* | Cigarholic" with the short or term description.
+  - **Kept out of search:** tag, brand, post-format and occasion archives (occasions until CAT-14), and author, date, search and attachment pages.
+  - **Sitemaps:** pages, journal posts, products and, new, product categories (`/product_cat-sitemap1.xml`). The empty blog-category sitemap and the author sitemap are gone.
+  - **Cart, checkout and My account are `noindex` and out of the page sitemap.** On a public site SEOPress removes WooCommerce's own noindex from these pages (`seopress_robots_wc_pages`) and prints `index, follow`. Production does this today: `/cart/` and `/my-account/` answer with the coming-soon page titled "Cart - Cigarholic" and "My account - Cigarholic", `index, follow`, and the page sitemap lists them (checked from outside 2026-11-05). The step sets SEOPress's per-page noindex on them.
+  - **Knowledge graph:** an `OnlineStore` with the name, legal name HuyLinh LLC, the logo from step 25, the Florida address, phone and support email, and a description saying no cigars, tobacco or nicotine are sold. No social profiles: the footer links are still placeholders.
+  - **Social cards:** large-image cards.
+  - **SEOPress's own Google Analytics module is off**, so GA4 can only come from Google Analytics for WooCommerce (MKT-02); its setup wizard redirect is off.
+  - `Seo\WebsiteSchema` (toggle `website-schema`, on) names the home page's WebSite node "Cigarholic". SEOPress copies the whole home title into it, which Google would read as the site name; the repeated `alternateName` is dropped.
+  - Manager guide section "Search results and social previews".
+  - Tests:
+    - `ProvisionTest`: keys set and unrelated top-level and nested keys kept; the cart, checkout and account robots tag rendered by SEOPress on a public site is `noindex`, and `index, follow` without the step's meta.
+    - `WebsiteSchemaTest`.
+    - `tests/e2e/seo.spec.js`: sitemap index and contents, titles, canonical, card type, the home page's WebSite and OnlineStore nodes.
+    - The PHPUnit bootstrap now loads SEOPress with its activation defaults.
+
 ### Changed
 
 - FND-13: WooCommerce 11.2.1 → 11.2.2, Complianz 7.5.6 → 7.5.7, FluentSMTP 2.4.1 → 2.4.5 (#62) and `php-stubs/woocommerce-stubs` 11.2.1 (#63), Dependabot. WooCommerce 11.2.2 is a fix release: Store API checkout requests each start with their own order and payment data, checkout stops when the order cannot be saved, cart quantity and shipping-rate validation, REST API key authentication only on REST requests, the Jetpack onboarding endpoints need an admin session. Its one database update removes PHP objects from product default attributes (`wc_update_1122_remove_objects_from_default_attributes`). Complianz fixes the banner stylesheet loading and Consent Mode's first page view; FluentSMTP fixes PHP 8.5 deprecation notices among others. Neither is configured yet (CMP-03, B1). Upgraded in place on the Compose stack: `wc update` ran that one function, provisioning dry run 0 changes, PHPUnit and Playwright green.
