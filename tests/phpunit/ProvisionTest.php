@@ -137,6 +137,31 @@ final class ProvisionTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Step 80: every site stays in coming soon until the owner's go-live (C5), staging included (owner,
+	 * 2026-11-05, OWNER-ACTIONS A9). A switch to Live in WP admin, as happened on staging before
+	 * release 15, is reported by a dry run and undone by the next deploy's provisioning (FND-03, CNT-04).
+	 */
+	public function test_switch_to_live_in_wp_admin_is_undone(): void {
+		// Earlier tests leave $wp_rewrite at /%postname%/ in memory after the database rollback.
+		$this->set_permalink_structure( '' );
+		$this->runner()->run( false );
+
+		// WooCommerce → Settings → Site visibility → Live, or a share link for the store pages only.
+		update_option( 'woocommerce_coming_soon', 'no' );
+		update_option( 'woocommerce_store_pages_only', 'yes' );
+		update_option( 'woocommerce_private_link', 'yes' );
+
+		$this->assertSame( 3, $this->runner()->run( true ), "a dry run must report all three settings:\n" . implode( "\n", $this->lines ) );
+		$this->assertSame( 'no', get_option( 'woocommerce_coming_soon' ), 'a dry run must not change anything' );
+
+		$this->runner()->run( false );
+		$this->assertSame( 'yes', get_option( 'woocommerce_coming_soon' ) );
+		$this->assertSame( 'no', get_option( 'woocommerce_store_pages_only' ) );
+		$this->assertSame( 'no', get_option( 'woocommerce_private_link' ) );
+		$this->assertSame( 0, $this->runner()->run( true ) );
+	}
+
+	/**
 	 * Step 10 runs WooCommerce's new-store defaults before the settings, so the first admin page view
 	 * after install (WC_Install::newly_installed on admin_init) no longer turns email theme sync on and
 	 * recolours the emails, and provisioning stays a no-op afterwards (FND-03).

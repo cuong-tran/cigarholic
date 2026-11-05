@@ -254,6 +254,7 @@ Verified from the sandbox afterwards: `https://staging.cigarholic.com/` 401 + HS
 19. **The ship time belongs to the manager, not to provisioning** (#59): it is a WooCommerce setting with a default in code (1–2 business days), never written by `wp cigarholic provision`, because it must change the moment orders will leave later (FTC Mail Order Rule) without a deploy. Every promise reads it: the product page, the cart line, the order-received card, the trust bar and the FAQ; templates never contain a day count.
 20. **Backordered lines get no ship time** (#59, #60): the product page and the cart promise nothing for them, and the order-received card says they ship when back in stock, that the buyer gets the expected date by email and can cancel. A line counts as backordered when WooCommerce marked it or its product's managed stock is below zero.
 21. **Theme files saved in the Site Editor are reported, never reset by a deploy** (step 85): a saved copy is the owner's or manager's content. Resetting one on production is the owner's call (A9).
+22. **Staging stays in coming soon, like production** (owner, 2026-11-05, A9 question 3): staging shows visitors the launch page and the store only to logged-in staff, behind basic auth and `noindex`. Provisioning step 80 sets it on every site and every deploy; a switch to Live in WP admin lasts until the next deploy (`ProvisionTest::test_switch_to_live_in_wp_admin_is_undone`). Going live (C5) is a change to step 80.
 
 ## Open owner decisions and inputs
 

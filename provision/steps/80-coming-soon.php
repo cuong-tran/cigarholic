@@ -5,7 +5,9 @@
  * The whole site shows the theme's coming-soon template (templates/coming-soon.html: brand, one line,
  * signup form, company footer, no navigation) to visitors; administrators and shop managers see the
  * store. No private share link. Coming soon stays on until the owner says "turn coming-soon off"
- * (milestone M4): that is a change to this step, not a click in WP admin. A copy of the template saved
+ * (milestone M4): that is a change to this step, not a click in WP admin. The same on every site:
+ * staging stays in coming soon like production (owner, 2026-11-05, OWNER-ACTIONS A9), so a switch to
+ * Live in WP admin on either one lasts only until the next deploy. A copy of the template saved
  * in the Site Editor would hide theme changes; step 85 reports one.
  *
  * Feature IDs: FND-03, CNT-04.

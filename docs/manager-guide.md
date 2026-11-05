@@ -56,6 +56,8 @@ Messages from the **Contact** page arrive by email in the support inbox, with th
 
 While **WooCommerce → Settings → Site visibility** is set to *Coming soon*, visitors see the launch page with the signup form and you (logged in as manager or admin) see the whole store. Only the owner decides when to switch it to *Live*.
 
+Staging (`staging.cigarholic.com`) runs in coming soon too, exactly like the live site (owner's decision, 2026-11-05): log in there to see the store. Switching *Site visibility* to *Live* on either site does not last; the next deploy sets it back to *Coming soon*. Going live is a code change made when the owner says so.
+
 The launch page is the template **Appearance → Editor → Templates → Page: Coming soon**. Saving it there makes a copy that hides every later theme update of that page (the brand design included) until the copy is reset with **⋮ → Reset**. To change the wording, ask for it to be changed in the theme instead; the deploy log warns about every saved copy.
 
 ## Logo and site icon

@@ -5,7 +5,7 @@ What runs where, and when it was last tested together. Same PHP minor on CI, sta
 | Component | Version | Where pinned | Tested | Notes |
 |---|---|---|---|---|
 | WordPress | 7.1.4 | `composer.lock` (`roots/wordpress`) | 2026-10-30 (install) | 7.2 is in beta; wait for 7.2.1 |
-| WooCommerce | 11.2.1 | `composer.lock` | 2026-10-30 (install) | |
+| WooCommerce | 11.2.2 | `composer.lock` | 2026-11-05 (upgrade from 11.2.1 on the Compose stack, CI runtime job) | Fix release (Store API checkout and cart validation, REST API keys only on REST requests, CSV importer column mapping). One DB update, `wc_update_1122_remove_objects_from_default_attributes`: strips PHP objects from `_default_attributes` postmeta; plain string defaults stay |
 | PHP (VPS, Compose, CI) | 8.5 (image `php:8.5.12-fpm-trixie`; Ubuntu 26.04 archive 8.5.4) | `docker-compose.yml`, `docker/php/Dockerfile`, `infra/` | 2026-10-30 (runtime) | Same minor everywhere; gate before M2, fallback 8.4 via ondrej PPA (ADR 0001). WP-CLI 2.12's own libraries emit 8.5 deprecations |
 | PHP (sandbox host, lint only) | 8.3.6 | `composer.json` platform | 2026-10-30 | Code stays 8.3-compatible |
 | MariaDB | 11.8 (image 11.8.9; Ubuntu 26.04 archive 11.8.6) | `docker-compose.yml`, `infra/` | 2026-10-30 (runtime) | |
@@ -16,7 +16,7 @@ What runs where, and when it was last tested together. Same PHP minor on CI, sta
 | Composer | 2.8.12 | sandbox image, `docker/php/Dockerfile` | 2026-10-30 | |
 | Mailpit | v1.32.0 | `docker-compose.yml`, `docker/php/Dockerfile` (sendmail shim) | 2026-10-30 (runtime) | Development only |
 | WP-CLI | 2.12.0 | `docker/php/Dockerfile` (from `wordpress:cli-2.12.0-php8.5`), sandbox | 2026-10-30 | |
-| PHPStan | 2.3.4 | `scripts/tools.sh` | 2026-10-30 | phar; `szepeviktor/phpstan-wordpress` 2.0.x, `php-stubs/woocommerce-stubs` 11.2.x |
+| PHPStan | 2.3.4 | `scripts/tools.sh` | 2026-10-30 | phar; `szepeviktor/phpstan-wordpress` 2.0.x, `php-stubs/woocommerce-stubs` 11.2.1 (2026-11-05) |
 | PHPUnit | 9.6.38 | `scripts/tools.sh` | 2026-10-30 (6 tests green in the container) | phar; the WordPress test suite (`wp-phpunit/wp-phpunit` 7.1.3) still uses PHPUnit 9 APIs; `yoast/phpunit-polyfills` 4.0 |
 | Deployer | 8.0.5 | `scripts/tools.sh` | 2026-10-30 | phar |
 | PHP_CodeSniffer + WPCS | 3.x + 3.4.1 | `composer.lock` | 2026-10-30 | PHPCompatibilityWP 2.1.x |
