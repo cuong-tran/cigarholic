@@ -91,6 +91,8 @@ the environment's setup script and applies the fixes below.
 - Playwright uses the preinstalled Chromium with `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`
   (`make e2e` sets it). Chromium does not trust the gateway CA; `playwright.config.js` sets
   `ignoreHTTPSErrors` when `CCR_AGENT_PROXY_ENABLED` is present.
+- For screenshots of store pages, wait for `load` plus a second, not `networkidle`: Turnstile and
+  Query Monitor keep connections open, so `networkidle` times out after 30 s.
 
 ## GitHub from the sandbox
 
@@ -106,6 +108,9 @@ the environment's setup script and applies the fixes below.
   `repos/.../actions/permissions`, `repos/.../actions/secrets`, `repos/.../actions/variables`.
   Secrets and variables can be neither read nor set from the sandbox.
 - A `workflow_dispatch` workflow can be triggered only once its file is on `main`.
+- **One branch per session, reused PR after PR** (verified 2026-11-04). The harness names the session's branch (`claude/<name>`), and only that branch may be pushed. GitHub deletes a PR's head branch when it is squash-merged, so start the next PR with `git fetch origin main && git checkout -B <branch> origin/main` (carry uncommitted work across with `git stash`) and a plain `git push -u origin <branch>`. `--force-with-lease` is refused by the classifier, and it is never needed this way. Commit a follow-up PR only after the previous one is merged, or its commits ride along.
+- `merge_pull_request` with `expectedHeadSha` needs the full 40-character SHA (`git rev-parse HEAD`); a shortened one is refused, and a wrong one gives 409 "Head branch was modified".
+- Sourcery (a review bot installed on the repository) comments on every PR. It is over its free weekly budget, so it posts only a summary and a notice; neither needs an answer.
 
 ## PHP 8.5 on the host (optional)
 
