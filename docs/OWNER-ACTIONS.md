@@ -7,9 +7,9 @@ The one place to see what the build needs from you (`docs/KICKOFF-BRIEF.md` rule
 - Secret and variable **names** are the contract (full inventory in `docs/runbooks/secrets.md`). Never put a value anywhere except GitHub, and never paste one into the session.
 - When you hand something over, reply in the session ("done A1, A2") or edit the Status column. I verify on first use and update this file.
 
-Last updated: 2026-11-05, Turn 7 (`v0.2.0` live and visible; A9 done).
+Last updated: 2026-11-05, Turn 7 (`v0.3.0` live; A9 done).
 
-**Status (2026-11-05): `v0.2.0` live and visible.** A9 is done: the saved coming-soon copy was reset at your request and visitors now see the Forest page. **Next from you:** B6 Turnstile keys and B1 Postmark, then the rest of section B. Cloudflare (A2) stays deferred. Tag `v0.3.0` whenever you like (ship-time messages and the order-received steps; nothing visitors see while coming soon is on). One open question from A9: should staging run without coming soon?
+**Status (2026-11-05): `v0.3.0` live, and the brand page visible.** Thank you for the `v0.3.0` tag and approval (release 5). A9 is done: the saved coming-soon copy was reset at your request and visitors now see the Forest page. **Next from you:** B6 Turnstile keys and B1 Postmark, then the rest of section B. Cloudflare (A2) stays deferred. One open question from A9: should staging run without coming soon?
 
 ## How to hand over secrets and variables
 

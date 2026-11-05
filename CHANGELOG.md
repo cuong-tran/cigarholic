@@ -4,6 +4,10 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-05
+
+Ship-time messaging and order-received next steps, and provisioning that survives the first admin visit. Tagged by the owner at `80b3515` and deployed to production on 2026-11-05 (release 5, run 42073737919, approved on the `production` Environment). Nothing visitors see changes while coming soon is on.
+
 ### Added
 
 - CHK-06 / SHP-03 / CMP-05: the order-received "What happens next" card is written from the order (`Checkout\OrderNextSteps`, block `cigarholic/order-next-steps`, toggle `order-next-steps`, on) instead of fixed template text. It covers:
