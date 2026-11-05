@@ -4,6 +4,12 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+### Changed
+
+- FND-13: WooCommerce 11.2.1 → 11.2.2, Complianz 7.5.6 → 7.5.7, FluentSMTP 2.4.1 → 2.4.5 (#62) and `php-stubs/woocommerce-stubs` 11.2.1 (#63), Dependabot. WooCommerce 11.2.2 is a fix release: Store API checkout requests each start with their own order and payment data, checkout stops when the order cannot be saved, cart quantity and shipping-rate validation, REST API key authentication only on REST requests, the Jetpack onboarding endpoints need an admin session. Its one database update removes PHP objects from product default attributes (`wc_update_1122_remove_objects_from_default_attributes`). Complianz fixes the banner stylesheet loading and Consent Mode's first page view; FluentSMTP fixes PHP 8.5 deprecation notices among others. Neither is configured yet (CMP-03, B1). Upgraded in place on the Compose stack: `wc update` ran that one function, provisioning dry run 0 changes, PHPUnit and Playwright green.
+
+- FND-03 / CNT-04: staging stays in coming soon like production (owner, 2026-11-05, OWNER-ACTIONS A9). Provisioning step 80 already sets it on every site; `ProvisionTest::test_switch_to_live_in_wp_admin_is_undone` now locks it in (a switch to Live, store-pages-only or a share link in WP admin is reported by a dry run and undone by the next deploy). Manager guide, "Coming soon".
+
 ## [0.3.0] - 2026-11-05
 
 Ship-time messaging and order-received next steps, and provisioning that survives the first admin visit. Tagged by the owner at `80b3515` and deployed to production on 2026-11-05 (release 5, run 42073737919, approved on the `production` Environment). Nothing visitors see changes while coming soon is on.

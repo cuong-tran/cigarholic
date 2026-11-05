@@ -8,15 +8,15 @@ Versions are pinned in `composer.lock`; `docs/versions.md` has the tested dates.
 
 | # | Plugin | Package | Version | Feature IDs | Why | Owner | HPOS / block checkout |
 |---|---|---|---|---|---|---|---|
-| 1 | WooCommerce | `wpackagist-plugin/woocommerce` | 11.2.1 | all | The store | Agents | yes (we enable HPOS, block cart/checkout) |
+| 1 | WooCommerce | `wpackagist-plugin/woocommerce` | 11.2.2 | all | The store | Agents | yes (we enable HPOS, block cart/checkout) |
 | 2 | WooCommerce Stripe Payment Gateway | `wpackagist-plugin/woocommerce-gateway-stripe` | 11.1.1 | PAY-01, PAY-02, PAY-04, PAY-05, PAY-06 | Cards, 3DS, Apple Pay, Google Pay, Link; official plugin, not WooPayments | Owner (account), agents (config) | yes |
 | 3 | WooCommerce PayPal Payments | `wpackagist-plugin/woocommerce-paypal-payments` | 4.2.0 | PAY-03, PAY-04, PAY-05 | PayPal, Venmo, Pay Later; official plugin | Owner (account), agents (config) | yes |
 | 4 | Stripe Tax for WooCommerce | `wpackagist-plugin/stripe-tax-for-woocommerce` | 2.2.0 | CMP-01, CMP-08 | Sales tax per nexus state (D-07); TaxJar is the fallback | Owner (registrations), agents | yes |
 | 5 | SEOPress | `wpackagist-plugin/wp-seopress` | 10.4 | SEO-01, SEO-02, SEO-07 | Titles, sitemaps, canonicals, Open Graph, redirects (D-09); the one SEO plugin | Agents | yes |
 | 6 | Two Factor | `wpackagist-plugin/two-factor` | 0.17.0 | OPS-07, ORD-04 | 2FA for every admin and shop manager; WordPress-maintained. Methods provisioned by `45-two-factor` (Authenticator App, Recovery Codes); enrolment required by `cigarholic-core` (`Security\TwoFactorRequired`, 3-day grace, `docs/runbooks/two-factor.md`) | Agents | n/a |
 | 7 | Redis Object Cache | `wpackagist-plugin/redis-cache` | 3.0.0 | OPS-09 | Object cache in Valkey (Redis protocol, `php-redis`) | Agents | n/a |
-| 8 | FluentSMTP | `wpackagist-plugin/fluent-smtp` | 2.4.1 | OPS-04, ORD-03 | Transactional mail through Postmark | Agents | n/a |
-| 9 | Complianz | `wpackagist-plugin/complianz-gdpr` | 7.5.6 | CMP-03, MKT-02 | Cookie notice and Google Consent Mode; Premium only when ad pixels arrive (MKT-09) | Agents | n/a |
+| 8 | FluentSMTP | `wpackagist-plugin/fluent-smtp` | 2.4.5 | OPS-04, ORD-03 | Transactional mail through Postmark | Agents | n/a |
+| 9 | Complianz | `wpackagist-plugin/complianz-gdpr` | 7.5.7 | CMP-03, MKT-02 | Cookie notice and Google Consent Mode; Premium only when ad pixels arrive (MKT-09) | Agents | n/a |
 | 10 | Google Analytics for WooCommerce | `wpackagist-plugin/woocommerce-google-analytics-integration` | 2.4.4 | MKT-02 | GA4 e-commerce events | Agents | yes |
 | 11 | Modern Image Formats (Performance Lab) | `wpackagist-plugin/webp-uploads` | 2.7.1 | OPS-09 | WebP/AVIF generation for uploads; removed if core does it natively | Agents | n/a |
 
