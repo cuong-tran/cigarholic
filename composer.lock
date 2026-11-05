@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9ae6468b66958ff06ec57a40b2f984b6",
+    "content-hash": "ec49f9ec90e5bb42453a019568370a90",
     "packages": [
         {
             "name": "composer/installers",
@@ -909,15 +909,15 @@
         },
         {
             "name": "wpackagist-plugin/complianz-gdpr",
-            "version": "7.5.6",
+            "version": "7.5.7",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/complianz-gdpr/",
-                "reference": "tags/7.5.6"
+                "reference": "tags/7.5.7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/complianz-gdpr.7.5.6.zip"
+                "url": "https://downloads.wordpress.org/plugin/complianz-gdpr.7.5.7.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -927,15 +927,15 @@
         },
         {
             "name": "wpackagist-plugin/fluent-smtp",
-            "version": "2.4.1",
+            "version": "2.4.5",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/fluent-smtp/",
-                "reference": "tags/2.4.1"
+                "reference": "tags/2.4.5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/fluent-smtp.2.4.1.zip"
+                "url": "https://downloads.wordpress.org/plugin/fluent-smtp.2.4.5.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -1017,15 +1017,15 @@
         },
         {
             "name": "wpackagist-plugin/woocommerce",
-            "version": "11.2.1",
+            "version": "11.2.2",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/woocommerce/",
-                "reference": "tags/11.2.1"
+                "reference": "tags/11.2.2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/woocommerce.11.2.1.zip"
+                "url": "https://downloads.wordpress.org/plugin/woocommerce.11.2.2.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -2098,5 +2098,5 @@
     "platform-overrides": {
         "php": "8.3.6"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
