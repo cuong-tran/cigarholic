@@ -4,6 +4,10 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-06
+
+WooCommerce 11.2.2, SEOPress configured as code (the cart, checkout and account pages `noindex` again), and "What happens next" in the customer's order emails. Tagged by the owner at `19533a9` and deployed to production on 2026-11-06 (release 6, run 42158788889, approved on the `production` Environment). Visitors still see the coming-soon page; what changed for them is the page title, the robots tag and the structured data.
+
 ### Added
 
 - SEO-01 / SEO-02: SEOPress is configured as code (provisioning step `75-seo`) instead of running on its activation defaults. It sets only its own keys inside SEOPress's option arrays and keeps every other key.
