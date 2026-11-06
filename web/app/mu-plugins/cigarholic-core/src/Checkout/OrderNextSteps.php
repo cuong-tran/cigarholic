@@ -83,11 +83,12 @@ final class OrderNextSteps implements Feature {
 	}
 
 	/**
-	 * The steps for an order (or the general steps without one), each a bold title and an HTML text
-	 * that contains only escaped text and links; an empty list when the card must not show.
+	 * The steps for an order (or the general steps without one), each a key (payment, packing,
+	 * tracking, questions), a bold title and an HTML text that contains only escaped text and links;
+	 * an empty list when the card must not show. The processing and on-hold emails reuse them (ORD-03).
 	 *
 	 * @param WC_Order|null $order Order with a verified key, or null.
-	 * @return array{steps: list<array{title: string, html: string}>, tip: string}
+	 * @return array{steps: list<array{key: string, title: string, html: string}>, tip: string}
 	 */
 	public static function steps( ?WC_Order $order ): array {
 		if ( null !== $order && ! in_array( $order->get_status(), self::PAID_STATUSES, true ) ) {
@@ -103,6 +104,7 @@ final class OrderNextSteps implements Feature {
 
 		if ( null !== $order && 'on-hold' === $order->get_status() ) {
 			$steps[] = array(
+				'key'   => 'payment',
 				'title' => __( 'Payment check.', 'cigarholic' ),
 				'html'  => esc_html__( 'Your payment is being confirmed. We start packing as soon as it is, and email you if we need anything from you.', 'cigarholic' ),
 			);
@@ -118,6 +120,7 @@ final class OrderNextSteps implements Feature {
 			$packing = esc_html( sprintf( __( 'We pack your order and hand it to the carrier within %s from our US warehouse in Houston, Texas.', 'cigarholic' ), $range ) );
 		}
 		$steps[] = array(
+			'key'   => 'packing',
 			'title' => __( 'Packing and shipping.', 'cigarholic' ),
 			'html'  => $packing,
 		);
@@ -131,6 +134,7 @@ final class OrderNextSteps implements Feature {
 			);
 		}
 		$steps[] = array(
+			'key'   => 'tracking',
 			'title' => __( 'Tracking.', 'cigarholic' ),
 			'html'  => $tracking,
 		);
@@ -166,6 +170,7 @@ final class OrderNextSteps implements Feature {
 			$questions .= ' ' . esc_html__( 'Please quote your order number.', 'cigarholic' );
 		}
 		$steps[] = array(
+			'key'   => 'questions',
 			'title' => __( 'Questions.', 'cigarholic' ),
 			'html'  => $questions,
 		);

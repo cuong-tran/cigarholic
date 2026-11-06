@@ -44,6 +44,10 @@ final class Features {
 			'class'   => Seo\WebsiteSchema::class,
 			'default' => true,
 		),
+		'email-next-steps' => array(
+			'class'   => Email\NextSteps::class,
+			'default' => true,
+		),
 		'signups'          => array(
 			'class'   => Signups\Signups::class,
 			'default' => true,
