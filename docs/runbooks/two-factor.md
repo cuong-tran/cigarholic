@@ -57,6 +57,15 @@ In this order:
 
    The next admin page view starts a fresh 3-day grace period.
 
+## Staging
+
+On `staging.cigarholic.com` the rule is off (owner, 2026-11-06): `deploy-staging.yml` writes
+`CIGARHOLIC_FEATURES=two-factor:off` into the staging `.env` at every deploy. No deadline, no
+profile-only restriction; the Two Factor plugin stays active, so an account that enrolled is still
+asked for its code (turn the methods off on the profile to log in with the password only). To
+require it again, remove that line from the workflow and unset the key
+(`env-upsert.sh staging --unset CIGARHOLIC_FEATURES`) or set `two-factor:on`. Production is not affected.
+
 ## Switching the rule off
 
 Only for an emergency, and only by the owner: `CIGARHOLIC_FEATURES=two-factor:off` in the site's

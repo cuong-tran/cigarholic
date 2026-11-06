@@ -4,6 +4,10 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+### Changed
+
+- OPS-07: **two-factor is no longer required on staging** (owner request). The staging deploy sets `CIGARHOLIC_FEATURES=two-factor:off` in the staging `.env`, so `staging.cigarholic.com` shows no two-factor deadline and never restricts an account to its profile. The Two Factor plugin stays active (an enrolled account is still asked for its code). Production is unchanged: two-factor stays required for administrators and shop managers.
+
 ### Added
 
 - CNT-01 / NAV-04 / FND-02: **sample photos for every image on the homepage and for the seven sample products**, until the owner's photos arrive (OWNER-ACTIONS B9).

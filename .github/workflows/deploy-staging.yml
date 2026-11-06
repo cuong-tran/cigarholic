@@ -1,6 +1,8 @@
 # Staging deploy (OPS-04, OPS-05, FND-09): every push to main that touches the application deploys
 # staging.cigarholic.com through Deployer over SSH. Before the deploy the application keys from GitHub
 # are upserted into the server .env (STAGING_* secrets become unprefixed keys; empty ones are skipped).
+# Feature toggles for staging are set here too (CIGARHOLIC_FEATURES): two-factor is not required on
+# staging (owner, 2026-11-06); production keeps it (its .env has no override).
 name: Deploy staging
 
 on:
@@ -104,7 +106,8 @@ jobs:
             STRIPE_TAX_SECRET_KEY=@STRIPE_TAX_SECRET_KEY \
             PAYPAL_SANDBOX_CLIENT_ID=@PAYPAL_SANDBOX_CLIENT_ID \
             PAYPAL_SANDBOX_CLIENT_SECRET=@PAYPAL_SANDBOX_CLIENT_SECRET \
-            GA4_MEASUREMENT_ID=@GA4_MEASUREMENT_ID
+            GA4_MEASUREMENT_ID=@GA4_MEASUREMENT_ID \
+            CIGARHOLIC_FEATURES=two-factor:off
 
       - name: dep deploy staging
         env:
