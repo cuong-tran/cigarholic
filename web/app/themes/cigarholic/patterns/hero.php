@@ -5,7 +5,7 @@
  * Categories: cigarholic, featured
  * Template Types: front-page
  * Keywords: hero, banner, intro
- * Description: Full-width Forest introduction with a Gold label, the brand promise, two calls to action and a photo panel. Carries the page's only H1.
+ * Description: Full-width Forest introduction with a Gold label, the brand promise, two calls to action and a photo. Carries the page's only H1.
  *
  * Feature IDs: NAV-04 (homepage), CNT-01 (brand system), CMP-02 (origin wording).
  *
@@ -48,7 +48,7 @@
 		<!-- wp:column {"verticalAlignment":"center","width":"48%"} -->
 		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:48%">
 			<!-- wp:image {"aspectRatio":"4/3","scale":"cover","sizeSlug":"large"} -->
-			<figure class="wp-block-image size-large"><img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/placeholder-hero.svg' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder for a photo of a handcrafted desktop humidor with its lid open', 'cigarholic' ); ?>" style="aspect-ratio:4/3;object-fit:cover"/></figure>
+			<figure class="wp-block-image size-large"><img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/sample-hero.webp' ) ); ?>" alt="<?php esc_attr_e( 'A walnut desktop humidor with its lid open, showing the Spanish cedar lining, a divider, a brass hygrometer and a humidifier', 'cigarholic' ); ?>" style="aspect-ratio:4/3;object-fit:cover"/></figure>
 			<!-- /wp:image -->
 		</div>
 		<!-- /wp:column -->

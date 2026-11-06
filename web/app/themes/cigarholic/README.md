@@ -28,8 +28,9 @@ styles/sections/forest.json  the Forest section style (dark sections: header, he
 assets/fonts/              Young Serif and Hanken Grotesk woff2 (latin) with their OFL licences
 assets/brand/              logo (WebP), site icon (PNG, the C on Forest) and email logo (PNG); provisioning step 25
                            imports all three into the media library (masters in /brand)
-assets/images/             SVG placeholders used until photos exist: product and workshop in the brand's photo
-                           sand, hero in Forest raised
+assets/images/             homepage sample photos (WebP, rendered by scripts/sample-photos/ until the owner's
+                           photos arrive, B9): sample-hero, sample-category-<slug> (six), sample-workshop;
+                           placeholder-product.svg is still used by the gift landing pattern
 ```
 
 WooCommerce supplies cart, checkout, my-account, product search results and the mini-cart drawer from its own block templates; the theme does not override them.
@@ -134,4 +135,4 @@ In the running store (`make up`), check on home, a category, a product, cart, ch
 
 ## Status of the copy
 
-All text is placeholder copy written to be true for the planned store (ships from Houston, contiguous US only at launch, Stripe and PayPal). The ship time is never typed into a template: the product page and the product content pattern use the `cigarholic/ship-time` block, and the trust bar and FAQ patterns read `ShipTime::range_text()` from `cigarholic-core`, so the manager's setting (WooCommerce → Settings → Shipping, SHP-03) changes every promise at once. The order-received card is the `cigarholic/order-next-steps` block (CHK-06), written from the order. It makes no claims about return windows, warranty terms or free shipping; those live on the policy pages the owner approves. Replace the SVG placeholders and alt texts when product photos arrive (OWNER-ACTIONS B9).
+All text is placeholder copy written to be true for the planned store (ships from Houston, contiguous US only at launch, Stripe and PayPal). The ship time is never typed into a template: the product page and the product content pattern use the `cigarholic/ship-time` block, and the trust bar and FAQ patterns read `ShipTime::range_text()` from `cigarholic-core`, so the manager's setting (WooCommerce → Settings → Shipping, SHP-03) changes every promise at once. The order-received card is the `cigarholic/order-next-steps` block (CHK-06), written from the order. It makes no claims about return windows, warranty terms or free shipping; those live on the policy pages the owner approves. The homepage photos (hero, category cards, workshop) are sample renders from `scripts/sample-photos/`: replace each file and its alt text with the owner's photo of the same subject when photos arrive (OWNER-ACTIONS B9); the gift landing pattern still shows the SVG placeholder.

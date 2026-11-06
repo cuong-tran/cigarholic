@@ -5,7 +5,7 @@
  * Categories: cigarholic, about
  * Template Types: front-page, page
  * Keywords: craftsmanship, workshop, vietnam, story
- * Description: Workshop photo placeholder beside a short story about how the humidors are made, with a link to the About page.
+ * Description: Workshop photo beside a short story about how the humidors are made, with a link to the About page.
  *
  * Feature IDs: NAV-04 (homepage), CNT-08 (craftsmanship story), CMP-02 (origin wording).
  *
@@ -16,7 +16,7 @@
 <!-- wp:group {"tagName":"section","align":"full","style":{"spacing":{"padding":{"top":"var:preset|spacing|70","bottom":"var:preset|spacing|70"}}},"layout":{"type":"constrained"}} -->
 <section class="wp-block-group alignfull" style="padding-top:var(--wp--preset--spacing--70);padding-bottom:var(--wp--preset--spacing--70)">
 	<!-- wp:media-text {"align":"wide","mediaType":"image"} -->
-	<div class="wp-block-media-text alignwide is-stacked-on-mobile"><figure class="wp-block-media-text__media"><img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/placeholder-workshop.svg' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder for a photo of a craftsman fitting a humidor lid in the Vietnam workshop', 'cigarholic' ); ?>"/></figure><div class="wp-block-media-text__content">
+	<div class="wp-block-media-text alignwide is-stacked-on-mobile"><figure class="wp-block-media-text__media"><img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/sample-workshop.webp' ) ); ?>" alt="<?php esc_attr_e( 'A walnut humidor box held in bar clamps on a workbench, with its lid panel, a chisel, a square and wood shavings', 'cigarholic' ); ?>"/></figure><div class="wp-block-media-text__content">
 		<!-- wp:paragraph {"className":"is-style-eyebrow"} -->
 		<p class="is-style-eyebrow"><?php esc_html_e( 'Our workshop', 'cigarholic' ); ?></p>
 		<!-- /wp:paragraph -->
