@@ -64,6 +64,8 @@ What happens next, without anything else from you:
 
 To correct a shipment, open the panel again, click the shipment, then **Edit fulfillment**. Fix the tracking number and save; with **Fulfillment notification** on, the customer gets a "shipment updated" email with the new details. To delete a shipment you entered by mistake, use **Remove fulfillment**; switch **Fulfillment notification** off first unless you want to email the customer that the shipment was cancelled. A completed order stays completed after a removal: set it back to **Processing** yourself if the package did not leave.
 
+If you refund the items that were still to ship, WooCommerce does not count the order as shipped by itself: set it to **Completed** yourself once the shipped items are on their way.
+
 Do not use **Mark as fulfilled** in the bulk actions of the orders list: it marks orders shipped without a tracking number and without telling the customer.
 
 The wording of the shipping email comes with the store. To change it, open **WooCommerce → Settings → Emails → Fulfillment created** and set your own subject or heading; your text then replaces the store's for every order. **Additional content** at the bottom of that page adds a paragraph under the order details.

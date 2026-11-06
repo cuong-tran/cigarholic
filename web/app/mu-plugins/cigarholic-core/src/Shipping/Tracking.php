@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDat
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 use Cigarholic\Core\Feature;
+use Cigarholic\Core\Logger;
 use Cigarholic\Core\Plugin;
 use WC_Email;
 use WC_Order;
@@ -232,6 +233,11 @@ final class Tracking implements Feature {
 		if ( ! $fulfillment instanceof Fulfillment || ! $fulfillment->get_is_fulfilled() ) {
 			return;
 		}
+		// WooCommerce's own auto-fulfillment (downloadable or virtual items) runs inside the status change and
+		// sends no email; completing the order there would nest a second status change and skip every email.
+		if ( doing_action( 'woocommerce_order_status_processing' ) || doing_action( 'woocommerce_order_status_completed' ) ) {
+			return;
+		}
 		$order = $fulfillment->get_order();
 		if ( ! $order instanceof WC_Order || ! $order->has_status( 'processing' ) || 'fulfilled' !== FulfillmentUtils::get_order_fulfillment_status( $order ) ) {
 			return;
@@ -306,6 +312,7 @@ final class Tracking implements Feature {
 			$store        = wc_get_container()->get( FulfillmentsDataStore::class );
 			$fulfillments = $store instanceof FulfillmentsDataStoreInterface ? $store->read_fulfillments( WC_Order::class, (string) $order->get_id() ) : array();
 		} catch ( \Throwable $e ) {
+			Logger::warning( sprintf( 'SHP-04: could not read the shipments of order %d: %s', $order->get_id(), $e->getMessage() ) );
 			return array();
 		}
 		return array_values(

@@ -243,6 +243,30 @@ final class ShippingTrackingTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * WooCommerce's own auto-fulfillment of a downloadable item, made inside the change to processing, does
+	 * not complete the order in the middle of that change.
+	 */
+	public function test_auto_fulfillment_on_processing_does_not_complete(): void {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Tracking test download' );
+		$product->set_regular_price( '5' );
+		$product->set_downloadable( true );
+		$product->set_virtual( true );
+		$product->save();
+		$order = wc_create_order();
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$order->add_product( $product, 1 );
+		$order->set_billing_email( 'buyer@example.test' );
+		$order->save();
+		$order->update_status( 'processing' );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+		$this->assertSame( 'fulfilled', $order->get_meta( '_fulfillment_status' ), "WooCommerce's auto-fulfillment ran" );
+		$this->assertSame( 'processing', $order->get_status() );
+	}
+
+	/**
 	 * A subject or heading set in the email's settings is kept; the customer's order page says
 	 * "shipped", not "fulfilled".
 	 */
