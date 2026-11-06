@@ -21,7 +21,7 @@ use WP_UnitTestCase;
 final class CatalogSeedTest extends WP_UnitTestCase {
 
 	/**
-	 * Generated placeholder images are deleted from the uploads directory.
+	 * Uploaded sample images are deleted from the uploads directory.
 	 */
 	public function tear_down(): void {
 		$this->remove_added_uploads();
@@ -66,7 +66,7 @@ final class CatalogSeedTest extends WP_UnitTestCase {
 		$this->assertSame( 0, $first['updated'] );
 		$counts = $this->counts();
 		$this->assertSame( 9, $counts['products'], '7 products and 2 variations' );
-		$this->assertSame( 7, $counts['images'], 'one placeholder image per product' );
+		$this->assertSame( 7, $counts['images'], 'one image per product' );
 
 		$second = Seed::run();
 		$this->assertSame( 0, $second['created'] );
@@ -144,5 +144,63 @@ final class CatalogSeedTest extends WP_UnitTestCase {
 		$cabinet = wc_get_product( wc_get_product_id_by_sku( 'SAMPLE-CAB-300-OAK-MATTE' ) );
 		$this->assertInstanceOf( WC_Product::class, $cabinet );
 		$this->assertTrue( DataModel::is_yes( $cabinet->get_meta( '_ch_prop65' ) ), 'one sample shows the Prop 65 warning' );
+	}
+
+	/**
+	 * Every sample product gets its rendered photo (a JPEG shipped in cigarholic-core), not a GD placeholder.
+	 */
+	public function test_products_use_the_sample_photos(): void {
+		Seed::run();
+
+		foreach ( Seed::products() as $definition ) {
+			$slug  = (string) $definition['slug'];
+			$photo = Seed::photo_path( $slug );
+			$this->assertNotSame( '', $photo, "sample photo for {$slug}" );
+			$size = getimagesize( $photo );
+			$this->assertIsArray( $size );
+			$this->assertSame( array( 1200, 1200, IMAGETYPE_JPEG ), array( $size[0], $size[1], $size[2] ), $slug );
+
+			$product = wc_get_product( wc_get_product_id_by_sku( (string) $definition['sku'] ) );
+			$this->assertInstanceOf( WC_Product::class, $product );
+			$image = $product->get_image_id();
+			$this->assertSame( 'image/jpeg', get_post_mime_type( $image ), $slug );
+			$this->assertSame( sha1_file( $photo ), get_post_meta( $image, Seed::SOURCE_META, true ), $slug );
+			$this->assertNotEmpty( wp_get_attachment_image_src( (int) $image, 'woocommerce_thumbnail' ), $slug );
+		}
+		$this->assertSame( '', Seed::photo_path( '../sample-walnut-desktop-humidor-50' ), 'no path outside the folder' );
+	}
+
+	/**
+	 * A catalog seeded before the photos existed (GD placeholders, no source meta) gets the photos on the
+	 * next run, once: the run after that changes nothing.
+	 */
+	public function test_placeholders_from_an_earlier_seed_are_replaced_once(): void {
+		Seed::run();
+		$map = (array) get_option( Seed::IMAGES_OPTION );
+		$key = 'sample-cherry-cigar-box-25';
+		$old = (int) $map[ $key ];
+		delete_post_meta( $old, Seed::SOURCE_META );
+
+		Seed::run();
+		$product = wc_get_product( wc_get_product_id_by_sku( 'SAMPLE-BOX-025-CHE-OIL' ) );
+		$this->assertInstanceOf( WC_Product::class, $product );
+		$new = (int) $product->get_image_id();
+		$this->assertNotSame( $old, $new, 'a new attachment for the photo' );
+		$this->assertSame( $new, (int) ( (array) get_option( Seed::IMAGES_OPTION ) )[ $key ] );
+		$this->assertSame( 'attachment', get_post_type( $old ), 'the old image stays in the media library' );
+
+		$counts = $this->counts();
+		Seed::run();
+		$this->assertSame( $new, (int) wc_get_product( wc_get_product_id_by_sku( 'SAMPLE-BOX-025-CHE-OIL' ) )->get_image_id() );
+		$this->assertSame( $counts, $this->counts(), 'nothing uploaded again' );
+
+		// A failed upload of a newer photo keeps the image the product already has.
+		delete_post_meta( $new, Seed::SOURCE_META );
+		$broken = static fn(): string => 'uploads unavailable';
+		add_filter( 'wp_upload_bits', $broken );
+		Seed::run();
+		remove_filter( 'wp_upload_bits', $broken );
+		$this->assertSame( $new, (int) wc_get_product( wc_get_product_id_by_sku( 'SAMPLE-BOX-025-CHE-OIL' ) )->get_image_id(), 'image kept when the upload fails' );
+		$this->assertSame( $counts, $this->counts() );
 	}
 }

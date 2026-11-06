@@ -8,6 +8,7 @@
 namespace Cigarholic\Core\Catalog;
 
 use Cigarholic\Core\Feature;
+use Cigarholic\Core\Plugin;
 use RuntimeException;
 use WC_Product;
 use WC_Product_Attribute;
@@ -17,17 +18,24 @@ use WC_Product_Variation;
 /**
  * `wp cigarholic seed` (run by scripts/runtime-up.sh): seven sample products across every category, one of
  * them variable (finish variations with their own SKU, price and stock), each with realistic specifications,
- * attributes, occasions, shipping class, compliance fields and a generated placeholder image with alt text.
+ * attributes, occasions, shipping class, compliance fields and a sample photo with alt text (rendered by
+ * `scripts/sample-photos/`, stored in `assets/sample-products/`; a GD placeholder when the file is missing).
  *
  * Sample data is unmistakable: every SKU starts with `SAMPLE-` and every title contains "Sample"
  * (`wp cigarholic catalog check` fails on production while any exists). Idempotent: products are found by
- * SKU and updated in place; images are uploaded once. WooCommerce CRUD only. Refuses to run on production.
+ * SKU and updated in place; each image is uploaded once per file version. WooCommerce CRUD only. Refuses to run
+ * on production.
  *
  * Feature IDs: FND-02 (primary), CAT-01, CAT-03.
  */
 final class Seed implements Feature {
 
 	public const IMAGES_OPTION = 'cigarholic_seed_images';
+
+	/**
+	 * Attachment meta: SHA-1 of the sample photo the attachment was made from ('gd' for a generated placeholder).
+	 */
+	public const SOURCE_META = '_cigarholic_seed_source';
 
 	/**
 	 * Shipping classes: slug => name (D-05).
@@ -274,33 +282,55 @@ final class Seed implements Feature {
 	}
 
 	/**
-	 * Attachment ID of the product's placeholder image, generated with GD and uploaded once.
+	 * Attachment ID of the product's image: the sample photo `assets/sample-products/<slug>.jpg`, or a GD
+	 * placeholder when that file is missing. Uploaded once per file version: a re-run keeps the attachment
+	 * while the file is unchanged and uploads a new one (leaving the old one in the media library) after it
+	 * changes, so staging picks up new photos with `wp cigarholic seed`.
 	 *
 	 * @param string          $key   Image key (product slug).
 	 * @param string          $title Product name.
-	 * @param array<int, int> $rgb   Background colour.
+	 * @param array<int, int> $rgb   Background colour of the placeholder.
 	 * @param string          $alt   Alt text.
-	 * @return int 0 when GD or the upload directory is unavailable.
+	 * @return int The previous attachment (or 0 without one) when a new image cannot be made or uploaded.
 	 */
 	private static function image_id( string $key, string $title, array $rgb, string $alt ): int {
-		$map = get_option( self::IMAGES_OPTION, array() );
-		$map = is_array( $map ) ? $map : array();
+		$map      = get_option( self::IMAGES_OPTION, array() );
+		$map      = is_array( $map ) ? $map : array();
+		$photo    = self::photo_path( $key );
+		$hash     = '' !== $photo ? sha1_file( $photo ) : false;
+		$source   = false !== $hash ? $hash : 'gd';
+		$existing = 0;
 		if ( isset( $map[ $key ] ) && 'attachment' === get_post_type( (int) $map[ $key ] ) ) {
-			$id          = (int) $map[ $key ];
-			$current_alt = (string) get_post_meta( $id, '_wp_attachment_image_alt', true );
-			if ( $alt !== $current_alt ) {
-				update_post_meta( $id, '_wp_attachment_image_alt', $alt );
+			$existing = (int) $map[ $key ];
+			$current  = (string) get_post_meta( $existing, '_wp_attachment_image_alt', true );
+			if ( $alt !== $current ) {
+				update_post_meta( $existing, '_wp_attachment_image_alt', $alt );
 			}
-			return $id;
+			$stored = (string) get_post_meta( $existing, self::SOURCE_META, true );
+			// Keep the attachment while its file is current, or when the photo cannot be read now.
+			if ( ( '' === $stored ? 'gd' : $stored ) === $source || ( '' !== $photo && false === $hash ) ) {
+				return $existing;
+			}
+		}
+		if ( '' !== $photo && false === $hash ) {
+			$photo = '';
 		}
 
-		$png = self::png( $title, $rgb );
-		if ( '' === $png ) {
-			return 0;
+		if ( '' !== $photo ) {
+			$bits = (string) file_get_contents( $photo ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- local file shipped with the plugin.
+			$name = $key . '.jpg';
+			$mime = 'image/jpeg';
+		} else {
+			$bits = self::png( $title, $rgb );
+			$name = $key . '.png';
+			$mime = 'image/png';
 		}
-		$upload = wp_upload_bits( $key . '.png', null, $png );
+		if ( '' === $bits ) {
+			return $existing;
+		}
+		$upload = wp_upload_bits( $name, null, $bits );
 		if ( ! empty( $upload['error'] ) || empty( $upload['file'] ) ) {
-			return 0;
+			return $existing;
 		}
 		if ( ! function_exists( 'wp_generate_attachment_metadata' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/image.php';
@@ -310,7 +340,7 @@ final class Seed implements Feature {
 		}
 		$id = wp_insert_attachment(
 			array(
-				'post_mime_type' => 'image/png',
+				'post_mime_type' => $mime,
 				'post_title'     => $title,
 				'post_content'   => '',
 				'post_status'    => 'inherit',
@@ -318,15 +348,30 @@ final class Seed implements Feature {
 			(string) $upload['file']
 		);
 		if ( is_wp_error( $id ) || 0 >= $id ) {
-			return 0;
+			return $existing;
 		}
 		wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, (string) $upload['file'] ) );
 		update_post_meta( $id, '_wp_attachment_image_alt', $alt );
+		update_post_meta( $id, self::SOURCE_META, '' !== $photo ? $source : 'gd' );
 
 		$map[ $key ] = $id;
 		update_option( self::IMAGES_OPTION, $map, false );
 
 		return $id;
+	}
+
+	/**
+	 * Path of the sample photo for a product slug, '' when there is none.
+	 *
+	 * @param string $key Product slug.
+	 * @return string
+	 */
+	public static function photo_path( string $key ): string {
+		if ( 1 !== preg_match( '/^[a-z0-9-]+$/', $key ) ) {
+			return '';
+		}
+		$path = Plugin::instance()->dir() . '/assets/sample-products/' . $key . '.jpg';
+		return is_readable( $path ) ? $path : '';
 	}
 
 	/**
@@ -430,7 +475,7 @@ final class Seed implements Feature {
 				),
 				'image'               => array(
 					'color' => array( 94, 62, 40 ),
-					'alt'   => 'Sample walnut desktop humidor, placeholder image',
+					'alt'   => 'Sample walnut desktop humidor with the lid open, showing the Spanish cedar lining, divider, hygrometer and humidifier',
 				),
 			),
 			array(
@@ -472,7 +517,7 @@ final class Seed implements Feature {
 				),
 				'image'             => array(
 					'color' => array( 120, 52, 38 ),
-					'alt'   => 'Sample mahogany desktop humidor, placeholder image',
+					'alt'   => 'Sample gloss mahogany desktop humidor, closed, with a front digital hygrometer and a brass key lock',
 				),
 			),
 			array(
@@ -514,7 +559,7 @@ final class Seed implements Feature {
 				),
 				'image'             => array(
 					'color' => array( 176, 138, 86 ),
-					'alt'   => 'Sample oak cabinet humidor, placeholder image',
+					'alt'   => 'Sample white oak cabinet humidor with its glass door ajar, four Spanish cedar trays and two drawers',
 				),
 			),
 			array(
@@ -556,7 +601,7 @@ final class Seed implements Feature {
 				),
 				'image'             => array(
 					'color' => array( 150, 100, 60 ),
-					'alt'   => 'Sample acacia travel humidor, placeholder image',
+					'alt'   => 'Sample acacia travel humidor, open, with its Spanish cedar insert',
 				),
 			),
 			array(
@@ -598,7 +643,7 @@ final class Seed implements Feature {
 				),
 				'image'             => array(
 					'color' => array( 140, 70, 50 ),
-					'alt'   => 'Sample cherry cigar box, placeholder image',
+					'alt'   => 'Sample cherry cigar box with the lid open, showing the felt-lined lid and Spanish cedar base',
 				),
 			),
 			array(
@@ -625,7 +670,7 @@ final class Seed implements Feature {
 				),
 				'image'             => array(
 					'color' => array( 70, 70, 80 ),
-					'alt'   => 'Sample digital hygrometer, placeholder image',
+					'alt'   => 'Sample round digital hygrometer showing 70 percent and 68 degrees, beside its magnetic plate',
 				),
 			),
 			array(
@@ -667,7 +712,7 @@ final class Seed implements Feature {
 				),
 				'image'             => array(
 					'color' => array( 60, 90, 70 ),
-					'alt'   => 'Sample groomsmen gift set, placeholder image',
+					'alt'   => 'Sample groomsmen gift set: walnut travel humidor and stainless cutter in a kraft gift box with a care card',
 				),
 			),
 		);

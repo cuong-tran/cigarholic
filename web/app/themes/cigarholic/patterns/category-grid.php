@@ -16,37 +16,37 @@ $cigarholic_categories = array(
 	'desktop-humidors'    => array(
 		'name' => __( 'Desktop Humidors', 'cigarholic' ),
 		'text' => __( 'For the desk, the study or the bar: 25 to 150 cigars at a steady humidity.', 'cigarholic' ),
-		'alt'  => __( 'Placeholder for a photo of a desktop humidor', 'cigarholic' ),
+		'alt'  => __( 'A walnut desktop humidor with its lid open beside a closed mahogany humidor', 'cigarholic' ),
 		'link' => __( 'Shop desktop humidors', 'cigarholic' ),
 	),
 	'cabinet-humidors'    => array(
 		'name' => __( 'Cabinet Humidors', 'cigarholic' ),
 		'text' => __( 'Furniture-sized storage for serious collections, built to stand in the room.', 'cigarholic' ),
-		'alt'  => __( 'Placeholder for a photo of a cabinet humidor', 'cigarholic' ),
+		'alt'  => __( 'A white oak cabinet humidor with its glass door ajar and Spanish cedar trays inside', 'cigarholic' ),
 		'link' => __( 'Shop cabinet humidors', 'cigarholic' ),
 	),
 	'travel-humidors'     => array(
 		'name' => __( 'Travel Humidors', 'cigarholic' ),
 		'text' => __( 'Compact, sealed and padded, so a few cigars arrive in the same condition they left.', 'cigarholic' ),
-		'alt'  => __( 'Placeholder for a photo of a travel humidor', 'cigarholic' ),
+		'alt'  => __( 'An open acacia travel humidor in front of two closed travel humidors', 'cigarholic' ),
 		'link' => __( 'Shop travel humidors', 'cigarholic' ),
 	),
 	'cigar-boxes'         => array(
 		'name' => __( 'Cigar Boxes', 'cigarholic' ),
 		'text' => __( 'Hand-finished wooden boxes for presentation, gifting and everyday storage.', 'cigarholic' ),
-		'alt'  => __( 'Placeholder for a photo of a wooden cigar box', 'cigarholic' ),
+		'alt'  => __( 'An open cherry cigar box with a green felt-lined lid beside two stacked wooden boxes', 'cigarholic' ),
 		'link' => __( 'Shop cigar boxes', 'cigarholic' ),
 	),
 	'humidor-accessories' => array(
 		'name' => __( 'Humidor Accessories', 'cigarholic' ),
 		'text' => __( 'Hygrometers, humidifiers, seasoning kits and dividers that keep a humidor working.', 'cigarholic' ),
-		'alt'  => __( 'Placeholder for a photo of humidor accessories', 'cigarholic' ),
+		'alt'  => __( 'Humidor accessories: an analog and a digital hygrometer, a humidifier jar, a humidifier bar and cedar dividers', 'cigarholic' ),
 		'link' => __( 'Shop accessories', 'cigarholic' ),
 	),
 	'gift-sets'           => array(
 		'name' => __( 'Gift Sets', 'cigarholic' ),
 		'text' => __( 'A humidor and its accessories, boxed together and ready to give.', 'cigarholic' ),
-		'alt'  => __( 'Placeholder for a photo of a humidor gift set', 'cigarholic' ),
+		'alt'  => __( 'A gift set in a kraft box: a walnut travel humidor and a stainless cutter, with a care card', 'cigarholic' ),
 		'link' => __( 'Shop gift sets', 'cigarholic' ),
 	),
 );
@@ -71,7 +71,7 @@ $cigarholic_categories = array(
 		<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|30"}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
 		<div class="wp-block-group">
 			<!-- wp:image {"aspectRatio":"3/2","scale":"cover","sizeSlug":"medium"} -->
-			<figure class="wp-block-image size-medium"><img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/placeholder-product.svg' ) ); ?>" alt="<?php echo esc_attr( $cigarholic_category['alt'] ); ?>" style="aspect-ratio:3/2;object-fit:cover"/></figure>
+			<figure class="wp-block-image size-medium"><img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/sample-category-' . $cigarholic_slug . '.webp' ) ); ?>" alt="<?php echo esc_attr( $cigarholic_category['alt'] ); ?>" style="aspect-ratio:3/2;object-fit:cover"/></figure>
 			<!-- /wp:image -->
 
 			<!-- wp:heading {"level":3,"fontSize":"x-large"} -->

@@ -21,7 +21,7 @@ All custom PHP of the store, one class per feature ID from `docs/FEATURES.md`. L
 | `Catalog\SpecTable` | CAT-04 | Block `cigarholic/spec-table` (`blocks/spec-table/`), inches + cm and lb + kg, hides the "Additional information" tab |
 | `Catalog\Csv` | CAT-10 | `Occasions` and GTIN columns for the WooCommerce importer and exporter; template `docs/templates/products-import-template.csv` |
 | `Catalog\Check`, `Catalog\Cli` | CAT-09 | `wp cigarholic catalog check [--format]` (the brief's `catalog:check`), exit 1 on problems, fails on production while sample data exists |
-| `Catalog\Seed` | FND-02 | `wp cigarholic seed`: seven `SAMPLE-` products, idempotent, with placeholder images |
+| `Catalog\Seed` | FND-02 | `wp cigarholic seed`: seven `SAMPLE-` products, idempotent, each with its sample photo from `assets/sample-products/` (rendered by `scripts/sample-photos/`; a re-run uploads a photo again only when its file changed) |
 ## Blocks
 
 Dynamic blocks live in `blocks/<name>/` with a `block.json` (`render: file:./render.php`), a plain-JavaScript `editor.js` registered with `ServerSideRender` (dependencies in `editor.asset.php`, no build step), optional `view.js` and `style.css`. The theme references them by name.

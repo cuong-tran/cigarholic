@@ -1,4 +1,4 @@
-// ESLint flat config. JavaScript lives only in the theme, the mu-plugin blocks and the Playwright tests.
+// ESLint flat config. JavaScript lives in the theme, the mu-plugin blocks, the Playwright tests and the sample-photo studio.
 import js from '@eslint/js';
 import globals from 'globals';
 
@@ -24,6 +24,22 @@ export default [
 			ecmaVersion: 2022,
 			sourceType: 'module',
 			globals: { ...globals.browser, wp: 'readonly', jQuery: 'readonly' },
+		},
+	},
+	{
+		files: ['scripts/sample-photos/*.js'],
+		languageOptions: {
+			ecmaVersion: 2022,
+			sourceType: 'module',
+			globals: { ...globals.browser },
+		},
+	},
+	{
+		files: ['scripts/sample-photos/*.mjs'],
+		languageOptions: {
+			ecmaVersion: 2022,
+			sourceType: 'module',
+			globals: { ...globals.node, window: 'readonly' },
 		},
 	},
 	{

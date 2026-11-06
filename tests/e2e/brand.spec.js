@@ -367,6 +367,38 @@ test.describe( 'brand system', () => {
 		}
 	} );
 
+	test( 'homepage photos load, are described and stay light (NAV-04)', async ( { page } ) => {
+		const photos = new Map();
+		page.on( 'response', async ( r ) => {
+			if ( /\/themes\/cigarholic\/assets\/images\/sample-[a-z-]+\.webp$/.test( r.url() ) ) {
+				const bytes = await r.body().then( ( b ) => b.length, () => -1 );
+				photos.set( new URL( r.url() ).pathname.split( '/' ).pop(), { status: r.status(), bytes } );
+			}
+		} );
+		await login( page );
+		await page.goto( '/' );
+
+		// Hero, six category cards and the workshop: real images, each with a description, none a placeholder.
+		const images = page.locator( 'main img[src*="/themes/cigarholic/assets/images/"]' );
+		await expect( images ).toHaveCount( 8 );
+		for ( const img of await images.all() ) {
+			await img.scrollIntoViewIfNeeded();
+			await expect.poll( () => img.evaluate( ( el ) => el.complete && el.naturalWidth ) ).toBeGreaterThan( 0 );
+			const alt = await img.getAttribute( 'alt' );
+			expect( alt.length ).toBeGreaterThan( 20 );
+			expect( alt ).not.toMatch( /placeholder/i );
+		}
+		expect( await page.locator( 'main img[src*="placeholder-"]' ).count() ).toBe( 0 );
+
+		// WebP, under 200 KB each (Core Web Vitals budget on mobile).
+		await expect.poll( () => photos.size ).toBe( 8 );
+		for ( const [ name, { status, bytes } ] of photos ) {
+			expect( status, name ).toBe( 200 );
+			expect( bytes, `${ name } body readable` ).toBeGreaterThan( 0 );
+			expect( bytes, name ).toBeLessThan( 200 * 1024 );
+		}
+	} );
+
 	test( 'WooCommerce pages follow the brand (CNT-01)', async ( { page } ) => {
 		await login( page );
 		const product = await cartWithOneProduct( page );

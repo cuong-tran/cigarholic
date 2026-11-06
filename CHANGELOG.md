@@ -6,6 +6,12 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ### Added
 
+- CNT-01 / NAV-04 / FND-02: **sample photos for every image on the homepage and for the seven sample products**, until the owner's photos arrive (OWNER-ACTIONS B9).
+  - **Homepage:** the hero (walnut desktop humidor, lid open, on the Forest ground), the six category cards (desktop, cabinet and travel humidors, cigar boxes, accessories, gift sets) and the workshop panel (a walnut humidor box in clamps on the bench) replace the SVG placeholders. WebP, 15 to 60 KB each; each alt text describes what the image shows. No cigars or tobacco appear in any image.
+  - **Sample products:** each `SAMPLE-` product gets a 1200 × 1200 JPEG of that product, marked "Sample image", instead of the flat-colour GD square. `wp cigarholic seed` uploads a photo once per file version (attachment meta `_cigarholic_seed_source`), so staging gets the photos with the next seed run and later runs change nothing; the old placeholder stays in the media library.
+  - **How they are made:** `scripts/sample-photos/` renders every image from code with three.js in headless Chromium: procedural wood grain (walnut, mahogany, white oak, acacia, cherry, Spanish cedar), lacquer, brass, glass and felt, softbox lighting, soft shadows and depth of field from averaging 48 jittered frames. `node scripts/sample-photos/render.mjs` rebuilds them all (about 25 minutes in the sandbox). three.js 0.187.0 is a dev dependency only; nothing new is loaded by the site.
+  - **Tests:** `CatalogSeedTest` checks that every product gets its JPEG and that an earlier placeholder is replaced once; `brand.spec.js` checks that the eight homepage images load, are described and stay under 200 KB.
+
 - SHP-04 / ORD-03: **tracking numbers and the shipping email.** The manager enters the carrier's tracking number on the order. That uses WooCommerce's own Order Fulfillments: the panel opened from the fulfillment badge in the orders list or on the order page. "Find info" recognises USPS, UPS, FedEx, DHL and other carriers and fills in the tracking link (77 carriers in all). No plugin is added; the plugin budget stays at 11 of 15.
   - **Provisioning:** step 50 switches the feature on (`woocommerce_feature_fulfillments_enabled`; WooCommerce 11.2 has no settings screen for it). Step 70 enables its three customer emails: shipped, shipment updated, shipment removed.
   - **`Shipping\Tracking`** (toggle `tracking`, on) makes the customer's "Fulfillment created" email the store's shipping email.
