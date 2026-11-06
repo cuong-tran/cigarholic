@@ -44,6 +44,32 @@ US law (the FTC Mail Order Rule) requires a reasonable basis for this promise. W
 2. For orders already placed that will miss the promise, email each customer before the promised date: the new ship date, and that they may cancel for a full refund. If a second delay follows, the customer must agree to it or the order is cancelled and refunded.
 3. Keep a note on each such order (**Add note** on the order page) of what you told the customer and when.
 
+## Shipping an order: tracking number and shipping email
+
+When a package leaves the warehouse, enter its tracking number on the order. That one step sends the customer the shipping email with the carrier and a **Track your package** button, shows the tracking number on the order in their account, and completes the order once everything has shipped.
+
+1. Open **WooCommerce → Orders** and click the order (or click the grey **No fulfillments** badge in its row).
+2. On the order page, click the **No fulfillments** badge at the top right, next to the order status. A panel opens on the right with the order's items, all ticked.
+3. If only some items are in this package, untick the others. They stay to be shipped later.
+4. Under **Shipment Information**, keep **Tracking Number**, paste the tracking number and click **Find info**. The carrier (USPS, UPS, FedEx, DHL and many more) and the tracking link fill in. If the carrier is wrong, click **Select your provider manually**. For a carrier that is not in the list, choose **Enter manually** and type the carrier name and its tracking link.
+5. Leave **Fulfillment notification** on (blue). It sends the customer the email.
+6. Click **Fulfill items**. The badge turns **Fulfilled** (or **Partially fulfilled** while items are still to ship), and the order notes record the shipment and the email.
+
+What happens next, without anything else from you:
+
+- The customer gets "Your Cigarholic order 1234 has shipped" with the carrier, the tracking number and the button. For a package with only some of the items, the subject starts "Part of your …"; the last package of such an order says "The rest of your …". Each email lists the items in that package.
+- When every item has shipped, the order changes from **Processing** to **Completed** by itself. WooCommerce's "Completed order" email is not sent for these orders, because the shipping email already went out. An order you complete by hand without entering a shipment still gets that email.
+- An order **On hold** (payment being checked) stays on hold even if you enter a shipment. Do not ship it until the payment is confirmed and the order is **Processing**.
+- Customers with an account see "It has shipped." and the tracking number on the order under **My account → Orders**.
+
+To correct a shipment, open the panel again, click the shipment, then **Edit fulfillment**. Fix the tracking number and save; with **Fulfillment notification** on, the customer gets a "shipment updated" email with the new details. To delete a shipment you entered by mistake, use **Remove fulfillment**; switch **Fulfillment notification** off first unless you want to email the customer that the shipment was cancelled. A completed order stays completed after a removal: set it back to **Processing** yourself if the package did not leave.
+
+If you refund the items that were still to ship, WooCommerce does not count the order as shipped by itself: set it to **Completed** yourself once the shipped items are on their way.
+
+Do not use **Mark as fulfilled** in the bulk actions of the orders list: it marks orders shipped without a tracking number and without telling the customer.
+
+The wording of the shipping email comes with the store. To change it, open **WooCommerce → Settings → Emails → Fulfillment created** and set your own subject or heading; your text then replaces the store's for every order. **Additional content** at the bottom of that page adds a paragraph under the order details.
+
 ## Contact form
 
 Messages from the **Contact** page arrive by email in the support inbox, with the visitor's address as Reply-To, so you answer by replying. Nothing is stored on the website.
@@ -97,4 +123,4 @@ While the store is in coming soon, visitors and search engines see only the laun
 
 ## Coming next in this guide
 
-Add or edit a product, change a price, run a sale, process an order, refund, add tracking, edit pages.
+Add or edit a product, change a price, run a sale, process an order, refund, edit pages.

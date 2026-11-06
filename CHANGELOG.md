@@ -4,6 +4,25 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+### Added
+
+- SHP-04 / ORD-03: **tracking numbers and the shipping email.** The manager enters the carrier's tracking number on the order. That uses WooCommerce's own Order Fulfillments: the panel opened from the fulfillment badge in the orders list or on the order page. "Find info" recognises USPS, UPS, FedEx, DHL and other carriers and fills in the tracking link (77 carriers in all). No plugin is added; the plugin budget stays at 11 of 15.
+  - **Provisioning:** step 50 switches the feature on (`woocommerce_feature_fulfillments_enabled`; WooCommerce 11.2 has no settings screen for it). Step 70 enables its three customer emails: shipped, shipment updated, shipment removed.
+  - **`Shipping\Tracking`** (toggle `tracking`, on) makes the customer's "Fulfillment created" email the store's shipping email.
+    - **Subject:** "Your Cigarholic order 1234 has shipped", or "Part of your …" while items are still to ship and "The rest of your …" for the last package.
+    - **Content:** the carrier's name (WooCommerce printed its key, "usps"), the tracking number and a **Track your package** button. The button appears only when there is an http(s) link. For customers with an account, a link to the order in it.
+    - **WooCommerce's wording replaced:** "Woo! Some items you purchased are being fulfilled", an empty "Tracking Number" line and an empty link when no tracking was entered, and "My Account > Orders" links for guests that pointed to `/wp/my-account/orders/`, a 404 on Bedrock.
+    - **Templates:** the four templates (HTML and plain text of the email and of the shipment block) are served from `cigarholic-core/templates/`; a theme override would still win.
+    - A subject or heading set in WooCommerce → Settings → Emails is kept.
+  - **One action ships an order:** a processing order whose items have all shipped is completed. The "Completed order" email is not sent for such an order, because the shipping email already went out; an order completed without a shipment still gets it. On-hold orders are never completed by a shipment.
+  - **Customer's order page:** "It has shipped." / "Part of it has shipped." instead of WooCommerce's "It has been Fulfilled." and "It has no fulfillments yet."
+  - Manager guide section "Shipping an order: tracking number and shipping email".
+  - **Tests:**
+    - `ShippingTrackingTest` sends every shipment through WooCommerce's fulfillment REST route, as the order screen does. It covers one package, two packages, no tracking number, the account link, plain text, on-hold orders, completion without a shipment, the manager's own subject, the order-page sentence, unsafe tracking links, and a guard that fails when WooCommerce changes one of the four templates.
+    - `ProvisionTest` checks the feature option and the three emails.
+    - `tests/e2e/tracking.spec.js` drives the manager's panel with a USPS number and reads the email in Mailpit.
+    - The PHPUnit bootstrap switches the feature on and creates WooCommerce's mailer before the suite saves its hooks, so email tests after the first still send.
+
 ## [0.4.0] - 2026-11-06
 
 WooCommerce 11.2.2, SEOPress configured as code (the cart, checkout and account pages `noindex` again), and "What happens next" in the customer's order emails. Tagged by the owner at `19533a9` and deployed to production on 2026-11-06 (release 6, run 42158788889, approved on the `production` Environment). Visitors still see the coming-soon page; what changed for them is the page title, the robots tag and the structured data.

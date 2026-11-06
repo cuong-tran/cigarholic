@@ -43,6 +43,16 @@ if ( file_exists( $cigarholic_woocommerce ) ) {
 			WC_Install::install();
 			// Roles were read before the install added WooCommerce's capabilities (core ticket 28374).
 			wp_roles()->for_site();
+			// Order Fulfillments (SHP-04) registers on init only when it is on, as provisioning step 50 leaves it.
+			update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		}
+	);
+	// The mailer hooks each email's trigger when it is first created. Created inside a test, those hooks are
+	// removed with the test's own when the suite restores the hooks, and later tests send no email.
+	tests_add_filter(
+		'wp_loaded',
+		static function (): void {
+			WC()->mailer();
 		}
 	);
 }

@@ -1,14 +1,16 @@
 <?php
 /**
- * Provisioning step: shipping classes, zones and methods (SHP-01, SHP-02).
+ * Provisioning step: shipping classes, zones and methods (SHP-01, SHP-02), tracking (SHP-04).
  *
  * Defaults D-05 (humidors ship free, accessories at a flat rate, an oversized class for cabinet
  * humidors) and D-06 (contiguous US only at launch). The accessory rate is a placeholder until the
  * owner sets prices and shipping rules (L-07). Alaska, Hawaii and the territories get a zone with
  * no method, so checkout tells those customers shipping is not available instead of silently
  * charging the mainland rate. Everything goes through WC_Shipping_Zone(s); zones are matched by name.
+ * Tracking numbers are WooCommerce's Order Fulfillments (a core feature without a settings screen, off by
+ * default); cigarholic-core's Shipping\Tracking words its customer email.
  *
- * Feature IDs: FND-03, SHP-01, SHP-02.
+ * Feature IDs: FND-03, SHP-01, SHP-02, SHP-04.
  *
  * @package Cigarholic
  */
@@ -202,4 +204,9 @@ return static function ( Context $ctx ): void {
 	$ctx->option( 'woocommerce_enable_shipping_calc', 'yes' );
 	$ctx->option( 'woocommerce_shipping_cost_requires_address', 'no' );
 	$ctx->option( 'woocommerce_shipping_debug_mode', 'no' );
+
+	// Tracking (SHP-04): WooCommerce's Order Fulfillments. The manager adds the carrier's tracking number on
+	// the order and the customer gets the shipping email (enabled in 70-emails). WooCommerce creates its two
+	// tables on the next request's init.
+	$ctx->option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
 };

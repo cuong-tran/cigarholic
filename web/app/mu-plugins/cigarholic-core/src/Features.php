@@ -92,6 +92,10 @@ final class Features {
 			'class'   => Checkout\OrderNextSteps::class,
 			'default' => true,
 		),
+		'tracking'         => array(
+			'class'   => Shipping\Tracking::class,
+			'default' => true,
+		),
 	);
 
 	/**

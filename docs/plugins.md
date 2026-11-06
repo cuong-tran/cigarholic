@@ -8,7 +8,7 @@ Versions are pinned in `composer.lock`; `docs/versions.md` has the tested dates.
 
 | # | Plugin | Package | Version | Feature IDs | Why | Owner | HPOS / block checkout |
 |---|---|---|---|---|---|---|---|
-| 1 | WooCommerce | `wpackagist-plugin/woocommerce` | 11.2.2 | all | The store | Agents | yes (we enable HPOS, block cart/checkout) |
+| 1 | WooCommerce | `wpackagist-plugin/woocommerce` | 11.2.2 | all | The store. Core features switched on by provisioning: HPOS, block cart/checkout, Order Attribution, Order Fulfillments (tracking numbers and the shipping email, SHP-04, worded by `Shipping\Tracking`) | Agents | yes (we enable HPOS, block cart/checkout) |
 | 2 | WooCommerce Stripe Payment Gateway | `wpackagist-plugin/woocommerce-gateway-stripe` | 11.1.1 | PAY-01, PAY-02, PAY-04, PAY-05, PAY-06 | Cards, 3DS, Apple Pay, Google Pay, Link; official plugin, not WooPayments | Owner (account), agents (config) | yes |
 | 3 | WooCommerce PayPal Payments | `wpackagist-plugin/woocommerce-paypal-payments` | 4.2.0 | PAY-03, PAY-04, PAY-05 | PayPal, Venmo, Pay Later; official plugin | Owner (account), agents (config) | yes |
 | 4 | Stripe Tax for WooCommerce | `wpackagist-plugin/stripe-tax-for-woocommerce` | 2.2.0 | CMP-01, CMP-08 | Sales tax per nexus state (D-07); TaxJar is the fallback | Owner (registrations), agents | yes |
@@ -35,7 +35,7 @@ Versions are pinned in `composer.lock`; `docs/versions.md` has the tested dates.
 | WooPayments | Brief: Stripe and PayPal official plugins instead |
 | Cloudflare | Cache purge runs from the deploy workflow through the API; APO only if cart/checkout bypass is verified (OPS-09, later). Cloudflare itself is deferred by the owner |
 | Klaviyo / Omnisend / MailPoet | D-04 undecided; coming-soon signups are stored by `cigarholic-core` and exported later (MKT-01) |
-| Advanced Shipment Tracking | Only if the 3PL connector does not return tracking (SHP-04, P1) |
+| Advanced Shipment Tracking | Not needed: WooCommerce 11.2's own Order Fulfillments covers SHP-04 (tracking number on the order, carrier detection and link, customer email); a 3PL connector (SHP-06) can write the same fulfillments through WooCommerce's REST API |
 | 3PL connector | After D-02 (P1) |
 | Action Scheduler (standalone) | Bundled with WooCommerce; used by `cigarholic-core` |
 | Contact form plugins | Contact form with Turnstile is written in `cigarholic-core` (CNT-03) |
