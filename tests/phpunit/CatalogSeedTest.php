@@ -193,5 +193,14 @@ final class CatalogSeedTest extends WP_UnitTestCase {
 		Seed::run();
 		$this->assertSame( $new, (int) wc_get_product( wc_get_product_id_by_sku( 'SAMPLE-BOX-025-CHE-OIL' ) )->get_image_id() );
 		$this->assertSame( $counts, $this->counts(), 'nothing uploaded again' );
+
+		// A failed upload of a newer photo keeps the image the product already has.
+		delete_post_meta( $new, Seed::SOURCE_META );
+		$broken = static fn(): string => 'uploads unavailable';
+		add_filter( 'wp_upload_bits', $broken );
+		Seed::run();
+		remove_filter( 'wp_upload_bits', $broken );
+		$this->assertSame( $new, (int) wc_get_product( wc_get_product_id_by_sku( 'SAMPLE-BOX-025-CHE-OIL' ) )->get_image_id(), 'image kept when the upload fails' );
+		$this->assertSame( $counts, $this->counts() );
 	}
 }

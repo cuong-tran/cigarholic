@@ -371,7 +371,8 @@ test.describe( 'brand system', () => {
 		const photos = new Map();
 		page.on( 'response', async ( r ) => {
 			if ( /\/themes\/cigarholic\/assets\/images\/sample-[a-z-]+\.webp$/.test( r.url() ) ) {
-				photos.set( new URL( r.url() ).pathname.split( '/' ).pop(), { status: r.status(), bytes: ( await r.body() ).length } );
+				const bytes = await r.body().then( ( b ) => b.length, () => -1 );
+				photos.set( new URL( r.url() ).pathname.split( '/' ).pop(), { status: r.status(), bytes } );
 			}
 		} );
 		await login( page );
@@ -393,6 +394,7 @@ test.describe( 'brand system', () => {
 		await expect.poll( () => photos.size ).toBe( 8 );
 		for ( const [ name, { status, bytes } ] of photos ) {
 			expect( status, name ).toBe( 200 );
+			expect( bytes, `${ name } body readable` ).toBeGreaterThan( 0 );
 			expect( bytes, name ).toBeLessThan( 200 * 1024 );
 		}
 	} );

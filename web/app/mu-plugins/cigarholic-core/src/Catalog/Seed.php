@@ -291,23 +291,29 @@ final class Seed implements Feature {
 	 * @param string          $title Product name.
 	 * @param array<int, int> $rgb   Background colour of the placeholder.
 	 * @param string          $alt   Alt text.
-	 * @return int 0 when no image could be made or the upload directory is unavailable.
+	 * @return int The previous attachment (or 0 without one) when a new image cannot be made or uploaded.
 	 */
 	private static function image_id( string $key, string $title, array $rgb, string $alt ): int {
-		$map    = get_option( self::IMAGES_OPTION, array() );
-		$map    = is_array( $map ) ? $map : array();
-		$photo  = self::photo_path( $key );
-		$source = '' !== $photo ? (string) sha1_file( $photo ) : 'gd';
+		$map      = get_option( self::IMAGES_OPTION, array() );
+		$map      = is_array( $map ) ? $map : array();
+		$photo    = self::photo_path( $key );
+		$hash     = '' !== $photo ? sha1_file( $photo ) : false;
+		$source   = false !== $hash ? $hash : 'gd';
+		$existing = 0;
 		if ( isset( $map[ $key ] ) && 'attachment' === get_post_type( (int) $map[ $key ] ) ) {
-			$id     = (int) $map[ $key ];
-			$stored = (string) get_post_meta( $id, self::SOURCE_META, true );
-			if ( ( '' === $stored ? 'gd' : $stored ) === $source ) {
-				$current_alt = (string) get_post_meta( $id, '_wp_attachment_image_alt', true );
-				if ( $alt !== $current_alt ) {
-					update_post_meta( $id, '_wp_attachment_image_alt', $alt );
-				}
-				return $id;
+			$existing = (int) $map[ $key ];
+			$current  = (string) get_post_meta( $existing, '_wp_attachment_image_alt', true );
+			if ( $alt !== $current ) {
+				update_post_meta( $existing, '_wp_attachment_image_alt', $alt );
 			}
+			$stored = (string) get_post_meta( $existing, self::SOURCE_META, true );
+			// Keep the attachment while its file is current, or when the photo cannot be read now.
+			if ( ( '' === $stored ? 'gd' : $stored ) === $source || ( '' !== $photo && false === $hash ) ) {
+				return $existing;
+			}
+		}
+		if ( '' !== $photo && false === $hash ) {
+			$photo = '';
 		}
 
 		if ( '' !== $photo ) {
@@ -320,11 +326,11 @@ final class Seed implements Feature {
 			$mime = 'image/png';
 		}
 		if ( '' === $bits ) {
-			return 0;
+			return $existing;
 		}
 		$upload = wp_upload_bits( $name, null, $bits );
 		if ( ! empty( $upload['error'] ) || empty( $upload['file'] ) ) {
-			return 0;
+			return $existing;
 		}
 		if ( ! function_exists( 'wp_generate_attachment_metadata' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/image.php';
@@ -342,11 +348,11 @@ final class Seed implements Feature {
 			(string) $upload['file']
 		);
 		if ( is_wp_error( $id ) || 0 >= $id ) {
-			return 0;
+			return $existing;
 		}
 		wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, (string) $upload['file'] ) );
 		update_post_meta( $id, '_wp_attachment_image_alt', $alt );
-		update_post_meta( $id, self::SOURCE_META, $source );
+		update_post_meta( $id, self::SOURCE_META, '' !== $photo ? $source : 'gd' );
 
 		$map[ $key ] = $id;
 		update_option( self::IMAGES_OPTION, $map, false );

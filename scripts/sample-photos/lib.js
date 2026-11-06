@@ -866,8 +866,10 @@ export class Studio {
 		const out = document.createElement( 'canvas' );
 		out.width = this.w;
 		out.height = this.h;
-		const ctx = out.getContext( '2d' );
+		const ctx = out.getContext( '2d', { willReadFrequently: true } );
 		const gl = this.renderer.domElement;
+		// Average in floating point: an 8-bit running average would drop most of the later frames.
+		const sum = new Float32Array( this.w * this.h * 4 );
 		const fwd = new THREE.Vector3();
 		const right = new THREE.Vector3();
 		const up = new THREE.Vector3();
@@ -910,13 +912,20 @@ export class Studio {
 			} else {
 				this.renderer.render( this.scene, this.camera );
 			}
-			ctx.globalAlpha = 1 / ( i + 1 );
 			ctx.drawImage( gl, 0, 0 );
+			const px = ctx.getImageData( 0, 0, this.w, this.h ).data;
+			for ( let k = 0; k < px.length; k++ ) {
+				sum[ k ] += px[ k ];
+			}
 			if ( i % 4 === 3 ) {
 				await new Promise( ( r ) => setTimeout( r, 0 ) );
 			}
 		}
-		ctx.globalAlpha = 1;
+		const img = ctx.createImageData( this.w, this.h );
+		for ( let k = 0; k < sum.length; k++ ) {
+			img.data[ k ] = Math.round( sum[ k ] / frames );
+		}
+		ctx.putImageData( img, 0, 0 );
 		return out;
 	}
 }

@@ -574,7 +574,23 @@ window.renderShot = async ( name, frames = 32 ) => {
 	shot.build( st );
 	const canvas = await st.render( frames, 3 );
 	finish( canvas, shot.post || {} );
+	st.scene.traverse( ( o ) => {
+		if ( o.geometry ) {
+			o.geometry.dispose();
+		}
+		( Array.isArray( o.material ) ? o.material : [ o.material ] ).filter( Boolean ).forEach( ( m ) => {
+			Object.values( m ).forEach( ( v ) => v && v.isTexture && v.dispose() );
+			m.dispose();
+		} );
+	} );
+	if ( st.scene.environment ) {
+		st.scene.environment.dispose();
+	}
+	if ( st.composer ) {
+		st.composer.dispose();
+	}
 	st.renderer.dispose();
+	st.renderer.forceContextLoss();
 	const type = shot.type || 'image/webp';
 	return canvas.toDataURL( type, type === 'image/jpeg' ? 0.86 : 0.84 );
 };

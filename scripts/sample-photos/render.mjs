@@ -42,13 +42,26 @@ const SERVED = [ 'scripts/sample-photos/', 'node_modules/three/', 'web/app/theme
 function args() {
 	const a = process.argv.slice( 2 );
 	const o = { frames: 48, only: null, out: null };
+	const value = ( i ) => {
+		if ( i >= a.length || a[ i ].startsWith( '--' ) ) {
+			throw new Error( `${ a[ i - 1 ] } needs a value` );
+		}
+		return a[ i ];
+	};
 	for ( let i = 0; i < a.length; i++ ) {
 		if ( '--frames' === a[ i ] ) {
-			o.frames = Number( a[ ++i ] );
+			o.frames = Number( value( ++i ) );
+			if ( ! Number.isInteger( o.frames ) || o.frames < 1 ) {
+				throw new Error( '--frames must be a whole number of 1 or more' );
+			}
 		} else if ( '--only' === a[ i ] ) {
-			o.only = a[ ++i ].split( ',' );
+			o.only = value( ++i ).split( ',' );
+			const unknown = o.only.filter( ( n ) => ! TARGETS[ n ] );
+			if ( unknown.length ) {
+				throw new Error( `unknown shot(s): ${ unknown.join( ', ' ) }; known: ${ Object.keys( TARGETS ).join( ', ' ) }` );
+			}
 		} else if ( '--out' === a[ i ] ) {
-			o.out = path.resolve( a[ ++i ] );
+			o.out = path.resolve( value( ++i ) );
 		} else {
 			throw new Error( `unknown argument ${ a[ i ] }` );
 		}
@@ -58,14 +71,20 @@ function args() {
 
 function serve() {
 	const server = http.createServer( ( req, res ) => {
-		const rel = decodeURIComponent( new URL( req.url, 'http://x' ).pathname ).replace( /^\/+/, '' );
-		const file = path.resolve( root, rel );
-		if ( ! file.startsWith( root + path.sep ) || ! SERVED.some( ( p ) => rel.startsWith( p ) ) || ! fs.existsSync( file ) ) {
+		const file = path.resolve( root, '.' + decodeURIComponent( new URL( req.url, 'http://x' ).pathname ) );
+		const rel = path.relative( root, file ).split( path.sep ).join( '/' );
+		let ok = ! rel.startsWith( '..' ) && ! path.isAbsolute( rel ) && SERVED.some( ( p ) => rel.startsWith( p ) );
+		try {
+			ok = ok && fs.statSync( file ).isFile();
+		} catch {
+			ok = false;
+		}
+		if ( ! ok ) {
 			res.writeHead( 404 ).end();
 			return;
 		}
 		res.writeHead( 200, { 'content-type': TYPES[ path.extname( file ) ] || 'application/octet-stream' } );
-		fs.createReadStream( file ).pipe( res );
+		fs.createReadStream( file ).on( 'error', () => res.destroy() ).pipe( res );
 	} );
 	return new Promise( ( resolve ) => server.listen( 0, '127.0.0.1', () => resolve( server ) ) );
 }
@@ -89,7 +108,10 @@ try {
 		const started = Date.now();
 		const url = await page.evaluate( ( [ n, f ] ) => window.renderShot( n, f ), [ name, opts.frames ] );
 		const buf = Buffer.from( url.split( ',' )[ 1 ], 'base64' );
-		const target = opts.out ? path.join( opts.out, path.basename( TARGETS[ name ] || `${ name }.webp` ) ) : path.join( root, TARGETS[ name ] );
+		if ( ! TARGETS[ name ] ) {
+			throw new Error( `shot ${ name } has no target file in TARGETS` );
+		}
+		const target = opts.out ? path.join( opts.out, path.basename( TARGETS[ name ] ) ) : path.join( root, TARGETS[ name ] );
 		fs.mkdirSync( path.dirname( target ), { recursive: true } );
 		fs.writeFileSync( target, buf );
 		process.stdout.write( `${ name }: ${ path.relative( process.cwd(), target ) } (${ Math.round( buf.length / 1024 ) } KB, ${ ( ( Date.now() - started ) / 1000 ).toFixed( 1 ) } s)\n` );
