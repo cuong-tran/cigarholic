@@ -6,6 +6,7 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ### Added
 
+- FND-04: `CLAUDE.md` rule: run the `code-review` and `security-review` skills before every push and fix the reasonable findings first.
 - SEO-01 / SEO-02: SEOPress is configured as code (provisioning step `75-seo`) instead of running on its activation defaults. It sets only its own keys inside SEOPress's option arrays and keeps every other key.
   - **Titles and descriptions:** separator `|`. The home page is "Cigarholic | Handcrafted Wooden Humidors and Cigar Boxes" with a description. The shop is "Shop Humidors and Cigar Boxes | Cigarholic": SEOPress's default archive template had dropped the site name ("Shop -"). Products, pages and collections use "*name* | Cigarholic" with the short or term description.
   - **Kept out of search:** tag, brand, post-format and occasion archives (occasions until CAT-14), and author, date, search and attachment pages.
