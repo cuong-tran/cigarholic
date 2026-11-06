@@ -8,7 +8,7 @@
  * email enabled. The logo (header image) is added when the brand assets arrive (B9). The low-stock
  * recipient is set with the inventory options in 10-woocommerce-general.
  *
- * Feature IDs: FND-03, ORD-02, ORD-03, CMP-07, CNT-01 (colours).
+ * Feature IDs: FND-03, ORD-02, ORD-03, CMP-07, CNT-01 (colours), SHP-04 (shipping emails).
  *
  * @package Cigarholic
  */
@@ -89,8 +89,11 @@ return static function ( Context $ctx ): void {
 		);
 	}
 
-	// Customer emails (ORD-03): order lifecycle and account emails on.
-	foreach ( array( 'customer_on_hold_order', 'customer_processing_order', 'customer_completed_order', 'customer_refunded_order', 'customer_cancelled_order', 'customer_failed_order', 'customer_note', 'customer_new_account', 'customer_reset_password' ) as $email_id ) {
+	// Customer emails (ORD-03): order lifecycle and account emails on, and the shipping emails of WooCommerce's
+	// Order Fulfillments (SHP-04: shipped, shipment updated, shipment removed; sent only when the manager leaves
+	// "Fulfillment notification" on). The completed-order email stays on for orders completed without a
+	// shipment; cigarholic-core skips it for orders whose items all shipped.
+	foreach ( array( 'customer_on_hold_order', 'customer_processing_order', 'customer_completed_order', 'customer_refunded_order', 'customer_cancelled_order', 'customer_failed_order', 'customer_note', 'customer_new_account', 'customer_reset_password', 'customer_fulfillment_created', 'customer_fulfillment_updated', 'customer_fulfillment_deleted' ) as $email_id ) {
 		$email( $email_id, array( 'enabled' => 'yes' ) );
 	}
 };

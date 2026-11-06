@@ -119,6 +119,8 @@ final class ProvisionTest extends WP_UnitTestCase {
 		$this->assertInstanceOf( \WP_Term::class, $accessory );
 		$this->assertSame( '9.95', $method->get_instance_option( 'class_cost_' . $accessory->term_id ) );
 		$this->assertSame( 'order', $method->get_instance_option( 'type' ) );
+		// Tracking (SHP-04): WooCommerce's Order Fulfillments on.
+		$this->assertSame( 'yes', get_option( 'woocommerce_feature_fulfillments_enabled' ) );
 
 		// 60, 70, 80.
 		$this->assertSame( 'yes', get_option( 'woocommerce_calc_taxes' ) );
@@ -131,6 +133,9 @@ final class ProvisionTest extends WP_UnitTestCase {
 		$this->assertSame( '#5e574e', get_option( 'woocommerce_email_footer_text_color' ) );
 		$new_order = get_option( 'woocommerce_new_order_settings' );
 		$this->assertSame( get_option( 'admin_email' ), $new_order['recipient'] );
+		foreach ( array( 'customer_fulfillment_created', 'customer_fulfillment_updated', 'customer_fulfillment_deleted', 'customer_completed_order' ) as $email_id ) {
+			$this->assertSame( 'yes', get_option( 'woocommerce_' . $email_id . '_settings' )['enabled'], $email_id );
+		}
 		$this->assertSame( 'yes', get_option( 'woocommerce_coming_soon' ) );
 		$this->assertSame( ( defined( 'DISALLOW_INDEXING' ) && DISALLOW_INDEXING ) ? '0' : '1', get_option( 'blog_public' ) );
 		$this->assertSame( 'no', get_option( 'woocommerce_store_pages_only' ) );
