@@ -22,6 +22,12 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
     - `tests/e2e/seo.spec.js`: sitemap index and contents, titles, canonical, card type, the home page's WebSite and OnlineStore nodes.
     - The PHPUnit bootstrap now loads SEOPress with its activation defaults.
 
+- ORD-03 / SHP-03 / CMP-05: the customer's **Processing order** and **Order on-hold** emails get a "What happens next" section after the addresses (`Email\NextSteps`, toggle `email-next-steps`, on). It is written by the same code as the order-received card (CHK-06), so the wording cannot drift:
+  - the packing promise with the manager's ship time, or what happens to backordered items;
+  - that a tracking email follows, with the Orders link for customers with an account;
+  - for an on-hold order, the payment check first.
+  The card's "Questions" step and seasoning tip are left out, because every email's footer has the support contact. Admin copies and other emails are unchanged; an unpaid order gets nothing. Plain-text emails get the same text. Tests: `EmailNextStepsTest` (HTML and plain text, placement after the addresses, on hold, admin, completed, unpaid), and the checkout smoke test reads the buyer's processing email from Mailpit.
+
 ### Changed
 
 - FND-13: WooCommerce 11.2.1 → 11.2.2, Complianz 7.5.6 → 7.5.7, FluentSMTP 2.4.1 → 2.4.5 (#62) and `php-stubs/woocommerce-stubs` 11.2.1 (#63), Dependabot. WooCommerce 11.2.2 is a fix release: Store API checkout requests each start with their own order and payment data, checkout stops when the order cannot be saved, cart quantity and shipping-rate validation, REST API key authentication only on REST requests, the Jetpack onboarding endpoints need an admin session. Its one database update removes PHP objects from product default attributes (`wc_update_1122_remove_objects_from_default_attributes`). Complianz fixes the banner stylesheet loading and Consent Mode's first page view; FluentSMTP fixes PHP 8.5 deprecation notices among others. Neither is configured yet (CMP-03, B1). Upgraded in place on the Compose stack: `wc update` ran that one function, provisioning dry run 0 changes, PHPUnit and Playwright green.

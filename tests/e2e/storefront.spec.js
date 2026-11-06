@@ -3,7 +3,7 @@
 // Functions passed to page.evaluate() run in the browser, hence this global.
 /* global getComputedStyle */
 import { test, expect } from '@playwright/test';
-import { login, mailpitMessages, uniqueEmail } from './helpers.js';
+import { login, MAILPIT, mailpitMessages, uniqueEmail } from './helpers.js';
 
 test.describe( 'storefront', () => {
 	test.beforeEach( async ( { page } ) => {
@@ -101,5 +101,14 @@ test.describe( 'storefront', () => {
 		// WooCommerce sends "[Cigarholic]: New order #N" to the shop and "Your Cigarholic order has been received!" to the buyer.
 		await expect.poll( async () => ( await mailpitMessages( request, `#${ orderNumber }` ) ).length, { timeout: 30_000 } ).toBeGreaterThan( 0 );
 		await expect.poll( async () => ( await mailpitMessages( request, 'order has been received' ) ).length, { timeout: 30_000 } ).toBeGreaterThan( 0 );
+
+		// ORD-03: the buyer's processing email repeats the packing promise and the tracking line.
+		const received = ( await mailpitMessages( request, 'order has been received' ) ).find( ( m ) => ( m.To || [] ).some( ( to ) => to.Address === email ) );
+		expect( received, `processing email to ${ email }` ).toBeTruthy();
+		const message = await ( await request.get( `${ MAILPIT }/api/v1/message/${ received.ID }` ) ).json();
+		const body = message.HTML.replace( /<[^>]+>/g, ' ' ).replace( /\s+/g, ' ' );
+		expect( body ).toContain( 'What happens next' );
+		expect( body ).toMatch( /Packing and shipping\. We pack your order and hand it to the carrier within \d+(–\d+)? business days? from our US warehouse in Houston, Texas\./ );
+		expect( body ).toContain( 'When your order ships, you receive an email with the tracking number.' );
 	} );
 } );
