@@ -2,7 +2,7 @@
 
 Progress tracker for the Cigarholic build (`docs/KICKOFF-BRIEF.md` rule 6). Updated at the end of every session. A fresh agent, in a new cloud session or on a laptop, starts here after reading `CLAUDE.md` (which imports `AGENTS.md`).
 
-Last updated: 2026-11-05, end of Turn 7 (session handoff): **`v0.2.0` (brand style) live on production, and since 2026-11-05 17:40 UTC visitors see it. At the owner's request (A9), the coming-soon template saved in the Site Editor (post 28) was deleted (WP-CLI run 42075862951, approved by the owner), so the theme's Forest page renders. This turn also merged #58 (FND-03 first-admin defaults), #59 (SHP-03 ship time) and #60 (CHK-06 order-received next steps); the owner tagged them as `v0.3.0` (production release 5, run 42073737919, 2026-11-05 17:21 UTC).**
+Last updated: 2026-11-06, end of Turn 8 (session handoff): **Dependabot #62 and #63 merged (WooCommerce 11.2.2, Complianz 7.5.7, FluentSMTP 2.4.5, stubs), staging stays in coming soon like production (owner, A9 closed, #65), SEOPress configured as code with the cart, checkout and account pages `noindex` (#66, SEO-01), and "What happens next" in the customer's processing and on-hold emails (#67, ORD-03). All on staging; production is still `v0.3.0` and needs a `v0.4.0` tag (OWNER-ACTIONS A10): it runs WooCommerce 11.2.1 and today answers `index, follow` on `/cart/` and `/my-account/`.**
 
 ## Where we are
 
@@ -10,8 +10,8 @@ Last updated: 2026-11-05, end of Turn 7 (session handoff): **`v0.2.0` (brand sty
 |---|---|
 | Current milestone | **M1 "Coming-soon live" reached 2026-11-03** (M0 2026-10-31). Next: M2 "Payments on staging" (Phase 2, waits for B4/B5); meanwhile the P0 work that needs no credentials |
 | Live on production | **`v0.3.0` (release 5, `80b3515`, run 42073737919, approved by the owner, 2026-11-05 17:21 UTC)**: #58 to #61 (first-admin defaults, ship-time setting and messages, order-received next steps); snapshot 52K, `wc update` none needed, provisioning 0 changes, health HTTP 200. Before it, **`v0.2.0` (release 4, `167fd98`, run 41760596394, approved by the owner, 2026-11-04 02:25 UTC)**: the brand style; provisioning applied 15 changes (logo, site icon and email logo imported as attachments 29 to 31, `site_logo`, `site_icon`, email header image, the five brand email colours). Checked from outside: theme fonts (`young-serif`, `hanken-grotesk`) and the PNG site icon served with 200, no Google Fonts request, the logo above the H1. Step 85 warned that the coming-soon template was saved in the Site Editor (post 28): `/` showed that copy (the pre-brand white layout and an edited lead sentence, "…humidor accessories, the only one in the world. The store opens soon."). **A9, 2026-11-05:** the owner asked for the reset; post 28 was deleted through `wp-cli.yml` (run 42075862951, owner-approved; the run log keeps the deleted content, so it can be restored), after which the template source is `theme`. Checked from outside at 17:40 UTC: the FastCGI cache served the old page once (`STALE`, background update), then `HIT` with the Forest page (`rgb(31, 43, 37)` ground, logo, "Handcrafted humidors" label, the theme's lead sentence, signup form), only the two theme fonts downloaded (200), no Google Fonts. Everything from `v0.1.1`:  WordPress 7.1.4 installed with WP-CLI (admin `owner`), 11 launch plugins active, provisioning applied, HPOS on, Valkey object cache on, whole-site coming-soon on, search engines allowed, two-factor required for admins and shop managers (Authenticator App, Recovery Codes). Checked from outside after the deploy: `/`, `/shop/`, `/cart/`, `/my-account/`, `/journal/` show the coming-soon page with the signup form; `/checkout/` 302 to the cart; `/hello-world/`, `/?author=1`, `/?author_name=owner`, `/author/owner/`, the users sitemap and REST users 404; feed without items or `owner`; REST posts and comments `[]`; oEmbed author "Cigarholic"; signup REST refuses an invalid email (400, nothing stored); installer, `setup-config.php`, `xmlrpc.php` 403; `/wp-admin` and `/wp-login.php` 301 into `/wp/`; `http://`, `www`, `max2lab.com`, `www.max2lab.com` 301 to `https://cigarholic.com` keeping path and query; HSTS, `X-Frame-Options`, `nosniff`, referrer and permissions policies on cached and uncached pages; Let's Encrypt certificate to 2027-01-31. **Since #49** (vhost by `site-production` 41599367782): `/robots.txt` 200 `text/plain` from WordPress (WooCommerce's rules, `Sitemap: https://cigarholic.com/sitemaps.xml`), FastCGI cache MISS then HIT; SEOPress `/sitemaps.xml` 200 XML (post, page, product, category sitemaps); `/sitemap.xml`, `/wp-sitemap.xml`, `/sitemap_index.xml` 301 to it; `/license.txt`, `/wp/license.txt`, `xmlrpc.php`, the installer still 403; a missing `.txt` still Nginx's 404 |
-| Live on staging | **Release 17, `main` at #60 (deploy run 41765262621)** (releases 15 and 16 for #58 and #59, runs 41762830797 and 41764165043): everything above plus the whole brand style (Forest header, footer, homepage and checkout header; shop, product, cart, checkout and account pages in the brand; logo, site icon and email logo; self-hosted fonts; brand email colours), the ship-time setting and messages (SHP-03), the order-received next steps (CHK-06) and the seven `SAMPLE-` products. Release 15's provisioning switched `woocommerce_coming_soon` back on: someone had turned coming soon off on staging (OWNER-ACTIONS A9 asks whether staging should stay without it); "Hello world!" trashed by provisioning; basic auth, `noindex` (also on `/robots.txt` and the sitemaps, 401 from outside); robots.txt `Disallow: /` (`blog_public` 0, `Seo\RobotsTxt`) |
-| In progress | **Me:** nothing in flight (no open PR of mine; Dependabot #62 and #63 wait). Next: next action 3 (Dependabot), then 4. **Owner:** say whether staging should run without coming soon (A9, question 3); B6 and B1 |
+| Live on staging | **Release 22, `main` at #67 (deploy run 42135141731)**. This turn: release 18 (#62, run 42129220297: `wc update` ran WooCommerce 11.2.2's one DB update, provisioning 0 changes), 19 (#63, 42129288438), 20 (#65, 42130131873), 21 (#66, 42133693853: step 75-seo applied 8 changes), 22 (#67, 42135141731). Everything on production plus WooCommerce 11.2.2, Complianz 7.5.7, FluentSMTP 2.4.5; SEOPress titles, sitemaps (with product categories, without cart, checkout, account, blog categories or authors), knowledge graph and the per-page `noindex` on cart, checkout and account (SEO-01); the email next steps (ORD-03); the whole brand style; the ship-time setting and messages (SHP-03); the order-received next steps (CHK-06); the seven `SAMPLE-` products. Coming soon on (owner, 2026-11-05: staging stays in coming soon like production; provisioning puts it back at every deploy); basic auth, `noindex` (also on `/robots.txt` and the sitemaps, 401 from outside); robots.txt `Disallow: /` (`blog_public` 0, `Seo\RobotsTxt`) |
+| In progress | **Me:** nothing in flight (no open PR of mine). Next: next action 3. **Owner:** tag `v0.4.0` (A10); B6 and B1; social profile URLs (B13) |
 | Blocked (owner) | B6 Turnstile keys (forms run with honeypot and rate limit only), B1 Postmark (no transactional mail on the servers yet), B2 backups, B3 monitoring, B4/B5 payments |
 
 ### Merged so far (all squash-merged to `main`, CI green)
@@ -65,6 +65,12 @@ Last updated: 2026-11-05, end of Turn 7 (session handoff): **`v0.2.0` (brand sty
 | #58 | FND-03 | Provisioning step 10 runs WooCommerce's new-store defaults (`WC_Install::newly_installed`) once, before its settings, so the first admin page view no longer turns email theme sync on and recolours the emails; `[0.2.0]` changelog section |
 | #59 | SHP-03, CMP-05 | One ship-time setting (WooCommerce → Settings → Shipping, default 1–2 business days): `cigarholic/ship-time` block on the product page, "Ships in …" under in-stock cart items (cart, checkout summary, mini cart), trust bar and FAQ; nothing promised for backorders, out of stock or a quantity above the stock; manager guide delay procedure |
 | #60 | CHK-06, SHP-03, CMP-05 | Order-received "What happens next" written from the order (ship time, backorders with the right to cancel, tracking email, account link, support with the order number, seasoning tip for humidors, payment check when on hold, nothing for unpaid orders; order key required); rendered as a real Card group |
+| #61, #64 | docs | Turn 7 handoffs (`v0.3.0` tagged by the owner; A9 reset) |
+| #62 | FND-13 | Dependabot: WooCommerce 11.2.2 (fix release, one DB update), Complianz 7.5.7, FluentSMTP 2.4.5; verified as an in-place upgrade of the Compose stack together with #63 |
+| #63 | FND-13 | Dependabot: `php-stubs/woocommerce-stubs` 11.2.1 |
+| #65 | FND-03, CNT-04, FND-13 | Staging stays in coming soon (owner, A9): `ProvisionTest::test_switch_to_live_in_wp_admin_is_undone`, manager guide, decision 22; versions and plugin register after #62/#63 |
+| #66 | SEO-01, SEO-02, MKT-02 | Provisioning step `75-seo` (SEOPress titles and descriptions, `noindex` rules, sitemaps with product categories, cart/checkout/account `noindex` per page, `OnlineStore` knowledge graph, large cards, SEOPress GA module off); `Seo\WebsiteSchema` (WebSite name "Cigarholic"); PHPUnit bootstrap loads SEOPress; `seo.spec.js` |
+| #67 | ORD-03, SHP-03, CMP-05 | "What happens next" in the customer's processing and on-hold emails (`Email\NextSteps`), from the same steps as the order-received card; `EmailNextStepsTest`; the checkout smoke test reads the processing email |
 
 ## Server (Phase 1, 2026-11-02 / 03)
 
@@ -120,6 +126,11 @@ All runs of `infra-provision.yml` on the Hostinger VPS (`srv2109040`, Ubuntu 26.
 | 41765262621 (03:08) | deploy staging (merge of #60) | Release 17: provisioning 0 changes, health HTTP 200 |
 | 42073737919 (2026-11-05 17:21, approved) | deploy production, tag `v0.3.0` (`80b3515`) | Release 5: snapshot (52K), activation no-op, `wc update` none needed, provisioning 0 changes, step 85 still warned about post 28 (reset 13 minutes later, next row), object cache, health HTTP 200 |
 | 42075862951 (2026-11-05 17:34, approved) | `wp-cli.yml` production `eval` (A9) | Checked post 28: `wp_template` `coming-soon`, theme `cigarholic`, publish, created and last modified in the 02:00 UTC hour of 2026-11-04, before the `v0.2.0` deploy (the log's secret filter masks part of the time and the size), content printed to the log; `before: source=custom`; deleted; object cache flushed; `after: source=theme forest=yes` |
+| 42129220297 (2026-11-05 23:26) | deploy staging (merge of #62) | Release 18: `wc update` "1 update functions completed. Database version is 11.2.2" (`wc_update_1122_remove_objects_from_default_attributes`), provisioning 0 changes, step 85 `ok`, health HTTP 200 |
+| 42129288438 | deploy staging (merge of #63) | Release 19: no DB update, provisioning 0 changes, health HTTP 200 |
+| 42130131873 | deploy staging (merge of #65) | Release 20: provisioning 0 changes (coming soon was still on), health HTTP 200 |
+| 42133693853 (2026-11-06 00:01) | deploy staging (merge of #66) | Release 21: no DB update; step 75-seo 8 changes (SEOPress titles, sitemaps, social and toggle options, notices; `noindex` on the cart #6, checkout #7 and my-account #8 pages), no warnings; health HTTP 200 |
+| 42135141731 (2026-11-06 00:12) | deploy staging (merge of #67) | Release 22 (the log prints `releases/***`: its secret filter masks every "22", the value of `SSH_PORT`): no DB update, provisioning 0 changes, health HTTP 200 |
 
 Verified from the sandbox afterwards: `https://staging.cigarholic.com/` 401 + HSTS + `noindex`; `https://cigarholic.com/` 404 (no release yet) with the Let's Encrypt chain; `www`, `max2lab.com`, `www.max2lab.com` and `http://` each 301 to `https://cigarholic.com/...` in one hop; `xmlrpc.php` 403. The server `.env` files hold random database credentials and salts; application keys arrive through `env-upsert.sh` on each deploy and are empty until the owner sets the secrets. `SSH_USER` stays `root` until the first deploys are verified, then `disable-root-login` (OWNER-ACTIONS A1).
 
@@ -160,6 +171,30 @@ Verified from the sandbox afterwards: `https://staging.cigarholic.com/` 401 + HS
 | `gh pr ...`, GraphQL | Blocked by the proxy; `gh auth status` even reports the token as invalid, yet `gh api repos/...` works | Use the GitHub MCP tools and REST |
 | Environments and Actions-settings API | 403 "not permitted through this proxy" | The owner answers OWNER-ACTIONS A4 |
 | `cigarholic.com`, `max2lab.com` | NXDOMAIN: both domains are on registrar `clientHold` (RDAP, iNET Software, registered 2026-10-03) | OWNER-ACTIONS A5; M1 impossible until lifted |
+
+## Tests executed in Turn 8 (2026-11-05 and 06: #62, #63, #65, #66, #67)
+
+- **Executed and passed (sandbox, Compose stack):**
+  - Dependabot #62 + #63 merged together in a scratch worktree, installed over a stack built on `main` (WooCommerce 11.2.1): `wc update` ran the one 11.2.2 function, provisioning dry run 0 changes, `composer check` with the new stubs, PHPUnit 106 tests, Playwright 28/28. `main`'s lock after the merges is byte-identical to the tested one.
+  - #65: `ProvisionTest` 9 tests; the new coming-soon test fails when step 80's line is removed (mutation check).
+  - #66: with `blog_public` 1 (production's condition) the stack rendered `index, follow` on `/cart/` and `/my-account/` before the step; `provision --step=75-seo` 8 changes, then a full dry run 0; PHPUnit 111 tests / 1276 assertions (SEOPress robots tag rendered for cart, checkout and account, `index, follow` again without the meta; WebSite node); Playwright 33/33 with `seo.spec.js`; the WebSite-name test fails without the filter.
+  - #67: PHPUnit 113 tests / 1301 assertions (`EmailNextStepsTest` on WooCommerce's real email classes, HTML and plain text); Playwright 33/33, the checkout test now opens the buyer's processing email in Mailpit; both new tests fail without the hook; screenshot of the email from Mailpit.
+  - `composer check` and `npm run lint` on every PR; CI green on every head (5 jobs).
+- **Executed and passed (staging and production):** the staging deploys in "Server" (releases 18 to 22). From outside, production `/cart/` and `/my-account/` answer `index, follow` (to be fixed by `v0.4.0`), its page sitemap lists `/cart/`, `/checkout/`, `/my-account/`, and `post-sitemap1.xml` holds only `/journal/`.
+- **Executed and failed, then fixed:**
+  - The coming-soon test counted 4 dry-run changes after other tests (the known `$wp_rewrite` leftover); it resets the permalinks like its neighbour.
+  - `seo.spec.js` failed 4/4 against SEOPress's defaults (as intended before the step).
+  - The SEO PHPUnit tests first ran without SEOPress (the bootstrap now loads it with its activation defaults), and SEOPress only strips WooCommerce's noindex when WooCommerce is in `active_plugins` (the test lists it, as on the servers).
+  - PHPCS alignment and a reserved parameter name.
+- **Found on the way:**
+  - SEOPress removes WooCommerce's `noindex` from cart, checkout and account on a public site and prints `index, follow` (fixed by #66 on staging; production with `v0.4.0`).
+  - SEOPress's default archive title template drops the site name ("Shop -"), and its WebSite node takes the whole home title as the site name (both fixed in #66).
+  - The footer's social links point to the networks' home pages, not to Cigarholic profiles (OWNER-ACTIONS B13).
+- **Could not run here:**
+  - Google's Rich Results Test and Search Console (coming soon, SEO-04 not started).
+  - A real inbox check of the emails (no transactional mail before B1).
+  - Lighthouse.
+  - Staging pages from outside (basic-auth credentials are not readable from the sandbox).
 
 ## Tests executed in Turn 7 (2026-11-04: #58, #59, #60)
 
@@ -255,22 +290,24 @@ Verified from the sandbox afterwards: `https://staging.cigarholic.com/` 401 + HS
 20. **Backordered lines get no ship time** (#59, #60): the product page and the cart promise nothing for them, and the order-received card says they ship when back in stock, that the buyer gets the expected date by email and can cancel. A line counts as backordered when WooCommerce marked it or its product's managed stock is below zero.
 21. **Theme files saved in the Site Editor are reported, never reset by a deploy** (step 85): a saved copy is the owner's or manager's content. Resetting one on production is the owner's call (A9).
 22. **Staging stays in coming soon, like production** (owner, 2026-11-05, A9 question 3): staging shows visitors the launch page and the store only to logged-in staff, behind basic auth and `noindex`. Provisioning step 80 sets it on every site and every deploy; a switch to Live in WP admin lasts until the next deploy (`ProvisionTest::test_switch_to_live_in_wp_admin_is_undone`). Going live (C5) is a change to step 80.
+23. **SEOPress is configured by provisioning step 75-seo, key by key** (#66): the step merges only the keys it owns into SEOPress's option arrays, so the per-item SEO box (titles, descriptions, noindex of a single product or page) stays the manager's, and any other SEOPress setting survives a deploy; the owned keys (templates, sitemaps, knowledge graph) come back with every deploy, like every provisioned setting.
+24. **Cart, checkout and account pages are `noindex` through SEOPress's own per-page setting** (#66), not through a filter: SEOPress deliberately empties WooCommerce's robots directives on those pages, and its per-page meta is the one setting it honours for both the robots tag and the sitemap.
+25. **The home `<title>` stays descriptive; the WebSite structured data says "Cigarholic"** (#66, `Seo\WebsiteSchema`): SEOPress has no setting to separate them, and a one-filter class is smaller than giving up the descriptive title.
+26. **Emails reuse the order-received steps** (#67): one function words the packing promise, backorders, tracking and payment check for both the page and the emails, so they cannot disagree (FTC Mail Order Rule). The emails leave out the support step and the seasoning tip; every email footer already carries the support contact.
 
 ## Open owner decisions and inputs
 
-All in `docs/OWNER-ACTIONS.md`: A1 and A3 to A9 done (A9's staging question still open); A2 (Cloudflare) deferred by the owner; `v0.2.0` tagged, deployed and visible. **Next from the owner:** B6 Turnstile keys and B1 Postmark (`v0.3.0` is tagged and live). **B9:** a vector master of the wordmark (SVG, AI or PDF), confirmation that the canvas is final, product photos, specs and copy. B1 to B12 within two weeks (B6 Turnstile and B1 Postmark first); C1 to C5 before go-live. Defaults D-01 to D-10 are in force.
+All in `docs/OWNER-ACTIONS.md`: A1 and A3 to A9 done (A9 closed 2026-11-05: staging stays in coming soon); A2 (Cloudflare) deferred by the owner. **Next from the owner:** **A10, tag `v0.4.0`** (WooCommerce 11.2.2's fixes, the cart and account `noindex`, the email next steps); B6 Turnstile keys and B1 Postmark; **B13** the real social profile URLs. **B9:** a vector master of the wordmark (SVG, AI or PDF), confirmation that the canvas is final, product photos, specs and copy. B1 to B13 within two weeks; C1 to C5 before go-live. Defaults D-01 to D-10 are in force.
 
 ## Next actions
 
-1. **Done 2026-11-05, A9:** the production coming-soon copy is reset and visitors see the Forest page. Still open from A9: whether staging should run without coming soon (owner).
-2. **Done 2026-11-05:** the owner tagged `v0.3.0` (#58 to #61) and approved its deploy (release 5). The next tag can wait for more work.
-3. **Dependabot, first:** [#62](https://github.com/cuong-tran/cigarholic/pull/62) (WooCommerce 11.2.1 → 11.2.2, Complianz 7.5.6 → 7.5.7, FluentSMTP 2.4.1 → 2.4.5) and [#63](https://github.com/cuong-tran/cigarholic/pull/63) (`php-stubs/woocommerce-stubs` 11.2.1), both green on 2026-11-05. Read the WooCommerce changelog for 11.2.2, update `docs/versions.md` in the same PR (or right after), merge, and check the staging deploy log (`wc update`, provisioning 0 changes).
-4. **P0 work that needs no credentials, in this order:**
-   - SEO-01/SEO-02 SEOPress provisioning: titles, sitemaps, Product and Organization schema. The live page sitemap lists `/cart/`, `/checkout/` and `/my-account/`, which must go, and the post category sitemap is empty.
-   - SHP-04 tracking: the manager pastes the carrier and tracking number, the customer gets a "Shipped" email with the link. It needs a plugin row in `docs/plugins.md` or a small custom module; decide by the budget (11 of 15 active).
-   - ORD-03 follow-up: the ship-time line in the customer's processing email.
+1. **Done 2026-11-05:** Dependabot #62 and #63 (WooCommerce 11.2.2 and plugins), A9 closed (#65), SEO-01 (#66), ORD-03 email next steps (#67). All on staging.
+2. **After the owner's `v0.4.0` tag and approval (A10):** check the production deploy log (`wc update` should run the 11.2.2 DB update once; step 75-seo about 8 changes), then from outside: `/cart/` and `/my-account/` `noindex`, `/page-sitemap1.xml` without them, `/product_cat-sitemap1.xml` 200, the home title and the WebSite/OnlineStore JSON-LD. Record the runs in "Server" and write the `[0.4.0]` changelog section from `[Unreleased]`.
+3. **P0 work that needs no credentials, in this order:**
+   - SHP-04 tracking: the manager pastes the carrier and tracking number, the customer gets a "Shipped" email with the link. **Try core first:** WooCommerce 11.2 ships *Order Fulfillments* (feature `fulfillments`, off by default, not experimental, no settings UI, so it is switched on by option `woocommerce_feature_fulfillments_enabled`), with USPS, UPS, FedEx and DHL providers and the customer emails `customer_fulfillment_created` / `_updated` / `_deleted` (`src/Admin/Features/Fulfillments/`, `includes/emails/class-wc-email-customer-fulfillment-*.php`). Checked on the Compose stack 2026-11-06: with that option `yes`, `FeaturesUtil::feature_is_enabled( 'fulfillments' )` is true and the three emails register, enabled. Its email template (`templates/emails/email-fulfillment-details.php`) prints the tracking number and a "Track your shipment" link from the fulfillment's `_tracking_number` / `_tracking_url`. Still to check: the order screen's tracking entry for the manager, the provider URL for USPS/UPS/FedEx, and the brand styling. If it covers the flow, SHP-04 is provisioning, email checks and manager-guide steps, with no new plugin.
+   - SEO-02 rest: Product `brand`, `itemCondition`, and Offer `shippingDetails` from the shipping zones and the ship time (WooCommerce prints none of them). `hasMerchantReturnPolicy` waits for the returns window (L-08); the accessory rate is a placeholder until L-07.
    - CMP-03 Complianz provisioning (cookie notice, Consent Mode).
-   - MKT-02 GA4 plugin provisioning from `GA4_MEASUREMENT_ID`.
+   - MKT-02 GA4 plugin provisioning from `GA4_MEASUREMENT_ID` (SEOPress's GA module is already off).
    - OPS-09 image settings (WebP/AVIF, sizes).
    - ORD-05 manager guide sections (products, prices, sales, orders, refunds, tracking).
    - WCAG/axe checks in the Playwright suite (CMP-04).
@@ -278,11 +315,13 @@ All in `docs/OWNER-ACTIONS.md`: A1 and A3 to A9 done (A9's staging question stil
    - A Playwright spec for the two-factor restricted flow.
    - Lighthouse on staging and production (accessibility 100, LCP and CLS in the good band; CNT-01 plan section 5).
    - `/favicon.ico` to WordPress in the vhost.
-5. **Before launch:**
+   - Footer social links: replace the placeholders once B13 arrives (theme footer and step 75's knowledge graph `sameAs`).
+4. **Before launch:**
    - `SSH_USER=deploy` (owner) and `disable-root-login` once the server configuration settles (decision 15).
    - B2 backups and B3 monitoring live.
    - Publish the contact, FAQ and policy pages: the order-received card links them only once they are published.
-6. **Phase 2 (P0 on staging) once B4/B5 arrive:** Stripe and PayPal test mode, wallets, refunds, webhooks (PAY-01..06), tax addresses (CMP-01), then the rest of brief section 8.
+   - SEO-04: Search Console and Bing, submit `https://cigarholic.com/sitemaps.xml` (B10).
+5. **Phase 2 (P0 on staging) once B4/B5 arrive:** Stripe and PayPal test mode, wallets, refunds, webhooks (PAY-01..06), tax addresses (CMP-01), then the rest of brief section 8.
 
 ## Reproduce and validate the current state
 
@@ -304,6 +343,10 @@ make wp ARGS="cigarholic features" && make wp ARGS="cigarholic provision --dry-r
 
 ```bash
 for u in / /shop/ '/?author=1' /feed/ /robots.txt /sitemaps.xml /wp-admin /wp/wp-admin/install.php /xmlrpc.php; do printf '%-28s ' "$u"; curl -sS -o /dev/null -w '%{http_code} %{redirect_url}\n' "https://cigarholic.com$u"; done   # production from outside
+```
+
+```bash
+for u in /cart/ /my-account/; do printf '%-14s ' "$u"; curl -sS "https://cigarholic.com$u" | grep -oE '<meta name=.robots.[^>]*>'; done; curl -sS https://cigarholic.com/page-sitemap1.xml | grep -oE '<loc>[^<]+'   # SEO-01 after v0.4.0: noindex, and no cart/checkout/account in the sitemap
 ```
 
 ## Starting a new session
