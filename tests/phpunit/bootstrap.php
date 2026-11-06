@@ -58,6 +58,26 @@ if ( file_exists( $cigarholic_two_factor ) ) {
 	);
 }
 
+// SEOPress (SEO-01): the 75-seo step and its rendered robots tag run against the real plugin. SEOPress decides
+// which modules to load from its `seopress_toggle` option on plugins_loaded (priority 999), so its activation
+// defaults are written just before, as activating it in WP admin would.
+$cigarholic_seopress = $cigarholic_root . '/web/app/plugins/wp-seopress/seopress.php';
+if ( file_exists( $cigarholic_seopress ) ) {
+	tests_add_filter(
+		'muplugins_loaded',
+		static function () use ( $cigarholic_seopress ): void {
+			require $cigarholic_seopress;
+		}
+	);
+	tests_add_filter(
+		'plugins_loaded',
+		static function (): void {
+			( new \SEOPress\Actions\Options\Init() )->activate();
+		},
+		998
+	);
+}
+
 // The mu-plugin loads from WP_CONTENT_DIR/mu-plugins through wp-settings.php; nothing to add here.
 
 require $cigarholic_wp_phpunit . '/includes/bootstrap.php';
