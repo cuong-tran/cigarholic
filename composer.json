@@ -30,7 +30,7 @@
     "wpackagist-plugin/woocommerce": "11.2.2",
     "wpackagist-plugin/woocommerce-gateway-stripe": "11.1.1",
     "wpackagist-plugin/woocommerce-google-analytics-integration": "2.4.4",
-    "wpackagist-plugin/woocommerce-paypal-payments": "4.2.0",
+    "wpackagist-plugin/woocommerce-paypal-payments": "4.2.2",
     "wpackagist-plugin/wp-seopress": "10.4"
   },
   "require-dev": {
