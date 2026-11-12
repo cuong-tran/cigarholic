@@ -27,10 +27,10 @@
     "wpackagist-plugin/stripe-tax-for-woocommerce": "2.2.0",
     "wpackagist-plugin/two-factor": "0.17.0",
     "wpackagist-plugin/webp-uploads": "2.7.1",
-    "wpackagist-plugin/woocommerce": "11.2.2",
-    "wpackagist-plugin/woocommerce-gateway-stripe": "11.1.1",
+    "wpackagist-plugin/woocommerce": "11.3.0",
+    "wpackagist-plugin/woocommerce-gateway-stripe": "11.2.0",
     "wpackagist-plugin/woocommerce-google-analytics-integration": "2.4.4",
-    "wpackagist-plugin/woocommerce-paypal-payments": "4.2.0",
+    "wpackagist-plugin/woocommerce-paypal-payments": "4.2.2",
     "wpackagist-plugin/wp-seopress": "10.4"
   },
   "require-dev": {
