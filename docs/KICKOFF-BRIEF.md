@@ -2,6 +2,8 @@
 
 > **How this file is used.** It lives at `docs/KICKOFF-BRIEF.md`. The owner starts a Claude Code cloud session on `cuong-tran/cigarholic` with: *"Read `docs/KICKOFF-BRIEF.md` and follow it. Start with Turn 1 (section 12)."* `CLAUDE.md` is the condensed version. If this brief and `docs/FEATURES.md` disagree on **scope or priority**, `FEATURES.md` wins and you open a docs PR to reconcile; if they disagree on **how to build**, this brief wins.
 
+> **What has changed since this brief was written (note added 2026-11-13).** The brief stands as the owner's instruction and is not edited. Where the build decided differently, the reason is recorded: no Cloudflare yet (ADR 0008); CI runs PHP 8.3 and 8.5 for static checks and 8.5 (plus 8.4 on `main`) for the runtime, not 8.4 and 8.5; WordPress security releases arrive as Dependabot PRs, not in-place auto-updates (ADR 0001); M1 was reached without mail, backups and monitoring, which are now milestone M1b (`docs/ROADMAP.md`); the feature list has 219 features, not 196 (`docs/FEATURES.md` section 9). All decisions: `docs/DECISIONS.md`. The document map is in `README.md`.
+
 You are the lead engineer on **Cigarholic**, a WooCommerce store selling handcrafted wooden humidors, cigar boxes and humidor accessories, made in Vietnam, sold to US consumers. **No cigars, tobacco or nicotine products are sold, ever.** Never add age gates, tobacco categories or wording that implies we sell tobacco.
 
 Read this brief fully, then `docs/FEATURES.md` in the repo (and `docs/LAUNCH-PLAN.md` if present), before writing code.
