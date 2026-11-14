@@ -2,7 +2,7 @@
 
 Cigarholic is a WooCommerce store selling handcrafted wooden humidors, cigar boxes and humidor accessories, made in Vietnam, sold to US consumers by HuyLinh LLC. **No cigars, tobacco or nicotine products are sold, ever.** Never add age gates, tobacco categories or wording that implies tobacco is sold or that anything is made in the USA ("Handcrafted in Vietnam").
 
-This file condenses `docs/KICKOFF-BRIEF.md` (the full brief, which wins on *how to build*) and `docs/FEATURES.md` (the scope of record, which wins on *what and in which order*). Read `docs/STATUS.md` first in every session: it says where the build is and what to do next.
+This file condenses `docs/KICKOFF-BRIEF.md` (the full brief, which wins on *how to build*) and `docs/FEATURES.md` (the scope of record, which wins on *what and in which order*). Read `docs/STATUS.md` first in every session (where the build is, the open risks), then `docs/HANDOVER.md` (how to start, check and end a session) and the first open package in `docs/PLAN.md` (what to do next).
 
 ## Non-negotiables
 
@@ -13,6 +13,7 @@ This file condenses `docs/KICKOFF-BRIEF.md` (the full brief, which wins on *how 
 - WooCommerce is the system of record. No runtime dependency on Shopify or any external system; every sync is a module behind a toggle (SHO-01).
 - Never weaken a test, skip a check or disable a security control to get green. Never bypass an environment restriction (proxy, permissions) to force something through.
 - Never rewrite or force-push history; never renumber or reuse feature IDs; keep `docs/FEATURES.md` history.
+- Every workflow that can change production runs under the `production` Environment, and a workflow input never reaches a shell as text (DEC-34). Until `docs/PLAN.md` WP-01 is merged, keep to the manual rules in `docs/HANDOVER.md` section 3.
 - Honesty: say "implemented", "tested" or "deployed" only when you did it and verified it. Every report separates **executed and passed / executed and failed / could not run here (why) / not implemented**.
 
 ## How work flows
@@ -23,7 +24,8 @@ This file condenses `docs/KICKOFF-BRIEF.md` (the full brief, which wins on *how 
 4. **Do not wait on the owner for anything you can default.** Defaults D-01 to D-10 are in `docs/OWNER-ACTIONS.md`. Batch questions there (group A/B/C), document assumptions in `docs/STATUS.md`, keep building.
 5. **Commit and push at least hourly and before ending a session.** Only what is pushed survives the sandbox.
 6. **Definition of done:** code + provisioning (if settings changed) + tests + docs (`docs/plugins.md`, `docs/versions.md`, `docs/manager-guide.md` where relevant) + `CHANGELOG.md` + `docs/STATUS.md`.
-7. **End of every session:** update `docs/STATUS.md` (milestone, live/staging/in progress/blocked, tests and results, decisions and why, open owner items, next actions, reproduce commands) and `docs/OWNER-ACTIONS.md` if anything is needed from the owner.
+7. **End of every session:** update `docs/STATUS.md` (one page: milestone, live/staging/in progress/blocked, open risks, latest test totals), the package rows in `docs/PLAN.md`, `docs/OWNER-ACTIONS.md` if anything is needed from the owner, `docs/DECISIONS.md` for decisions and why, and the session's rows in `docs/history/` (test log, server runs, merged PRs). `docs/CHECKLIST.md` section 4 is the list.
+8. **Work in the order of `docs/PLAN.md`.** A change of scope or priority is a line in `docs/FEATURES.md` section 9; a decision is an entry in `docs/DECISIONS.md` (or an ADR when it is expensive to change).
 
 ## Commands
 
@@ -54,7 +56,8 @@ docker/ docker-compose.yml Makefile        the runtime for sandbox, CI and lapto
 infra/                                     cloud-setup.sh, server provisioning (Ubuntu 26.04), Deployer, Cloudflare, backups
 .github/workflows/                         ci.yml, deploy-staging.yml, deploy-production.yml, infra-provision.yml, cloudflare.yml
 tests/phpunit/ tests/e2e/                  PHPUnit for cigarholic-core; Playwright smoke tests
-docs/                                      FEATURES, KICKOFF-BRIEF, STATUS, OWNER-ACTIONS, plugins, versions, adr/, runbooks/
+docs/                                      STATUS, HANDOVER, PLAN, ROADMAP, FEATURES, OWNER-ACTIONS, ARCHITECTURE, DECISIONS, TESTING,
+                                           CHECKLIST, KICKOFF-BRIEF, LAUNCH-PLAN, plugins, versions, adr/, runbooks/, history/
 ```
 
 ## Coding standards
@@ -64,7 +67,8 @@ docs/                                      FEATURES, KICKOFF-BRIEF, STATUS, OWNE
 - **Commerce:** WooCommerce CRUD APIs only, no raw SQL on commerce tables, no `WP_Query` for orders (HPOS). Declare HPOS compatibility. Respect stock reservations and status transitions. Payment truth comes from gateway webhooks, never from the browser redirect.
 - **Side effects are idempotent:** assume duplicate webhooks, retries, concurrent checkouts and partial failures. Idempotency keys + Action Scheduler for anything with side effects.
 - **No empty abstractions:** no gateway-independent payment layer, no interface with one implementation. Smallest code that works with supported APIs. Prefer, in order: Core → Config → Plugin → Custom.
-- **Feature toggles:** `Cigarholic\Core\Features` reads defaults from code and overrides from `CIGARHOLIC_FEATURES` (`.env`). Unfinished work ships off.
+- **Feature toggles:** `Cigarholic\Core\Features` reads defaults from code and overrides from `CIGARHOLIC_FEATURES` (`.env`). Unfinished work ships off. A feature that is off prints nothing and sends nothing: a caller of another feature checks its toggle (DEC-35).
+- **One source per fact:** a fact about the business (address, phone, support email, ship time, returns window) is a setting read everywhere, never typed into a template, a pattern or a provisioning step (DEC-37). Provisioning re-applies configuration on every deploy but never resets a value the manager is meant to change (DEC-38).
 - **Logging:** `wc_get_logger()` with source `cigarholic`; never `error_log` in production paths.
 - **Theme:** `theme.json` tokens, templates and patterns; no PHP logic beyond `functions.php` setup. WCAG 2.2 AA from the first template, Core Web Vitals "good" on mobile is a budget.
 - **Seed data** is clearly sample data: SKU prefix `SAMPLE-`, "Sample" in titles; `wp cigarholic catalog:check` fails on production while any exists.
@@ -79,4 +83,4 @@ Stop and ask: spending money or creating paid accounts; live payment keys; deplo
 
 ## Portability
 
-Everything lives in the repo. A fresh agent in a new session, on a laptop or on the VPS must be able to clone, read this file and `docs/STATUS.md`, and continue. If the sandbox VM expired: `git status`, read `docs/STATUS.md`, run `scripts/runtime-up.sh`, continue from the next action listed there.
+Everything lives in the repo. A fresh agent in a new session, on a laptop or on the VPS must be able to clone, read this file, `docs/STATUS.md` and `docs/HANDOVER.md`, and continue. If the sandbox VM expired: `git status`, read `docs/STATUS.md`, run `scripts/runtime-up.sh`, continue from the first open package in `docs/PLAN.md`.

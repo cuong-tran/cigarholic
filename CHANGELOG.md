@@ -4,6 +4,16 @@ All notable changes to Cigarholic. Format: [Keep a Changelog](https://keepachang
 
 ## [Unreleased]
 
+### Documentation
+
+- **Project revision (2026-11-13).** Every document was read and the custom plugin, theme, provisioning, infrastructure, workflows and tests were audited. No code, setting or server changed.
+  - **Verdict:** the architecture and the design stay (`docs/adr/0010-architecture-review-2026-11.md`). The review lists 7 high, 14 medium and a group of low findings in `docs/ARCHITECTURE.md` section 7; none needs a redesign. The most serious: the production approval can be bypassed through the WP-CLI workflow and three workflows that lack it; nothing is backed up off the server and the nightly backup fails every night; nothing drives scheduled jobs; outgoing mail is not wired; the public forms are throttled by a header the visitor controls.
+  - **New documents:** `docs/ARCHITECTURE.md` (how the store works and is built), `docs/ROADMAP.md` (milestones and dates; M1b "Safe to keep live" added; January 2027 as the working launch window), `docs/PLAN.md` (30 work packages with acceptance criteria), `docs/CHECKLIST.md` (pull request, production tag, go-live, session), `docs/TESTING.md` (strategy, coverage of the required matrix, ten test-debt items), `docs/DECISIONS.md` (ADR index, owner decisions, DEC-01 to DEC-41), `docs/HANDOVER.md`.
+  - **`docs/STATUS.md`** is one page again. Its history moved unchanged to `docs/history/`: merged PRs, server runs and the 2026-11-02 incident, the test log, the environment report.
+  - **`docs/FEATURES.md`:** 22 features added (197 → 219; P0 84 → 93), decision D-11, three go-live checklist lines, and a scope change log (section 9). New P0: FND-16 pre-release gate, FND-17 secret scanning, OPS-15 scheduled jobs, OPS-16 server access, CHK-13 out-of-zone message, PAY-11 card-testing protection, SHP-15 transit damage process, CNT-14 photo and copy standard, CMP-12 one source for policy facts.
+  - **`docs/OWNER-ACTIONS.md`:** A12 (protect `main`, secret scanning), B14 (launch facts), B15 (email platform), and an order of urgency.
+  - `README.md`, `AGENTS.md`, `CLAUDE.md`, the PR template, the ADR index and runbook pointers follow the new structure; `docs/LAUNCH-PLAN.md` and `docs/KICKOFF-BRIEF.md` each got a note on what changed since they were written.
+
 ### Changed
 
 - OPS-07: **two-factor is no longer required on staging** (owner request). The staging deploy sets `CIGARHOLIC_FEATURES=two-factor:off` in the staging `.env`, so `staging.cigarholic.com` shows no two-factor deadline and never restricts an account to its profile. The Two Factor plugin stays active (an enrolled account is still asked for its code). Production is unchanged: two-factor stays required for administrators and shop managers.

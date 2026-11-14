@@ -46,5 +46,5 @@ production: the owner decides (AGENTS.md approval gates).
 ## After a rollback
 
 - `health-check.md`: home, a product page, `/wp/wp-login.php`, checkout as a guest.
-- Note the failed tag and the cause in `docs/STATUS.md`; the fix ships as a new tag, never by
+- Note the failed tag and the cause in `docs/history/server-runs.md`; the fix ships as a new tag, never by
   editing the server.

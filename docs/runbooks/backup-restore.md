@@ -44,7 +44,7 @@ staging database first, drops and imports the tables, runs `wp search-replace` f
 uploads, then re-asserts staging safety: `blog_public 0`, Stripe `testmode` with live keys deleted
 from `woocommerce_stripe_settings`, PayPal `sandbox_on` with live credentials deleted from
 `woocommerce-ppcp-settings`, `wp cigarholic provision`, cache flush. Afterwards run
-`health-check.md` against staging and record the drill in `docs/STATUS.md`.
+`health-check.md` against staging and record the drill in `docs/history/server-runs.md`.
 
 Restoring into production is refused unless `--i-know-this-overwrites-production` is given and is
 deliberately not offered by the workflow: it is an owner decision, done from the console or a laptop.
@@ -64,5 +64,5 @@ wp --path=current/web/wp cache flush && sudo -n /usr/local/sbin/cigarholic-cache
 
 - `backup-restore.yml` → `list` shows a folder per night; `status` in `infra-provision.yml` shows
   the last upload under "last B2".
-- Quarterly: a restore drill into staging; the result goes into `docs/STATUS.md`.
+- Quarterly: a restore drill into staging; the result goes into `docs/history/server-runs.md`.
 - Owner: the B2 bucket has the lifecycle rule and the application key is restricted to that bucket.

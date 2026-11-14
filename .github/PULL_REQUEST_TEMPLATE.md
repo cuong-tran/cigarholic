@@ -31,7 +31,8 @@ none
 
 - [ ] `composer check` and the tests pass locally; CI is green
 - [ ] Provisioning updated if a setting changed (`provision/`), and `wp cigarholic provision` re-run cleanly
-- [ ] `CHANGELOG.md` and `docs/STATUS.md` updated; `docs/versions.md` / `docs/plugins.md` / `docs/manager-guide.md` where relevant
+- [ ] `CHANGELOG.md`, `docs/STATUS.md` and the package's row in `docs/PLAN.md` updated; `docs/versions.md` / `docs/plugins.md` / `docs/manager-guide.md` / `docs/TESTING.md` where relevant
+- [ ] The new test fails without the change (checked by hand); `code-review` and `security-review` ran, findings fixed or listed above
 - [ ] Unfinished parts are behind a feature toggle and listed above
 - [ ] No secrets, dumps, uploads or generated files in the diff; nothing confidential (the repository is public)
 - [ ] Custom code touching orders is idempotent and uses WooCommerce CRUD only (HPOS)

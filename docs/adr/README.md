@@ -13,3 +13,4 @@ One file per decision, numbered, never rewritten: a superseded decision gets a n
 | [0007](0007-dev-tools-as-phars.md) | PHPStan, PHPUnit and Deployer as pinned phars, not Composer packages | accepted |
 | [0008](0008-edge-optional.md) | Cloudflare is additive: the origin alone must serve TLS, redirects and rate limits | accepted |
 | [0009](0009-brand-system.md) | Brand system as semantic theme tokens with contrast rules, a Forest section style, self-hosted Young Serif and Hanken Grotesk | accepted |
+| [0010](0010-architecture-review-2026-11.md) | Architecture review of 2026-11-13: keep the architecture and the design, fix the listed gaps in the order of `docs/PLAN.md` | accepted |

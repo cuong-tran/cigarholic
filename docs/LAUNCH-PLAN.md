@@ -2,6 +2,24 @@
 
 Oct 30, 2026 · @Cuong Tran
 
+> **Status of this document (2026-11-13).** This is the owner's launch plan as written on 2026-10-30, kept unchanged below as the record of the reasoning, the costs and the sources. The build has since decided some things differently; where they disagree, the newer document wins.
+>
+> | This plan says | What was built or decided | Where |
+> |---|---|---|
+> | DigitalOcean or Vultr with SpinupWP | A Hostinger VPS provisioned by scripts in `infra/`, no panel | ADR 0001 |
+> | DDEV for local development, a `.ddev/` folder | Docker Compose pinned to the server's versions (`make up`) | ADR 0001 |
+> | Cloudflare Pro in front, APO | Cloudflare deferred by the owner; the origin serves TLS, redirects and rate limits alone | ADR 0008 |
+> | One 3PL in one state; tax in that state | Stock in Houston TX and the business address in FL: tax configured for both until the CPA confirms | Brief section 1, OWNER-ACTIONS C2 |
+> | Advanced Shipment Tracking for tracking numbers | WooCommerce's own Order Fulfillments, no plugin | DEC-27 |
+> | Klaviyo plugin at launch | Undecided; signups are stored by the site | D-04, OWNER-ACTIONS B15 |
+> | 13 to 14 plugins | 11 active | `docs/plugins.md` |
+> | Path A (December) or path B (January) | Path B is the working assumption; the stock question is still open | `docs/ROADMAP.md`, OWNER-ACTIONS B14 |
+> | "Proposed edits to FEATURES.md" | Applied on 2026-10-30 (PR #3) | `docs/FEATURES.md` section 9 |
+> | "What I still need from you", 12 questions | The unanswered ones are OWNER-ACTIONS B14 | |
+> | Photos with "a hand or cigar for scale" | No cigars in any image until the owner decides | D-11 |
+>
+> Prices, fees, tariffs and policies quoted below were checked on 2026-10-30 and change often; recheck before acting on them.
+
 ## Summary
 
 The P0 store takes about 4 weeks to build, but the go-live date is set by owner items: approved payment accounts, stock received at a US 3PL, cleared import paperwork and a sales-tax registration in the 3PL's state. Build and paperwork run in parallel from week 1, and the coming-soon page with email capture goes live this week.

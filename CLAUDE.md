@@ -4,7 +4,7 @@
 
 Everything above applies. These notes cover the Claude Code cloud sandbox specifically; the measured facts are in `docs/runbooks/sandbox.md`.
 
-- **Start every session** with `git status`, `docs/STATUS.md`, then `scripts/tools.sh && composer install` and `make up` if the runtime is needed. The filesystem does not survive between sessions; the conversation does.
+- **Start every session** with `git status`, `docs/STATUS.md` and `docs/HANDOVER.md`, then `scripts/tools.sh && composer install` and `make up` if the runtime is needed. The filesystem does not survive between sessions; the conversation does.
 - **Docker:** the daemon is not running at start. `nohup dockerd >/tmp/dockerd.log 2>&1 &` (about 3 s). Images pull through the `mirror.gcr.io` mirror configured by `infra/cloud-setup.sh`. Containers that need HTTPS get the proxy through `HTTPS_PROXY` and the CA bundle at `/root/.ccr/ca-bundle.crt`; `scripts/runtime-up.sh` handles this.
 - **Network:** all HTTPS goes through the agent proxy. Never bypass it (`--noproxy`, unsetting `HTTPS_PROXY`). GitHub API zipballs of other repositories are refused, so Composer clones GitHub packages from source; release downloads work, which is why PHPStan, PHPUnit and Deployer are phars (`scripts/tools.sh`). Under load the proxy times out some connections: lower `COMPOSER_MAX_PARALLEL_HTTP` and retry rather than switching sources.
 - **No SSH, no raw TCP.** Server work runs as GitHub Actions `workflow_dispatch` jobs; read logs with `gh api repos/cuong-tran/cigarholic/actions/jobs/<id>/logs`.

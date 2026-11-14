@@ -10,7 +10,7 @@
 | Payments | Stripe (cards, Apple Pay, Google Pay, Link) and PayPal (PayPal, Venmo, Pay Later) |
 | Operators | Non-technical **site manager** runs products, prices, orders and content in WP admin. **AI coding agents** (e.g. Claude Code) do most development and maintenance. |
 | Independence | WooCommerce is the system of record. Any Shopify sync is an optional, removable add-on. |
-| Last updated | 2026-10-30 |
+| Last updated | 2026-11-13 (project revision: 22 features added, section 9 lists every scope change) |
 
 ---
 
@@ -23,7 +23,8 @@
 - Every feature has a **stable ID** (e.g. `CAT-04`). Reference it in branch names, commit messages, issues and PRs (`feat(CAT-04): spec table from attributes`).
 - **Never renumber or reuse IDs.** Add new features at the end of their section with the next number. Mark dropped features ~~struck through~~ with a reason rather than deleting them.
 - Work in priority order (P0 first). Don't start P1 work while a P0 item is open, unless it's needed to unblock a P0.
-- Progress is tracked in `docs/STATUS.md` during the build (GitHub Issues are used only for bugs and owner decisions), not in this file. This file changes only when scope or priority changes.
+- Progress is tracked in `docs/STATUS.md` during the build (GitHub Issues are used only for bugs and owner decisions), not in this file. This file changes only when scope or priority changes, and every such change gets a line in section 9.
+- The order of work inside a priority is in `docs/PLAN.md`; the milestones and dates are in `docs/ROADMAP.md`.
 - The **How** column says how a feature should be built. Prefer, in order: **Core** → **Config** → **Plugin** → **Custom**. A new plugin must be justified in the PR (see FND-11).
 
 ### How column legend
@@ -52,7 +53,9 @@
 
 **Guiding rule:** go live with P0 only, then ship small, frequent releases. A simple store that takes real orders beats a complete store that isn't live.
 
-**Timing note (today is 2026-10-30):** Black Friday is 2026-11-27 and Cyber Monday 2026-11-30. If stock is already in the US and payment accounts get approved quickly, a P0-only launch before the holiday peak is possible but tight. Either way, put up the **Coming-soon page with email capture (CNT-04)** in week 1 so the domain starts collecting subscribers and search history.
+**Timing note (2026-10-30):** Black Friday is 2026-11-27 and Cyber Monday 2026-11-30. If stock is already in the US and payment accounts get approved quickly, a P0-only launch before the holiday peak is possible but tight. Either way, put up the **Coming-soon page with email capture (CNT-04)** in week 1 so the domain starts collecting subscribers and search history.
+
+**Timing note (2026-11-13):** the coming-soon page has been live since 2026-11-03. The payment accounts, the launch catalog and the fulfillment decision are still open, so a launch before the holiday peak is no longer realistic. The working target is a January 2027 launch with Valentine's Day (2027-02-14) as the first campaign; `docs/ROADMAP.md` has the dates and what each depends on.
 
 ---
 
@@ -69,9 +72,11 @@ A customer in the US can find a humidor, read its full specs, pay by card / Appl
 7. **Operations:** order handling, branded emails, Shop Manager role, manager handbook (ORD).
 8. **Content, SEO & compliance:** core pages and policies, SEO basics, sales tax, accessibility, privacy (CNT, SEO, CMP).
 
-P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCommerce settings (Core/Config), 21 are content, ops or SaaS setup, 8 are plugin installs, and only 20 need custom code.
+P0 has 93 items, but it's lighter than it looks: 37 are built-in WordPress/WooCommerce settings (Core/Config), 25 are content, ops or SaaS setup, 8 are plugin installs, and 23 need custom code.
 
 ### Go-live checklist (all must pass on production)
+
+The working copy, with the steps and the evidence for each line, is `docs/CHECKLIST.md`. The lines below are the contract.
 
 - [ ] Real-money orders completed and refunded with: card, Apple Pay (iPhone Safari), Google Pay (Android Chrome), PayPal.
 - [ ] Sales tax is correct for test addresses in every state where the business has nexus.
@@ -83,6 +88,9 @@ P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 - [ ] Staging is `noindex` and password-protected; production is indexable; sitemap submitted in Search Console.
 - [ ] Uptime and SSL monitoring alert the owner.
 - [ ] The manager has completed a product edit, an order, a refund and a tracking update alone, using the handbook.
+- [ ] No `SAMPLE-` product, sample photo or placeholder text is left on production (`wp cigarholic catalog check` passes). *(added 2026-11-13)*
+- [ ] Scheduled jobs run from the system clock, deploys run as the limited `deploy` user and root SSH login is off (OPS-15, OPS-16). *(added 2026-11-13)*
+- [ ] The pre-release gate (FND-16) passed on the go-live tag. *(added 2026-11-13)*
 
 ---
 
@@ -93,7 +101,7 @@ P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | ID | Feature | Pri | How | Notes |
 |---|---|---|---|---|
 | FND-01 | Composer-managed WordPress repo (Bedrock-style layout): core, plugins and theme as dependencies; uploads, DB dumps and secrets never in Git | P0 | Custom | Plugins from wpackagist / vendor Composer repos; lock file committed |
-| FND-02 | One-command local environment (DDEV or wp-env) with seed data (sample products, pages, menus) | P0 | Custom | `make up` / `make seed`; agents must be able to reproduce the site from scratch |
+| FND-02 | One-command local environment (DDEV or wp-env) with seed data (sample products, pages, menus) | P0 | Custom | `make up` / `make seed`; agents must be able to reproduce the site from scratch. Built as a Docker Compose stack pinned to the server's versions, not DDEV (ADR 0001) |
 | FND-03 | Config as code: idempotent WP-CLI provisioning scripts for settings, pages, menus, permalinks, shipping zones, tax, emails | P0 | Config | Re-runnable on every deploy; manual admin clicks for settings are discouraged |
 | FND-04 | Agent instructions: `AGENTS.md` / `CLAUDE.md` with architecture, commands, coding standards, do/don't rules, plus `docs/` (ADRs, runbooks) | P0 | Custom | Rules include: no page builders, no direct edits on production, every change through a PR |
 | FND-05 | Single site plugin `cigarholic-core` (mu-plugin) for all custom PHP, plus a block theme (custom or child) for presentation | P0 | Custom | Small, namespaced, one feature per file/class, referencing feature IDs |
@@ -104,16 +112,20 @@ P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | FND-10 | Issue & PR templates that require a feature ID, test notes and screenshots; Conventional Commits; `CHANGELOG.md` | P0 | Custom | Keeps agent work reviewable |
 | FND-11 | Plugin budget and register: `docs/plugins.md` lists every plugin, why it's there and who owns it; target ≤ 15 active plugins | P0 | Custom | New plugin needs an ADR line in the PR |
 | FND-12 | End-to-end smoke tests (Playwright): browse → add to cart → checkout with Stripe test card → order email; run on staging after every deploy | P0 | Custom | Highest-value test suite for a store. Raised from P1 (2026-10-30): the suite starts in Phase 0 — a smoke subset runs in CI against the local runtime, the full suite against staging after every deploy |
-| FND-13 | Automated dependency update PRs (Renovate or Dependabot) gated by CI + E2E | P1 | Service | Weekly batch; security fixes immediately |
+| FND-13 | Automated dependency update PRs (Renovate or Dependabot) gated by CI + E2E | P1 | Service | Weekly batch; security fixes immediately. Brought forward: Dependabot has run since 2026-10-31 (ADR 0001 replaces in-place auto-updates with it) |
 | FND-14 | Production → staging DB refresh with customer data anonymised | P2 | Custom | Lets agents debug with realistic data safely |
 | FND-15 | Visual regression tests for key templates (home, category, product, cart, checkout) | P3 | Custom | |
+| FND-16 | Pre-release gate for every production tag: one workflow that checks the tagged commit (CI green, `composer audit` clean, secret scan, every active plugin declares HPOS compatibility, a provisioning dry run on staging shows no drift, the changelog has the release section) and prints the report the owner reads before approving | P0 | Custom | Turns the brief's pre-release review (section 10) into a repeatable check. Added 2026-11-13 |
+| FND-17 | Secret scanning: GitHub secret scanning with push protection on the repository, and a scanner (gitleaks) in CI over every PR's commits | P0 | Service | The repository is public, so a leaked key is public at once. Added 2026-11-13 |
+| FND-18 | `wp cigarholic doctor`: one read-only report of an environment's health and drift (versions against `docs/versions.md`, active plugins against `docs/plugins.md`, feature toggles, provisioning dry-run changes, theme files saved in the Site Editor, scheduled-job backlog, object cache, mail transport, coming-soon state) | P1 | Custom | One command for the health-check runbook, the post-deploy check and FND-19. Added 2026-11-13 |
+| FND-19 | Scheduled maintenance session: a weekly agent run that triages dependency PRs, reads the doctor report (FND-18), the uptime history and the WooCommerce logs, and updates `docs/STATUS.md` | P1 | Ops | Agents do all maintenance; without a schedule it happens only when the owner opens a session. Added 2026-11-13 |
 
 ### 4.2 Hosting, security & performance (OPS)
 
 | ID | Feature | Pri | How | Notes |
 |---|---|---|---|---|
 | OPS-01 | US-region VPS: Nginx, PHP 8.x, MariaDB/MySQL, Redis/Valkey | P0 | Ops | Raw VPS provisioned by idempotent scripts in `infra/` run from GitHub Actions; no server panel (SpinupWP-class panel only if the owner asks). Size for spikes (holiday promos) |
-| OPS-02 | Domain, DNS on Cloudflare, SSL, HTTPS-only, single canonical host (www or apex) | P0 | Ops | |
+| OPS-02 | Domain, DNS on Cloudflare, SSL, HTTPS-only, single canonical host (www or apex) | P0 | Ops | Live without Cloudflare: registrar DNS, Let's Encrypt on the origin, apex canonical. Cloudflare is deferred by the owner and additive (ADR 0008) |
 | OPS-03 | Cloudflare CDN + WAF: bot protection, rate limit on `wp-login.php` and checkout, block `xmlrpc.php` | P0 | Config | |
 | OPS-04 | Transactional email through a provider (Postmark, Amazon SES, Mailgun…) with SPF, DKIM, DMARC | P0 | Service | VPS mail alone lands in spam; order emails are critical |
 | OPS-05 | Backups: daily DB + files, stored off-server, 30-day retention, restore runbook tested | P0 | Ops | Extra on-demand backup before every production deploy |
@@ -126,6 +138,11 @@ P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | OPS-12 | Malware scanning and file-integrity monitoring | P1 | Service | |
 | OPS-13 | Disaster-recovery runbook: rebuild on a new VPS from Git + backups in < 4 h, rehearsed | P2 | Ops | |
 | OPS-14 | Load test before major promotions (Black Friday, Father's Day) | P2 | Ops | |
+| OPS-15 | Scheduled jobs run from the system clock, not from page views: WordPress cron switched off in the page request and run every minute by a server timer on each site; the Action Scheduler backlog is visible to the health check | P0 | Config | Order emails, webhook follow-ups and every queued job depend on it, and a store in coming soon or behind the page cache gets few page views to trigger them. Added 2026-11-13 |
+| OPS-16 | Server access closed down before launch: deploys run as the limited `deploy` user, root SSH login is off, and the root-only workflows are documented as provider-console procedures | P0 | Ops | Planned since the first server run (DEC-15); a line of the go-live checklist. Added 2026-11-13 |
+| OPS-17 | Content-Security-Policy: report-only first, then enforced, built from the script inventory of the cart and checkout pages | P1 | Config | The other security headers exist; this one needs the payment scripts to be known first. Pairs with CMP-13. Added 2026-11-13 |
+| OPS-18 | Log rotation and retention for Nginx, PHP and WooCommerce logs, with a stated retention period for anything that holds IP addresses or email addresses | P1 | Ops | Disk safety and a privacy-policy fact. Added 2026-11-13 |
+| OPS-19 | Staging on its own small server | P2 | Ops | Today both sites share one VPS, so a staging load test, a full disk or a compromised staging plugin reaches production. Decide after launch (ADR when decided). Added 2026-11-13 |
 
 ### 4.3 Catalog & product pages (CAT)
 
@@ -192,6 +209,7 @@ P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | CHK-10 | US address autocomplete and validation | P2 | Plugin | Reduces failed deliveries |
 | CHK-11 | Paid gift wrapping | P2 | Custom | |
 | CHK-12 | Post-purchase one-click upsell on order-received page | P3 | Plugin | |
+| CHK-13 | A clear message when an address is outside the shipping zones (Alaska, Hawaii, territories, APO/FPO, non-US): what the store ships to today and how to ask for a quote, instead of the checkout's bare "no shipping options" | P0 | Custom | A buyer who cannot finish must know why (D-06). Added 2026-11-13 |
 
 ### 4.6 Payments (PAY)
 
@@ -207,6 +225,8 @@ P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | PAY-08 | Buy now, pay later (Klarna, Afterpay, Affirm) via Stripe for high-ticket items | P2 | Plugin | Same Stripe plugin |
 | PAY-09 | Saved payment methods for returning customers | P2 | Plugin | |
 | PAY-10 | Gift cards / store credit | P3 | Plugin | |
+| PAY-11 | Card-testing protection: rate limit on the checkout endpoints at the server and in WooCommerce's Store API, a challenge on checkout that can be switched on during an attack, and an alert when declined payments spike | P0 | Config | New Stripe accounts are a common target for card testing; an attack costs dispute fees and can get the account restricted. Added 2026-11-13 |
+| PAY-12 | Daily payment reconciliation: a queued job that lists orders pending payment for too long, payments the gateway holds that no order shows as paid, and refunds that differ, and emails the manager when the list is not empty | P1 | Custom | A missed webhook otherwise stays unseen until a customer writes (PAY-05). Added 2026-11-13 |
 
 ### 4.7 Shipping & fulfillment (SHP)
 
@@ -215,7 +235,7 @@ P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | SHP-01 | Shipping zones: US contiguous states at launch; decide on Alaska, Hawaii, territories and APO/FPO (D-06) | P0 | Config | |
 | SHP-02 | Shipping methods: flat rate and/or free shipping (always or above a threshold), with shipping classes for oversized items (cabinet humidors) | P0 | Config | Simple rules beat real-time rates at launch |
 | SHP-03 | Ship-time messaging on product page and cart ("Ships in 1–2 business days from our US warehouse"; personalised items + X days) | P0 | Custom | Must match reality (CMP-05) |
-| SHP-04 | Tracking number on the order and a "Shipped" email with carrier tracking link | P0 | Plugin | Shipment-tracking extension or the 3PL/shipping integration |
+| SHP-04 | Tracking number on the order and a "Shipped" email with carrier tracking link | P0 | Plugin | Shipment-tracking extension or the 3PL/shipping integration. Built on WooCommerce's own Order Fulfillments (Core), no plugin (DEC-27) |
 | SHP-05 | Fulfillment hand-off to the US warehouse/3PL: manual at launch (CSV export, portal or email), automated order push + tracking back in P1 | P0 | Ops | Automation is P1 once the 3PL is chosen (D-02) |
 | SHP-06 | Automated 3PL integration: orders pushed, tracking and stock returned | P1 | Plugin | Use the 3PL's WooCommerce connector if one exists |
 | SHP-07 | Customer order-tracking page (order number + email) | P1 | Custom | Cuts "where is my order?" emails |
@@ -226,6 +246,7 @@ P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | SHP-12 | Shipping insurance and signature-required option for high-value orders | P2 | Config | |
 | SHP-13 | Estimated delivery date by ZIP code | P3 | Plugin | |
 | SHP-14 | Canada and international shipping | P4 | Config | Adds duties, tax and returns complexity |
+| SHP-15 | Transit damage and lost-parcel process: how the customer reports it (photos, within how many days), what the store does (replacement or refund), the carrier or 3PL claim steps for the manager, and the same wording in the returns policy, the FAQ and the shipping email | P0 | Ops | Lacquered wood and glass travel badly; the first damaged parcel must not be improvised. Photo upload on the contact form can follow in P1. Added 2026-11-13 |
 
 ### 4.8 Order management & admin experience (ORD)
 
@@ -245,6 +266,8 @@ P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | ORD-12 | Order export (CSV) for accounting | P1 | Core | |
 | ORD-13 | Returns / RMA requests from My Account with status tracking (launch: email-based process per policy) | P2 | Plugin | |
 | ORD-14 | Accounting sync (QuickBooks / Xero) | P3 | Plugin | |
+| ORD-15 | Delay notice: the manager sets a new ship date on an order and the customer gets an email with the new date and a link to accept it or cancel for a full refund | P1 | Custom | The FTC Mail Order Rule process of CMP-05, which is done by hand-written email at launch. Added 2026-11-13 |
+| ORD-16 | Cancellation request by the customer from the order page while the order has not shipped | P2 | Custom | Added 2026-11-13 |
 
 ### 4.9 Customer accounts (ACC)
 
@@ -261,7 +284,7 @@ P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 |---|---|---|---|---|
 | CNT-01 | Brand system in `theme.json` (logo, colours, typography, spacing) and block patterns; no page builder | P0 | Custom | Manager edits content, not design |
 | CNT-02 | Core pages: About / Our Craft, Contact, FAQ / Help Center, Shipping Policy, Returns & Refunds, Warranty, Privacy Policy, Terms of Service, Accessibility Statement | P0 | Content | Policy texts reviewed by the owner (legal review recommended) |
-| CNT-03 | Contact form with spam protection (Cloudflare Turnstile) routed to the support inbox | P0 | Plugin | |
+| CNT-03 | Contact form with spam protection (Cloudflare Turnstile) routed to the support inbox | P0 | Plugin | Built in `cigarholic-core` (Custom), no plugin |
 | CNT-04 | **Coming-soon page with email signup** while the store is built | P0 | Core | Do this first; WooCommerce has a built-in coming-soon mode |
 | CNT-05 | Humidor care & seasoning guide, linked from every humidor product | P1 | Content | Top customer question category |
 | CNT-06 | Journal / blog with categories (guides, gift ideas, craftsmanship) and 3–5 launch articles | P1 | Content | Main acquisition channel given ad restrictions |
@@ -272,6 +295,7 @@ P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | CNT-11 | Wood species & materials pages (Spanish cedar, walnut, rosewood…) | P2 | Content | SEO + transparency |
 | CNT-12 | Wholesale / authorized-retailer application page | P3 | Custom | Reference site has "Become a Partner" form |
 | CNT-13 | Downloadable care manuals (PDF) and warranty registration | P3 | Content | |
+| CNT-14 | Photo and copy standard for launch products: shot list per product type (front, open, interior, joinery, scale, packaging), minimum size and aspect ratio, file naming, alt-text rule, and the tone of the copy | P0 | Content | The owner and the manager produce the launch catalog from it (L-06); it settles whether images may show cigars (D-11). Added 2026-11-13 |
 
 ### 4.11 SEO (SEO)
 
@@ -287,6 +311,8 @@ P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | SEO-08 | Content plan with topic hubs and internal linking (buying guides, comparisons, care) | P2 | Content | |
 | SEO-09 | Google Merchant Center product feed for free listings | P2 | Plugin | Check policy first: Google bars products that "facilitate tobacco consumption"; humidors may be disapproved. Expect rejections: submit one product first and keep the rest out of the feed until it is approved |
 | SEO-10 | Pinterest catalog / rich pins | P3 | Plugin | Gift and décor audience |
+| SEO-11 | Structured data for content pages: FAQPage on the FAQ, Article on journal posts, HowTo-style steps on the care and seasoning guide, each checked by a test | P1 | Custom | Search and content are the main acquisition channel (CNT-05, CNT-06). Added 2026-11-13 |
+| SEO-12 | AI-search readiness: a decided crawl policy for AI crawlers in `robots.txt`, an `llms.txt` that points to the care guides, policies and collections, and product facts that agree between the page and its structured data | P2 | Custom | Paid ads are high-risk for this category, so being found and quoted correctly by AI assistants matters. The crawl policy is an owner decision. Added 2026-11-13 |
 
 ### 4.12 Marketing & retention (MKT)
 
@@ -307,6 +333,7 @@ P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | MKT-13 | Wholesale pricing: role-based prices, minimum order quantities, net terms | P3 | Plugin | Pairs with CNT-12 |
 | MKT-14 | Instagram / user-generated photo gallery | P3 | Plugin | |
 | MKT-15 | Loyalty / rewards points | P4 | Plugin | Low repeat rate for durable goods |
+| MKT-16 | Launch announcement to the waitlist: the coming-soon signups moved into the email platform with their consent date and source, a launch email with the launch offer, and unsubscribes honoured from then on | P1 | Service | The reason the coming-soon page collects addresses; ready in go-live week. Needs D-04. Added 2026-11-13 |
 
 ### 4.13 Compliance, legal & trust — US (CMP)
 
@@ -323,6 +350,9 @@ P0 has 84 items, but it's lighter than it looks: 35 are built-in WordPress/WooCo
 | CMP-09 | Honest reviews and endorsements: no fake, gated or undisclosed incentivised reviews | P1 | Ops | FTC rule on consumer reviews |
 | CMP-10 | Material disclosures: wood species and finish on every product (from CAT-03) | P1 | Content | Supports Lacey Act declarations and customer questions |
 | CMP-11 | Per-product import compliance data: wood species (genus + species) for every wood incl. lining and veneer, country of harvest, composite-wood flag (plywood/MDF/particleboard → TSCA Title VI), HTS code | P0 | Custom | Private product fields in `cigarholic-core`, included in the CSV template (CAT-10), checked by `wp cigarholic catalog:check`, exportable for the customs broker (Lacey Act, TSCA, L-11); feeds CMP-10 |
+| CMP-12 | One source for the store's policy facts (returns window, who pays return shipping, warranty length, damage-report window, ship time): settings the manager edits, read by the policy pages, the FAQ, the order emails and the structured data | P0 | Custom | The ship time already works this way (DEC-19). Pages that each state their own number end up disagreeing, which is what the reference site shows. Added 2026-11-13 |
+| CMP-13 | Card-data scope kept at the smallest self-assessment (PCI DSS SAQ A): hosted payment fields only, an inventory of every script on the checkout page with a reason, change detection for those scripts, and the owner's yearly self-assessment | P1 | Ops | Since PCI DSS 4.0 the merchant must control the scripts on the page that hosts the payment fields. Confirm the exact obligations with Stripe and PayPal; this is not legal advice. Added 2026-11-13 |
+| CMP-14 | `wp cigarholic catalog check` flags protected or permit-bound wood species (for example *Dalbergia*, rosewood) and composite-wood products without a TSCA Title VI note | P1 | Custom | Uses the CMP-11 fields; the launch plan warns that rosewood finished goods need CITES permits. Added 2026-11-13 |
 
 ### 4.14 AI customer service — later phase (AI)
 
@@ -423,6 +453,7 @@ These usually decide the launch date more than development does.
 | D-08 | Is a Prop 65 warning needed? | CMP-06 | Ask the workshop for finish/material data |
 | D-09 | SEO plugin | SEO-01 | Whichever the team knows; only one |
 | D-10 | Helpdesk tool (must have an API for AI-02, AI-03, AI-05 later) | ORD-10, AI | Any helpdesk with API + email channel |
+| D-11 | May product and lifestyle photos show cigars (for scale, or inside an open humidor)? *(added 2026-11-13)* | CNT-14, CAT-05, SEO-09, MKT-09 | No cigars, tobacco or smoke in any image until decided. Empty humidors read as furniture and gifts to payment reviewers and ad platforms; the launch plan's photo brief suggested "a hand or cigar for scale", so the owner settles it |
 
 ---
 
@@ -453,22 +484,35 @@ Gaps on the reference site we can beat: no visible reviews, no delivery-time est
 
 | Area | P0 | P1 | P2 | P3 | P4 | Total |
 |---|---|---|---|---|---|---|
-| FND – Foundation & agent workflow | 12 | 1 | 1 | 1 | 0 | 15 |
-| OPS – Hosting, security & performance | 9 | 3 | 2 | 0 | 0 | 14 |
+| FND – Foundation & agent workflow | 14 | 3 | 1 | 1 | 0 | 19 |
+| OPS – Hosting, security & performance | 11 | 5 | 3 | 0 | 0 | 19 |
 | CAT – Catalog & product pages | 10 | 4 | 5 | 5 | 1 | 25 |
 | NAV – Navigation & merchandising | 7 | 3 | 3 | 1 | 0 | 14 |
-| CHK – Cart & checkout | 6 | 1 | 4 | 1 | 0 | 12 |
-| PAY – Payments | 6 | 1 | 2 | 1 | 0 | 10 |
-| SHP – Shipping & fulfillment | 5 | 5 | 2 | 1 | 1 | 14 |
-| ORD – Order management & admin | 7 | 5 | 1 | 1 | 0 | 14 |
+| CHK – Cart & checkout | 7 | 1 | 4 | 1 | 0 | 13 |
+| PAY – Payments | 7 | 2 | 2 | 1 | 0 | 12 |
+| SHP – Shipping & fulfillment | 6 | 5 | 2 | 1 | 1 | 15 |
+| ORD – Order management & admin | 7 | 6 | 2 | 1 | 0 | 16 |
 | ACC – Customer accounts | 1 | 1 | 0 | 1 | 1 | 4 |
-| CNT – Content & brand | 4 | 4 | 3 | 2 | 0 | 13 |
-| SEO – SEO | 5 | 2 | 2 | 1 | 0 | 10 |
-| MKT – Marketing & retention | 2 | 3 | 4 | 5 | 1 | 15 |
-| CMP – Compliance & trust | 8 | 3 | 0 | 0 | 0 | 11 |
+| CNT – Content & brand | 5 | 4 | 3 | 2 | 0 | 14 |
+| SEO – SEO | 5 | 3 | 3 | 1 | 0 | 12 |
+| MKT – Marketing & retention | 2 | 4 | 4 | 5 | 1 | 16 |
+| CMP – Compliance & trust | 9 | 5 | 0 | 0 | 0 | 14 |
 | AI – AI customer service | 0 | 1 | 3 | 6 | 0 | 10 |
 | APP – Mobile order app | 0 | 1 | 1 | 2 | 0 | 4 |
 | INV – Inventory integration | 1 | 0 | 1 | 3 | 1 | 6 |
 | SHO – Shopify sync | 1 | 1 | 0 | 1 | 1 | 4 |
 | CHN – Other channels | 0 | 0 | 0 | 0 | 2 | 2 |
-| **Total** | **84** | **39** | **34** | **32** | **8** | **197** |
+| **Total** | **93** | **49** | **37** | **32** | **8** | **219** |
+
+---
+
+## 9. Scope change log
+
+Every change to scope or priority, newest first. IDs are never renumbered or reused.
+
+| Date | Change | Why |
+|---|---|---|
+| 2026-11-13 | **Added 22 features** (project revision after the architecture review, ADR 0010). P0: FND-16, FND-17, OPS-15, OPS-16, CHK-13, PAY-11, SHP-15, CNT-14, CMP-12. P1: FND-18, FND-19, OPS-17, OPS-18, PAY-12, ORD-15, SEO-11, MKT-16, CMP-13, CMP-14. P2: OPS-19, ORD-16, SEO-12. Totals 197 → 219, P0 84 → 93 | The review found launch risks no feature covered (scheduled jobs, card testing, secrets in a public repository, server access, damage claims, policy facts stated in several places) and follow-ups that the first weeks of running the site made concrete |
+| 2026-11-13 | Added decision D-11 (cigars in photos) and three go-live checklist lines (no sample data, OPS-15/OPS-16, FND-16) | The sample photos avoid cigars while the launch plan's photo brief allows them; the checklist lines make existing rules checkable |
+| 2026-11-13 | Notes only, no scope change: FND-02 (Compose, not DDEV), FND-13 (running since 2026-10-31), OPS-02 (live without Cloudflare), SHP-04 (WooCommerce Order Fulfillments, no plugin), CNT-03 (custom, no plugin) | The How column is a suggestion; the notes record what was built |
+| 2026-10-30 | SEO-03 changed to `/products/<slug>/` and `/collections/<slug>/`; SHO-02 P3 → P1; CMP-11 added (P0); FND-12 P1 → P0; notes on D-03, MKT-09, SEO-09, PAY-03, OPS-01; progress tracking moved to `docs/STATUS.md` | Reconciliation with the kickoff brief (PR #3). Totals 196 → 197 |

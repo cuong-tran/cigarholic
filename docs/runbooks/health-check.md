@@ -48,7 +48,7 @@ sudo fail2ban-client status wp-login
 3. `/wp/wp-login.php` loads; a wrong password returns to the form; 2FA prompt for admins.
 4. WooCommerce → Status: no red rows; Action Scheduler has no stuck past-due actions.
 5. Order emails arrive (Postmark activity on production, sandbox server on staging).
-6. `wp cigarholic catalog:check` passes on production (no `SAMPLE-` SKUs).
+6. `wp cigarholic catalog check` passes on production (no `SAMPLE-` SKUs).
 
 ## Monitoring (UptimeRobot, owner account; B3)
 

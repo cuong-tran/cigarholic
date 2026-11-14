@@ -92,8 +92,8 @@ Always first: open the alert's reason (UptimeRobot shows the HTTP status, "keywo
 | `cigarholic-staging-home` **down with 401** | The staging basic-auth credentials changed (`STAGING_BASIC_AUTH_*`) and the monitor still has the old ones | Re-run the workflow for `staging` (not a dry run); it rewrites the monitor's credentials. Repeated 401s also trip fail2ban's `nginx-http-auth` jail for UptimeRobot's addresses: `sudo fail2ban-client set nginx-http-auth unbanip <ip>` on the VPS after fixing the credentials |
 | Alerts during a **restore drill or a planned maintenance** | Expected | Pause the monitors in the dashboard first (the script never pauses or resumes anything), resume them afterwards |
 
-After every incident: add the cause to `troubleshooting.md` if it was new, and note it in
-`docs/STATUS.md`.
+After every incident: add the cause to `troubleshooting.md` if it was new, and record it in
+`docs/history/server-runs.md` (a one-line mention in `docs/STATUS.md` while it is open).
 
 ## Server-side signals that already exist
 
