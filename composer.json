@@ -36,7 +36,7 @@
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "^1.2",
     "php-parallel-lint/php-parallel-lint": "^1.4",
-    "php-stubs/woocommerce-stubs": "^11.2",
+    "php-stubs/woocommerce-stubs": "^11.3",
     "phpcompatibility/phpcompatibility-wp": "^2.1",
     "szepeviktor/phpstan-wordpress": "^2.0",
     "wp-coding-standards/wpcs": "^3.4",
