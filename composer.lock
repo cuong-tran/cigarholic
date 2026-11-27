@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ec49f9ec90e5bb42453a019568370a90",
+    "content-hash": "3b0060bfaa39b694a19055ef6142c2a0",
     "packages": [
         {
             "name": "composer/installers",
@@ -1266,16 +1266,16 @@
         },
         {
             "name": "php-stubs/woocommerce-stubs",
-            "version": "v11.2.1",
+            "version": "v11.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-stubs/woocommerce-stubs.git",
-                "reference": "8cfdb86cad90da64441317e1bebe5f71a437a074"
+                "reference": "80c661dc71012c7d82ebcb8098a11ef4b0f01bf3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-stubs/woocommerce-stubs/zipball/8cfdb86cad90da64441317e1bebe5f71a437a074",
-                "reference": "8cfdb86cad90da64441317e1bebe5f71a437a074",
+                "url": "https://api.github.com/repos/php-stubs/woocommerce-stubs/zipball/80c661dc71012c7d82ebcb8098a11ef4b0f01bf3",
+                "reference": "80c661dc71012c7d82ebcb8098a11ef4b0f01bf3",
                 "shasum": ""
             },
             "require": {
@@ -1304,9 +1304,9 @@
             ],
             "support": {
                 "issues": "https://github.com/php-stubs/woocommerce-stubs/issues",
-                "source": "https://github.com/php-stubs/woocommerce-stubs/tree/v11.2.1"
+                "source": "https://github.com/php-stubs/woocommerce-stubs/tree/v11.3.1"
             },
-            "time": "2026-10-09T20:26:55+00:00"
+            "time": "2026-11-19T22:34:55+00:00"
         },
         {
             "name": "php-stubs/wordpress-stubs",
@@ -2006,15 +2006,15 @@
         },
         {
             "name": "wpackagist-plugin/query-monitor",
-            "version": "4.1.1",
+            "version": "4.1.2",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/query-monitor/",
-                "reference": "tags/4.1.1"
+                "reference": "tags/4.1.2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/query-monitor.4.1.1.zip"
+                "url": "https://downloads.wordpress.org/plugin/query-monitor.4.1.2.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
