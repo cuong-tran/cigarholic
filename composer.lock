@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ec49f9ec90e5bb42453a019568370a90",
+    "content-hash": "f55980219d13df96106e6631fe124893",
     "packages": [
         {
             "name": "composer/installers",
@@ -909,15 +909,15 @@
         },
         {
             "name": "wpackagist-plugin/complianz-gdpr",
-            "version": "7.5.7",
+            "version": "7.5.9",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/complianz-gdpr/",
-                "reference": "tags/7.5.7"
+                "reference": "tags/7.5.9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/complianz-gdpr.7.5.7.zip"
+                "url": "https://downloads.wordpress.org/plugin/complianz-gdpr.7.5.9.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -945,15 +945,15 @@
         },
         {
             "name": "wpackagist-plugin/redis-cache",
-            "version": "3.0.0",
+            "version": "3.0.2",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/redis-cache/",
-                "reference": "tags/3.0.0"
+                "reference": "tags/3.0.2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/redis-cache.3.0.0.zip"
+                "url": "https://downloads.wordpress.org/plugin/redis-cache.3.0.2.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -963,15 +963,15 @@
         },
         {
             "name": "wpackagist-plugin/stripe-tax-for-woocommerce",
-            "version": "2.2.0",
+            "version": "2.2.1",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/stripe-tax-for-woocommerce/",
-                "reference": "tags/2.2.0"
+                "reference": "tags/2.2.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/stripe-tax-for-woocommerce.2.2.0.zip"
+                "url": "https://downloads.wordpress.org/plugin/stripe-tax-for-woocommerce.2.2.1.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -1017,15 +1017,15 @@
         },
         {
             "name": "wpackagist-plugin/woocommerce",
-            "version": "11.2.2",
+            "version": "11.3.1",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/woocommerce/",
-                "reference": "tags/11.2.2"
+                "reference": "tags/11.3.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/woocommerce.11.2.2.zip"
+                "url": "https://downloads.wordpress.org/plugin/woocommerce.11.3.1.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -1035,15 +1035,15 @@
         },
         {
             "name": "wpackagist-plugin/woocommerce-gateway-stripe",
-            "version": "11.1.1",
+            "version": "11.2.0",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/woocommerce-gateway-stripe/",
-                "reference": "tags/11.1.1"
+                "reference": "tags/11.2.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/woocommerce-gateway-stripe.11.1.1.zip"
+                "url": "https://downloads.wordpress.org/plugin/woocommerce-gateway-stripe.11.2.0.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -1053,15 +1053,15 @@
         },
         {
             "name": "wpackagist-plugin/woocommerce-google-analytics-integration",
-            "version": "2.4.4",
+            "version": "2.4.5",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/woocommerce-google-analytics-integration/",
-                "reference": "tags/2.4.4"
+                "reference": "tags/2.4.5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/woocommerce-google-analytics-integration.2.4.4.zip"
+                "url": "https://downloads.wordpress.org/plugin/woocommerce-google-analytics-integration.2.4.5.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -1071,15 +1071,15 @@
         },
         {
             "name": "wpackagist-plugin/woocommerce-paypal-payments",
-            "version": "4.2.0",
+            "version": "4.2.2",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/woocommerce-paypal-payments/",
-                "reference": "tags/4.2.0"
+                "reference": "tags/4.2.2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/woocommerce-paypal-payments.4.2.0.zip"
+                "url": "https://downloads.wordpress.org/plugin/woocommerce-paypal-payments.4.2.2.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
